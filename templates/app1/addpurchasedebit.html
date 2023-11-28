@@ -1,6 +1,31 @@
 {% extends 'app1/base.html' %}
+
 {% block body %}
+
+<style>
+      .select2-container--default .select2-results__option {
+            color: white;
+            background-color: black;
+
+
+        }
+        .select2-container--default .select2-selection--single{
+    padding:6px;
+    height: 35px!important;
+    
+    
+    
+    font-size: 1.2em;  
+    
+}
+</style>
+
     {% load static %}
+
+    <script>
+        $('select').select2();
+    </script> 
+
 
     <!--<h1>Taxes</h1>-->
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -25,13 +50,54 @@
                             <div class="row">
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Vendor</label>
-                                    <div class="d-flex">
-                                        <select name="vendor" id="select" class="custom-select">
+                                    <div class="d-flex"  >
+                                         <!-- <select name="vendor" id="select" class="custom-select">
                                             <option selected disabled>Select Vendor</option>
                                             {% for v in vndr %}
                                             <option value="{{ v.firstname }} {{ v.lastname }}">{{ v.firstname }} {{ v.lastname }}</option>
-                                            {% endfor %}
-                                        </select>
+                                            {% endfor %} 
+                                        </select>   -->
+
+                                     
+    
+                                     
+                                          
+
+                
+<select name="vendor" class="custom-select vendor selectpicker" id="select" data-live-search="true">
+    <option selected disabled hidden>Select Vendor</option>
+    {% for v in vndr %}
+    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}">{{ v.firstname }} {{ v.lastname }}</option>
+    {% endfor %}
+</select> 
+
+<script>
+// $(function () {
+//     $('select').selectpicker();
+// });
+
+// $(function() {
+//   $('.selectpicker').selectpicker();
+// });
+
+
+</script>                              
+
+<script>
+    $(document).ready(function() {
+            $("#combo1").selectpicker ({});    
+        }); </script>
+
+
+<!-- Include Bootstrap JS and CSS -->
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
+
+
+<!-- Include Bootstrap SelectPicker CSS and JS -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script> -->
+
+                                                        
                                         <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newvendor" data-toggle="modal">+</a>
                                     </div>
                                 </div>
@@ -1190,6 +1256,20 @@
     </div> 
 
     </div>
+
+#search dropdown
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+
+<script>
+    $('.select2').select2();
+</script>
+                                          
+              
+
+
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
@@ -2823,6 +2903,9 @@ function qtychange1(input) {
     });
 
 </script>
+
+
+
 
 
 
