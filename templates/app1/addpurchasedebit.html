@@ -18,13 +18,22 @@
     font-size: 1.2em;  
     
 }
+
+input[name="service-city"] {
+  border: 2px solid orange;
+  border-radius: 10px 10px 10px 10px;
+  font-size: 18px;
+  padding: 5px;
+  height: 35px;
+  width: 350px;
+}
+
+
 </style>
 
     {% load static %}
 
-    <script>
-        $('select').select2();
-    </script> 
+    
 
 
     <!--<h1>Taxes</h1>-->
@@ -58,46 +67,76 @@
                                             {% endfor %} 
                                         </select>   -->
 
-                                     
+                                   
     
-                                     
-                                          
-
+                                                           
                 
-<select name="vendor" class="custom-select vendor selectpicker" id="select" data-live-search="true">
+<!-- <select name="vendor" class="custom-select vendor selectpicker" id="select" data-live-search="true">
     <option selected disabled hidden>Select Vendor</option>
     {% for v in vndr %}
     <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}">{{ v.firstname }} {{ v.lastname }}</option>
     {% endfor %}
-</select> 
+</select>  -->
 
-<script>
-// $(function () {
-//     $('select').selectpicker();
-// });
-
-// $(function() {
-//   $('.selectpicker').selectpicker();
-// });
+<input list="brow" class="form-control vendor" id="selected">
+<datalist id="brow" >
+    {% for v in vndr %}
+    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
+    {% endfor %}
+</datalist>   
 
 
-</script>                              
+<!-- <select class="form-control select2 vendor" data-width="100%" id="selected">
+    {% for v in vndr %}
+    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
+    {% endfor %}
+  </select> -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- Include Select2 -->
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-<script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
+ <!-- <script>
+    $('.select2').select2();
+    console.log("select is 'select2'");
+</script>    -->
+
+ <!-- <script>
     $(document).ready(function() {
-            $("#combo1").selectpicker ({});    
-        }); </script>
+  $(".select2").select2();
+
+  console.log("select is 'select2'");
+});
+</script>  -->
 
 
-<!-- Include Bootstrap JS and CSS -->
-<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
 
+ <script>
+    // Initialize Select2 for the datalist
+    $(document).ready(function () {
+        $('#browserInput').select2({
+            width: 'resolve',  // Adjust the width as needed
+            placeholder: 'Select Browser',
+            theme: 'bootstrap4'
+        });
+    });
+</script>  
 
-<!-- Include Bootstrap SelectPicker CSS and JS -->
-<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script> -->
+<!-- <script>
 
-                                                        
+ $(function() {
+  $('.selectpicker').selectpicker();
+});
+
+</script>                               -->
+
+                                               
                                         <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newvendor" data-toggle="modal">+</a>
                                     </div>
                                 </div>
@@ -111,6 +150,18 @@
                                     <label for="validationCustom02">Billing address</label>
                                     <textarea class="form-control" name="address" rows="5" id="mailaddr"></textarea>
                                 </div>
+                                <div class="col-md-5 mt-3"></div>
+                                <div class="col-md-5 mt-3">
+                                    <label for="validationCustom02">GST Treatment</label>
+                                    
+                                    <input type="text" class="form-control" name="gst_type" id="gst_type" required>
+                                </div>
+                                <div class="col-md-5 mt-3">
+                                    <label for="validationCustom02">GST Number</label>
+                                    
+                                    <input type="text" class="form-control" name="gst_num" id="gst_num" required>
+                                </div>
+
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Debit Note Date</label>
                                     <input type="date" class="form-control" name="debitdate" id="date">
@@ -118,8 +169,9 @@
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Debit Note Number</label>
                                     
-                                    <input type="text" class="form-control" name="debitno" id="debitno" required>
+                                    <input type="text" class="form-control" name="debitno" id="debitno" pattern="{a-zA-Z}{}" required>
                                 </div>
+                                
                             </div>
                             <div class="row">
                                 <div class="col-md-5 mt-3">
@@ -171,10 +223,12 @@
                                     <label for="validationCustom02">Bill Number</label>
                                     <select name="billno" id="billno" class="form-control">
                                         <option selected>No Bill</option>
-                                        
-
-                                            <option> </option>
-                                    
+                                        {% for r in rbill %}
+                                        <option>{{ r.billno }}</option>
+                                        {% endfor %}
+                                        {% for p in pbill %}
+                                        <option>{{ p.billno }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
@@ -297,22 +351,40 @@
                         <div class="col-md-6">
                             <label for="">Payment Type</label>
                             <div class="d-flex">
-                                <select class="form-control" name="paytype" id="paytype" required style="width:70%;">
+                                <select class="form-control my-select" name="paytype" id="pay_method" required style="width:70%;">
                                     <option value="" hidden>Select</option>
-                                    {% for i in bank %}
-                                    <option value="{{i.id}}">{{i.bankname}}</option>
-                                    {% endfor %}
-                                    <option value="Cash">Cash</option>
-                                    <option value="Cheque">Cheque</option>
-                                    <option value="Creadit Card/Debit Card">Creadit Card/Debit Card</option>
                                     
-                                    <option value="Paypal/Other service">Paypal/Other service</option>
-                                 
+                                    <option value="cash">Cash</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="upi">UPI</option>
+                                    {% for i in bank %}
+                                    <option value="{{i.bankname}}">{{i.bankname}}</option>
+                                    {% endfor %}
                                     
                                 </select>
+
+                                
                                 
                             </div> 
+
+                            <div class="col-md-9 mt-2" style="display:none;margin-left: -1rem;"  id="chequediv">
+                                <label class="col-form-label" >Cheque No</label>
+                                <input type="text" class="form-control" name="cheque_id" id="cheque_id" placeholder="Enter Cheque No">
+                            </div>
+                            <div class="col-md-9 mt-2"  style="display:none;margin-left: -1rem;" id="upidiv">
+                                <label class="col-form-label" >UPI ID</label>
+                                <input type="text" class="form-control" name="upi_id" id="upi_id" placeholder="Enter UPI ID">
+                            </div>
+                            <div class="col-md-9 mt-2"  style="display:none;margin-left: -1rem;" id="bnkdiv">
+                                <label class="col-form-label" >Bank Account</label>
+                                <input type="text" class="form-control" name="bnk_id" id="bnk_id" style="background-color: #43596c;" readonly>
+                            </div>
+                           
                         </div>
+
+                        
+
+
                     </div>
                                     
                                 
@@ -1257,15 +1329,65 @@
 
     </div>
 
-#search dropdown
+<!-- #search dropdown
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
 
 <script>
     $('.select2').select2();
+</script> -->
+                  
+
+
+#payment method
+<script>
+    $(document).ready(function() {
+      $("#pay_method").change(function() {
+        var x=$('#pay_method').val();
+        if(x==='cash'){
+          $('#chequediv').hide()
+          $('#bnkdiv').hide()
+          $('#upidiv').hide()
+          document.getElementById('cheque_id').value=null
+          document.getElementById('upi_id').value=null
+        }else if(x==='cheque'){
+          $('#chequediv').show()
+          $('#bnkdiv').hide()
+          $('#upidiv').hide()
+          document.getElementById('upi_id').value=null
+        }else if(x==='upi'){
+          $('#upidiv').show()
+          $('#bnkdiv').hide()
+          $('#chequediv').hide()
+          document.getElementById('cheque_id').value=null
+        }else{
+          $('#bnkdiv').show()
+          $('#chequediv').hide()
+          $('#upidiv').hide()
+          document.getElementById('cheque_id').value=null
+          document.getElementById('upi_id').value=null
+
+          $.ajax({
+              type: "GET",
+              url: "{% url 'bankdata' %}",
+              data: {
+                  id: x,
+              },
+              success: function (response) {
+                  data = response.bank
+                  document.getElementById('cheque_id').value=null
+                  document.getElementById('upi_id').value=null
+                  document.getElementById("bnk_id").value = data
+              }
+          });
+        }
+      });
+    });
 </script>
-                                          
+
+
+</script>
               
 
 
@@ -1350,8 +1472,8 @@
         }
     
         $(document).ready(function () {
-            $('#select').on('change', function() {
-                select = $('#select').val();
+            $('#selected').on('change', function() {
+                select = $('#selected').val();
                 $('#billno').val('');
                 $.ajax({
                 type: "GET",
@@ -1365,6 +1487,8 @@
                     document.getElementById('email').value = json_data[key]['email'];
                     document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
                     document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    document.getElementById('gst_num').value = json_data[key]['gstin'];
                 console.log(json_data[key]['vendorid']);
                 
                 reloadbill(json_data[key]['vendorid']) ;
@@ -1779,7 +1903,7 @@
                         }
                             // Update the HTML elements based on the response
                             var data = response.hsn;
-                            var data2 = response.qty;
+                            var data2 =  response.qty;
                             var data3 = response.price;
                             var data4 = response.gst;
                             var data5 = response.sgst;
@@ -1788,7 +1912,10 @@
                             console.log(data7);
                        
                             document.getElementById('hsn1').value = data;
-                            document.getElementById('qtyspan').innerHTML = data2;
+
+                
+
+                            document.getElementById('qtyspan').innerHTML = data2 ;
                             document.getElementById('unit1').value = data3;
                             document.getElementById('taxs').value = data7;
                             document.getElementById('quantitys').value = data6;

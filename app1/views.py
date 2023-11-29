@@ -36660,7 +36660,9 @@ def addpurchasedebit(request):
         unit = unittable.objects.filter(cid=cmp1)
         acc2 = accounts1.objects.filter(cid=cmp1,acctype='Sales')
         acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
-        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2} 
+        rbill= recurring_bill.objects.filter(cid=cmp1)
+        bank=bankings_G.objects.filter(cid=cmp1)
+        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank} 
         return render(request,'app1/addpurchasedebit.html',context)
     return redirect('gopurchasedebit') 
 
@@ -49021,6 +49023,7 @@ def bankdata(request):
     bank_name = request.GET.get('id')
     bank = bankings_G.objects.get(bankname=bank_name,cid=cmp1)
     data = {'bank': bank.account_number}
+    print(data,'account number')
     return JsonResponse(data)
     
 def stockdata(request):
