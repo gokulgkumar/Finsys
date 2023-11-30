@@ -34043,6 +34043,7 @@ def create_item3(request):
             iinv = request.POST.get('invacc')
             istock = request.POST.get('stock')
             istatus = request.POST['status']
+            min_stock = request.POST['min_stock']
             item = itemtable(name=iname,item_type=itype,unit=iunit,
                                 hsn=ihsn,tax_reference=itax,
                                 purchase_cost=ipcost,
@@ -34059,7 +34060,8 @@ def create_item3(request):
                                 stockin=istock,
                                 stock=istock,
                                 status=istatus,
-                                cid=cmp1)
+                                cid=cmp1,
+                                min_stock=min_stock)
             item.save()
             return redirect('addpurchasedebit')
         return render(request,'app1/addpurchasedebit.html')
@@ -45555,6 +45557,7 @@ def createitem_rbill(request):
             istock = request.POST.get('stock')
             istatus = request.POST['status']
             istock_rate = request.POST['stock_rate']
+            min_stock = request.POST['min_stock']
             item = itemtable(name=iname,item_type=itype,unit=iunit,
                                 hsn=ihsn,tax_reference=itax,
                                 purchase_cost=ipcost,
@@ -45572,7 +45575,8 @@ def createitem_rbill(request):
                                 stock=istock,
                                 status=istatus,
                                 cid=cmp1,
-                                stock_rate=istock_rate)
+                                stock_rate=istock_rate
+                                )
             item.save()
     #         return redirect('addrecurringbill')
     #     return render(request,'app1/recurringbills_add.html')

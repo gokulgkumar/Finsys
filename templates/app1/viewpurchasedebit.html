@@ -277,6 +277,20 @@
     }
 
     }
+
+    .equal-length-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%; /* Make the container fill the height of the column */
+            margin-left: 2vh;
+            margin-right: 2vh;
+        }
+
+        .equal-length-item {
+            flex: 1;
+            text-align: center;
+        }
 </style>
   
 
@@ -338,6 +352,7 @@
                     <hr style="width:95%">
                     <a style="padding: 10px; cursor: pointer; font-size: large;" onclick="Details()" ><i class="fa fa-info-circle" style="font-size: large;">&nbsp;Details</i></a>
                     <a style="padding: 10px; cursor: pointer; font-size: large;" onclick="Overview()"><i class="fa fa-tasks" style="font-size: large;">&nbsp;Statement</i></a>
+                    <a style="padding: 10px; cursor: pointer; font-size: large;" onclick="Slip()"><i class="fa fa-tasks" style="font-size: large;">&nbsp;Slip</i></a>
                     <nav class="navbar navbar-expand-lg navbar-light" style="background-color:rgba(0,0,0,.01);">
                       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                           <span class="navbar-toggler-icon"></span>
@@ -737,7 +752,10 @@
 
         <!-- ##details end## -->
 
-        <div id="whatToPrint" style="display: none;" class="print-only">
+
+
+        <!-- template 1 -->
+        <div id="whatToPrint1" style="display: none;" class="print-only printTemplates">
         <div class="my-5 page" size="A4" >
             <div class="p-5">
                 <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
@@ -923,17 +941,7 @@
                                                 <td style="color: #000;">:</td>
                                                 <th class="text-center" style="color:#000;">{{pdebt.grandtotal}}.0</th>
                                             </tr>
-                                            
-                                            <!-- <tr>
-                                                <td style="color: #000;">Advance Amount</td>
-                                                <td style="color: #000;">:</td>
-                                                <th class=" text-center" style="color: #000;">{{pdebt.paid_amount}}</th>
-                                            </tr>
-                                            <tr >
-                                                <th style="color: #000;">Balance Amount</th>
-                                                <td style="color: #000;">:</td>
-                                                <th class="text-center" style="color: #000;">{{pdebt.balance_amount}}</th>
-                                            </tr>  -->
+
 
                                         </tbody>
 
@@ -950,17 +958,617 @@
                                 <div class="col-sm-4 m-0 p-0"></div>
                             </div>
                         </section>
+                       
+                </div>
+                
+                </div>
+                <div id="templateToggle" class="templateToggleSegment mt-3 mb-0 w-100 d-flex justify-content-center">
+                    <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint1','toggleTemplate1')" class="btn btn-outline-light btn-sm m-2 active templateToggleButtons">1</button>
+                    <button id="toggleTemplate2" onclick="toggleTemplate('whatToPrint2','toggleTemplate2')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">2</button>
+                    <button id="toggleTemplate3" onclick="toggleTemplate('whatToPrint3','toggleTemplate3')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">3</button>
+                </div>
+              
+            </div>   
+                
+            
+                            
 
+
+
+<!-- template 2 (2)-->
+
+                <div  id="whatToPrint2"  class="printTemplates template2" style="display: none;">
+                    <div class="my-5 page" size="A4" >
+                        <div id="printdiv2">
+                            <div class="row px-5 py-4" style="background-color:#268ddd;" >
+                                <div id="ember2512" class="col-md-4 d-flex justify-content-start tooltip-container ember-view ribbon text-ellipsis">
+                                  <div class="text-white d-flex align-items-center px-5" style="border-radius: 1vh; background-color:#999999">{{pdebt.status}}<!----></div>
+                              </div>
+                              <div class="col-md-4 d-flex justify-content-center">
+                                  <center class="h3 text-white"><b>DEBIT NOTE</b></center>
+                              </div>  
+                              <div class="col-md-4 d-flex justify-content-end">
+                                  <div class="text-white">
+                                      <p class="mb-0 mt-2">Debit No #: <b>{{pdebt.debit_no }}</b></p>
+                                  </div>
+                                
+                              </div>
+                          </div>
+                          <div class="px-5 py-1">
+                              <section class="store-user"><br><br>
+                                  <div class="col-12">
+                                      <div class="row bb pb-2 mt-3">
+                                          <div class="col-4 pl-0">
+                                              <label class="text-white w-100 p-1" style="background-color: #999999; border-top-right-radius: 4vh; border-bottom-right-radius: 4vh;" ><b>BILLING TO</b></label>
+                                              <p class="address" style="font-weight: bold;color: #000;">
+                                                {{pdebt.vendor}}
+                                                  <br>
+                                                  {{pdebt.email}}
+                                                  <br>
+                                                  {{ pdebt.address|linebreaksbr }}
+                                                  <br>
+                                                 
+                                              </p>  
+                                          </div>
+                                          <div class="col-4"></div>
+                                          <div class="col-4 pr-0">
+                                              <label class="text-white w-100 p-1" style="border-top-right-radius: 4vh; border-bottom-right-radius: 4vh; background-color: #999999;" ><b>SHIPPING ADDRESS</b></label>
+                                              <h5 class="text-secondary" style="font-weight: bold;">{{cmp1.cname }}</h5>
+                                              <p class="address" style="font-weight: bold;color: #000;"> {{cmp1.caddress}} </p>
+                                              <p> {{cmp1.city}},</p>
+                                              <p> {{cmp1.state}},</p>
+                                              <p> {{cmp1.pincode}}</p>
+                                              <p>{{cmp1.cemail}}</p>
+                                              
+                                              
+
+
+                                          </div>
+                                      </div>
+                                      
+                                  </div>
+                              </section>
+                  
+                              <section class="product-area mt-2">
+                                  <table class="table table-hover table-bordered  template2table" id="table2">
+                                      <thead >
+                                          <tr class="template3tablehead">
+                                              <th class="text-center bg-dark" style="color:black">Items</th>
+                                              <th class="text-center bg-dark" style="color:black">HSN Code</th>
+                                              <th class="text-center bg-dark" style="color:black">Quantity</th>
+                                              <th class="text-center bg-dark" style="color:black">Rate</th>
+                                              <th class="text-center bg-dark" style="color:black">Tax</th>
+                                              <th class="text-center bg-dark" style="color:black">Discount</th>
+                                              <th class="text-center bg-dark" style="color:black">Total</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody  style="background-color: #999999;">
+                                        {% for p in pdeb %}
+                                              <tr>
+                                                  <td class="text-center" style="color:black">{{ p.items }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.hsn }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.quantity  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.price  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.tax  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.discount }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.total }}</td>
+                                              </tr>
+                                          {% endfor %} 
+                                      </tbody>
+                                  </table>
+                              </section>
+                  
+                              <section class="balance-info">
+                                  <div class="row mt-3">
+                                     
+                                    
+                                      <div class="col-4">
+                                        <table class="table table-borderless" >
+                                            <tbody>
+                                                
+                                                <tr >
+                                                    <td style="color: #000;text-align: left;white-space: nowrap;">Payment Type</td>
+                                                    <td style="color: #000;text-align: left;">:</td>
+                                                    
+                                                    {% if bank %}
+                                                    <th style="color: #000;text-align: center;">{{bank.bankname}}</th>
+                                                    {% else %}
+                                                    <th style="color: #000;text-align: center;white-space: nowrap;">{{pdebt.payment_type}}</th>
+                                                    {% endif %}
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    
+                                                </tr>
+                                               
+    
+                                            </tbody>
+                                        </table>
+                                        
+                                    </div>
+                                    <div class="col-4"></div>
+                                     
+                                      <div class="col-4"><br><br>
+                                          <table class="table table-borderless">
+                                              <tbody>
+                                                  <tr >
+                                                      <td style="color: #000;">Sub Total</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.subtotal}}</td>
+                                                  </tr>
+                                                  
+                                                  
+                                                  <tr class="igst-section" >
+                                                      <td style="color: #000;">IGST</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.igst}}</td>
+                                                  </tr>
+                                                  
+                                                  
+                                                  <tr class="cgst-section">
+                                                      <td style="color: #000;">CGST</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.cgst}}</td>
+                                                      
+                                                  </tr>
+                                                  
+                                                  
+                                                  <tr class="sgst-section">
+                                                      <td style="color: #000;">SGST</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.sgst}}</td>
+                                                  </tr>
+                                                  
+                                                  <tr >
+                                                    <td style="color: #000;">Tax Amount</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.taxamount}}</td>
+                                                </tr>
+                                                  <tr class="ship-section">
+                                                      <td style="color: #000;">Shipping Charge</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.ship_charge}}</td>
+                                                  </tr>
+                                                  {% if pdebt.tcs != "0.00" %}
+                                                  <tr style="display: none;">
+                                                      <td style="color: #000;">TCS:</td>
+                                                      <td style="color: #000;">:</td>
+                                                      <td class="text-right" style="color: #000;">{{pdebt.tcs}}</td>
+                                                  </tr>
+                                                  {% endif %}
+
+                                                  <tr class="adjust-section">
+                                                    <td style="color:black">Adjustment </td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.round_off}}</td>
+                                                </tr>
+
+                                              </tbody>
+      
+                                          </table>
+                                          <hr style="background-color: #000000;">
+                                          <table class="table table-borderless">
+                                              <tbody>
+                                                  <tr >
+                                                      <th style="color: #000;">Grand Total</th>
+                                                      <th style="color: #000;">:</th>
+                                                      <th class="text-right" style="color: #000;">{{pdebt.grandtotal}}.0</th>
+                                                  </tr>
+                                              </tbody>
+                                          </table>
+                                      </div> 
+                                  </div>
+
+                                  <div class="row container-fluid" style="margin-bottom:10px ;">
+                                    <div class="col-sm-3 m-0 p-0"><label style="color: #000;"><b>Authorized Signature</b></label></div>
+                                    <div class="col-sm-4 m-0 p-0 text-dark">________________________</div>
+                                    <div class="col-sm-4 m-0 p-0"></div>
+                                </div>
+                              </section>
+                                 
+                          </div>
+                        </div>
+                    </div>
+                    <div id="templateToggle" class="templateToggleSegment mt-3 mb-0 w-100 d-flex justify-content-center">
+                        <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint1','toggleTemplate1')" class="btn btn-outline-light btn-sm m-2 active templateToggleButtons">1</button>
+                        <button id="toggleTemplate2" onclick="toggleTemplate('whatToPrint2','toggleTemplate2')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">2</button>
+                        <button id="toggleTemplate3" onclick="toggleTemplate('whatToPrint3','toggleTemplate3')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">3</button>
+                    </div>
                 </div>
+
+                <!-- template 3 -->
+                <div id="whatToPrint3" class="printTemplates template3" style="display: none;">
+                    <div class="my-5 page"  size="A4" >
+                        <div class="" id="printdiv3">
+                            <div class="row">
+                                <div class="col-sm-12" style="background-image: linear-gradient(#1b83e8, black); color: white;">
+                                    <p style="font-size: 4vh; text-align: center;">Debit Note</p>
+                                    <p style=" text-align: center;"> {{cmp1.cname}} <br>
+                                        {{cmp1.caddress}} <br>
+                                        {{cmp1.city}},
+                                        {{cmp1.state}}<br>
+                                        {{cmp1.cemail}}
+                                        <br>
+                                    </p>
+
+                                </div>
+                                
+                                <div class="row col-12">
+                                    <div class="col-md-1"></div>
+                                    <div class="col-5">
+                                        <br><br><br>
+                                        <p style="color:black;"> <span style=" font-weight: bold;">To: </span><br>
+                                            {{pdebt.vendor}}<br>
+                                            {{pdebt.email}} <br>
+                                            {{ pdebt.address|linebreaksbr }}
+                                        </p>
+                                    </div>
+                                    <div class="col-5">
+                                        <br><br><br>
+                                        <table class="table table-borderless">
+                                            <tbody>
+                                                <tr >
+                                                    <td style="color: #000; font-weight: bold;">Debit Note No</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{ pdebt.debit_no }}</td>
+                                                </tr>
+                                                
+                                                <tr >
+                                                    <td style="color: #000; font-weight: bold;">Debit Date</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.debitdate | date:'d-m-Y'}}<td>
+                                                </tr>
+ 
+                                                
+                                            </tbody>
+        
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10"><br>
+                                    <table class="table table-hover table-bordered  template3table" id="table3">
+                                        <thead >
+                                            <tr class="template3tablehead">
+                                                <th class="text-center bg-dark"  style="color:black">Items</th>
+                                                <th class="text-center bg-dark"  style="color:black">HSN Code</th>
+                                                <th class="text-center bg-dark"  style="color:black">Quantity</th>
+                                                <th class="text-center bg-dark"  style="color:black">Rate</th>
+                                                <th class="text-center bg-dark"  style="color:black">Tax</th>
+                                                <th class="text-center bg-dark"  style="color:black">Discount</th>
+                                                <th class="text-center bg-dark"  style="color:black">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for p in pdeb %}
+                                                <tr>
+                                                  <td class="text-center" style="color:black">{{ p.items }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.hsn }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.quantity  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.price  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.tax  }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.discount }}</td>
+                                                  <td class="text-center" style="color:black">{{ p.total }}</td>
+                                                </tr>
+                                            {% endfor %} 
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div> 
+                            <section class="balance-info mt-3">
+                                <div class="row">
+                                    <div class="col-4" style="margin-left: 50px;">
+                                        <table class="table table-borderless" >
+                                            <tbody>
+                                                
+                                                <tr >
+                                                    <td style="color: #000;text-align: left;white-space: nowrap;">&nbsp; Payment Type</td>
+                                                    <td style="color: #000;text-align: left;">:</td>
+                                                    
+                                                    {% if bank %}
+                                                    <th style="color: #000;text-align: center;">{{bank.bankname}}</th>
+                                                    {% else %}
+                                                    <th style="color: #000;text-align: center;white-space: nowrap;">{{pdebt.payment_type}}</th>
+                                                    {% endif %}
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    
+                                                </tr>
+                                               
+    
+                                            </tbody>
+                                        </table>
+                                        
+                                    </div>
+                                    <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <br>
+                                        <table class="table table-borderless">
+                                            <tbody>
+                                                <tr >
+                                                    <td style="color: #000;">Sub Total</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.subtotal}}</td>
+                                                </tr>
+                                                
+                                               
+                                                <tr  class="igst-section" >
+                                                    <td style="color: #000;">IGST</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.igst}}</td>
+                                                </tr>
+                                                
+                                                <tr class="cgst-section">
+                                                    <td style="color: #000;">CGST</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.cgst}}</td>
+                                                    
+                                                </tr>
+                                                
+                                                
+                                                <tr class="sgst-section">
+                                                    <td style="color: #000;">SGST</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.sgst}}</td>
+                                                </tr>
+                                                
+                                                <tr>
+                                                  <td style="color: #000;">Tax Amount</td>
+                                                  <td style="color: #000;">:</td>
+                                                  <td class="text-right" style="color: #000;">{{pdebt.taxamount}}</td>
+                                              </tr>
+
+                                                <tr class="ship-section">
+                                                    <td style="color: #000;">Shipping Charge</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.ship_charge}}</td>
+                                                </tr>
+
+                                                {% if pdebt.tcs != "0.00" %}
+                                                <tr style="display: none;">
+                                                    <td style="color: #000;">TCS:</td>
+                                                    <td style="color: #000;">:</td>
+                                                    <td class="text-right" style="color: #000;">{{pdebt.tcs}}</td>
+                                                </tr>
+                                                {% endif %}
+
+                                                <tr class="adjust-section">
+                                                  <td style="color:black">Adjustment </td>
+                                                  <td style="color: #000;">:</td>
+                                                  <td class="text-right" style="color: #000;">{{pdebt.round_off}}</td>
+                                              </tr>
+
+                                            </tbody>
+        
+                                        </table>
+                                        <hr style="background-color: #000000;">
+                                        <table class="table table-borderless">
+                                            <tbody>
+                                                <tr >
+                                                    <th style="color: #000;">Grand Total</th>
+                                                    <th style="color: #000;">:</th>
+                                                    <th class="text-right" style="color: #000;">{{pdebt.grandtotal}}.0</th>
+                                                </tr>
+                                                <tr >
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="row container-fluid mt-2" style="margin-bottom:10px ;margin-left: 40px;">
+                                    <div class="col-sm-3 m-0 p-0"><label style="color: #000;"><b>Authorized Signature</b></label></div>
+                                    <div class="col-sm-4 m-0 p-0 text-dark">________________________</div>
+                                    <div class="col-sm-4 m-0 p-0"></div>
+                                </div>
+                                
+                            </section> 
+                        </div>
+                    </div>
+                    <div id="templateToggle" class="templateToggleSegment mt-3 mb-0 w-100 d-flex justify-content-center">
+                        <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint1','toggleTemplate1')" class="btn btn-outline-light btn-sm m-2 active templateToggleButtons">1</button>
+                        <button id="toggleTemplate2" onclick="toggleTemplate('whatToPrint2','toggleTemplate2')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">2</button>
+                        <button id="toggleTemplate3" onclick="toggleTemplate('whatToPrint3','toggleTemplate3')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">3</button>
+                    </div>
                 </div>
-                </div>
+
+
+
+
+
+
+               
+               
+
+                <!-- SLIP -->
+
+                            
+                            <div id="slipdiv" style="background-color: #243e54; border-radius: 2vh; display: none; ">
+                                <div class="p-5"  >
+                                    <div class="my-5 page" size="A4">
+                                        <div class="row" style="margin-top: 20%;" id="printslip">
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-6 ml-3">
+                                                <div class="card bg-white" style="border: 1px dotted black;">
+                                                    <div class="mt-2" style="text-align: center;">
+                                                        <div class="text-center" style="font-size: 3vh; color: black;">
+                                                            <b>{{cmp1.cname}} </b>
+                                                        </div>
+                                                        <span style="font-size: x-small; color: black;">{{ cmp1.caddress }} <br>
+                                                            {{cmp1.city}},
+                                                            {{cmp1.state}}
+                                                            {{cmp1.pincode}} <br>
+                                                            {{ cmp1.phone }} <br>{{ cmp1.cemail }} 
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-4 mt-2" style="color: black;">
+                                                        <div class="row">
+                                                            <div class="col-md-6 text-left">Debit No:</div>
+                                                            <div class="col-md-5 text-right">{{pdebt.debit_no}}</div>
+                                                        </div>
+                                                        <!-- <div class="row">
+                                                            <div class="col-md-6 text-left">Customer Name:</div>
+                                                            <div class="col-md-5 text-right">{{cust.firstname}} {{cust.lastname}}</div>
+                                                        </div> -->
+                                                        <div class="row">
+                                                            <div class="col-md-6 text-left">Debit Date :</div>
+                                                            <div class="col-md-5 text-right">{{pdebt.debitdate | date:'d-m-Y'}}</div>
+                                                        </div>
+                                                        <!-- <div class="row">
+                                                            <div class="col-md-6 text-left">Shipment Date:</div>
+                                                            <div class="col-md-5 text-right">{{sale.shipmentdate | date:'d-m-Y'}}</div>
+                                                        </div> -->
+                                                    </div>
+                                                    <div><br>
+                                                        <div class="equal-length-container" style="color: black; font-weight: bold;">
+                                                            <div class="equal-length-item" style=" text-align: center;">
+                                                                Product
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:95%">
+                                                            </div>
+                                                            <div class="equal-length-item ml-2"  style=" text-align:center;">
+                                                                HSN
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
+                                                            </div>
+                                                            <div class="equal-length-item ml-2"  style=" text-align:center;">
+                                                                Discount
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
+                                                            </div>
+                                                            <div class="equal-length-item"  style=" text-align: center; ">
+                                                                Qty
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                            </div>
+                                                            <div class="equal-length-item"  style=" text-align: center; ">
+                                                                Price
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                            </div>
+                                                            <div class="equal-length-item"  style=" text-align: center; ">
+                                                                Tax
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                            </div>
+                                                            <div class="equal-length-item" style=" text-align: center; ">
+                                                                Total
+                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        {% for j in saleitem %}
+                                                        <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
+                                                            <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
+                                                                {{j.product}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: right;">
+                                                                {{j.hsn}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: center; ">
+                                                                {{j.qty}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: center; ">
+                                                                {{j.price}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: center; ">
+                                                                {{j.tax}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: center; ">
+                                                                {{j.total}}
+                                                            </div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                    
+                                                    <div><br>
+                                                        <div class="row ml-1">
+                                                            <div class="col-md-5 text-left" style=" color: black;">
+                                                                Discount
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                                {{ tot_dis }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="row ml-1">
+                                                            <div class="col-md-5 text-left" style=" color: black;">
+                                                                Subtotal
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                                {{ sale.subtotal }}
+                                                            </div>
+                                                        </div>
+                                                        {% if sale.IGST != '0' %}
+                                                        <div class="row ml-1">
+                                                            <div class="col-md-5 text-left " style=" color: black;">
+                                                                IGST
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                                {{ sale.IGST }}
+                                                            </div>
+                                                        </div>
+                                                        {% else %}
+                                                        <div class="row ml-1">
+                                                            <div class="col-md-5 text-left" style=" color: black;">
+                                                                CGST
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                                {{ sale.CGST }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="row ml-1">
+                                                            <div class="col-md-5 text-left" style=" color: black;">
+                                                                SGST
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                                {{ sale.SGST }}
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+                                                        <hr class="ml-2 mr-2" style="color: black; border-bottom: 1px solid black; ">
+                                                    </div>
+                    
+                                                    <div class="mb-2">
+                                                        <div class="row">
+                                                            <div class="col-md-5 text-left ml-2" style=" font-size: large; color: black; font-weight: bold;">
+                                                                Total
+                                                            </div>
+                                                            <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
+                                                                {{ sale.salestotal }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3"></div>
+                                        </div>
+                                    </div>
+                    
+                    
+                    
+                         
+                                </div>
+                            </div>              
+
+
+
+
+
+
+
+
+
+
+
             </div>
                                  
-                
+            
 
     
    
 <script>
+
+
     function printSection(sectionId) {
         var printContents = document.getElementById(sectionId).innerHTML;
         var originalContents = document.body.innerHTML;
@@ -984,16 +1592,46 @@
     </script>
 
 <script>
+
+
+function toggleTemplate(templateId,buttonId){
+                $('.printTemplates').css('display','none');
+                $('#'+templateId).css('display','block');
+                $('.templateToggleButtons').removeClass('active');
+                $('#'+buttonId).addClass('active');
+                $("#templatePrintButton").attr("onclick","printSection('"+templateId+"')");
+                document.getElementById('page-content').scrollIntoView();
+            }
+   
+
+
+
+
     function Overview() {
         
-        document.getElementById('whatToPrint').style.display = 'block';
+        document.getElementById('whatToPrint1').style.display = 'block';
         document.getElementById('details').style.display = 'none';
+        document.getElementById('slipdiv').style.display = 'none';
+        document.getElementById('whatToPrint3').style.display = 'none';
+        
+        
+        
        
         
 }
 function Details() {
-    document.getElementById('whatToPrint').style.display = 'none';
+    document.getElementById('whatToPrint1').style.display = 'none';
     document.getElementById('details').style.display = 'block';
+    document.getElementById('slipdiv').style.display = 'none';
+    
+}
+
+function Slip() {
+    document.getElementById('whatToPrint1').style.display = 'none';
+    document.getElementById('slipdiv').style.display = 'block';
+    document.getElementById('details').style.display = 'none';
+    document.getElementById('whatToPrint3').style.display = 'none';
+   
 }
 
 </script>
