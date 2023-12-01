@@ -291,9 +291,13 @@
             flex: 1;
             text-align: center;
         }
+
+
+     
+
+
 </style>
   
-
 
   
 <!-- Add Comments Modal -->
@@ -366,7 +370,9 @@
                               </li>&nbsp;
                             
                             <li class="nav-item active" >
-                                <a class="nav-link text-light btn btn-outline-info btn-sm" style="font-size: medium;" role="button"  onclick="printSection('whatToPrint')"><i class="fa fa-print">&nbsp;Print</i><span class="sr-only">(current)</span></a>
+                                <!-- onclick="printSection('whatToPrint')" -->
+                                <a class="nav-link text-light btn btn-outline-info btn-sm" style="font-size: medium;" role="button" onclick="printSection('whatToPrint')"><i class="fa fa-print">&nbsp;Print</i><span class="sr-only">(current)</span></a>
+
                             </li>
                                   
                             <li class="nav-item dropdown " id="convertDropdown" style="display: none;">
@@ -386,7 +392,7 @@
                             
                             
                               <li class="nav-item">
-                                  <a class="nav-link text-light btn btn-outline-info btn-sm" style="font-size: medium;" role="button" href="{% url 'render_pdfdebit_view' pdebt.pdebitid %}">
+                                  <a class="nav-link text-light btn btn-outline-info btn-sm" style="font-size: medium;" role="button" id="pdflink" href="">
                                     <i class="fa fa-file-pdf-o">&nbsp;Pdf</i>
                                   </a>
                               </li>&nbsp;
@@ -414,7 +420,7 @@
                                     <i class="fa fa-file mr-1 epov_icons"></i>File
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" data-toggle="modal" data-target="#file"><i class="fa fa-paperclip">&nbsp;Attach File</i></a>
+                                    <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-paperclip">&nbsp;Attach File</i></a>
                                     <!-- {% if ewbill.file != "default.png" %} -->
                                         <a class="dropdown-item" download  href=""><i class="fa fa-download">&nbsp;Download File</i></a>
                                     <!-- {% endif %} -->
@@ -693,7 +699,7 @@
             </div>
             </div>
             <div class="col-lg-4 bg-grey" style="background-color: rgba(0, 0, 0, 0.4);">
-                <div class="p-5">
+                <div class="p-5" >
                     <h3 class="fw-bold mb-5 mt-2 pt-1" style="font-size: 40px; justify-content:center">Debit Note</h3>
                     <hr class="my-4" style="font-size: 20px; background-color: #000; width: 100%;">
                     <table style="width: 100%;">
@@ -753,11 +759,12 @@
         <!-- ##details end## -->
 
 
-
+        <div id="whatToPrint" class="your-content-container">
         <!-- template 1 -->
         <div id="whatToPrint1" style="display: none;" class="print-only printTemplates">
+            
         <div class="my-5 page" size="A4" >
-            <div class="p-5">
+            <div class="p-5"  id="printdiv1">
                 <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
                     <div class="ribbon-inner ribbon-open">{{pdebt.status}}<!----></div>
                 </div>
@@ -946,10 +953,7 @@
                                         </tbody>
 
                                     </table>
-                                    
-                                    
-                                    
-                                    
+
                                 </div> 
                             </div><br>
                             <div class="row container-fluid" style="margin-bottom:10px ;">
@@ -1379,9 +1383,31 @@
 
 
 
+</div>
 
-
-
+        <!-- modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Add File</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form action="{% url 'debit_add_file'  pdebt.pdebitid%}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                <div class="modal-body">
+                  <input type="file" class="form-control" name="file">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+              </div>
+            </div>
+          </div>
+        
                
                
 
@@ -1457,18 +1483,21 @@
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        {% for j in saleitem %}
+                                                        {% for j in pdeb %}
                                                         <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
                                                             <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
-                                                                {{j.product}}
+                                                                {{j.items}}
                                                             </div>
                                                             <div class="equal-length-item" style="text-align: right;">
                                                                 {{j.hsn}}
                                                             </div>
-                                                            <div class="equal-length-item" style="text-align: center; ">
-                                                                {{j.qty}}
+                                                            <div class="equal-length-item" style="text-align: right; ">
+                                                                {{j.discount}}
                                                             </div>
-                                                            <div class="equal-length-item" style="text-align: center; ">
+                                                            <div class="equal-length-item" style="text-align: right; ">
+                                                                {{j.quantity}}
+                                                            </div>
+                                                            <div class="equal-length-item" style="text-align: right; ">
                                                                 {{j.price}}
                                                             </div>
                                                             <div class="equal-length-item" style="text-align: center; ">
@@ -1487,7 +1516,7 @@
                                                                 Discount
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ tot_dis }}
+                                                                {{ pdebt.discount }}
                                                             </div>
                                                         </div>
                                                         <div class="row ml-1">
@@ -1495,16 +1524,16 @@
                                                                 Subtotal
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ sale.subtotal }}
+                                                                {{pdebt.subtotal}}
                                                             </div>
                                                         </div>
-                                                        {% if sale.IGST != '0' %}
+                                                        {% if pdebt.igst != '0' %}
                                                         <div class="row ml-1">
                                                             <div class="col-md-5 text-left " style=" color: black;">
                                                                 IGST
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ sale.IGST }}
+                                                                {{pdebt.igst}}
                                                             </div>
                                                         </div>
                                                         {% else %}
@@ -1513,7 +1542,7 @@
                                                                 CGST
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ sale.CGST }}
+                                                                {{ pdebt.cgst }}
                                                             </div>
                                                         </div>
                                                         <div class="row ml-1">
@@ -1521,7 +1550,7 @@
                                                                 SGST
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ sale.SGST }}
+                                                                {{pdebt.sgst}}
                                                             </div>
                                                         </div>
                                                         {% endif %}
@@ -1534,7 +1563,7 @@
                                                                 Total
                                                             </div>
                                                             <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
-                                                                {{ sale.salestotal }}
+                                                                {{pdebt.grandtotal}}.0
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1562,8 +1591,23 @@
 
             </div>
                                  
-            
 
+            <!-- <script>
+                function printfun() {
+                    // Clone the content to preserve the original styles
+                    var contentToPrint = document.getElementById('whatToPrint').cloneNode(true);
+            
+                    // Create a new window for printing
+                    var printWindow = window.open('', '_blank');
+            
+                    // Append the cloned content to the new window
+                    printWindow.document.body.appendChild(contentToPrint);
+            
+                    // Trigger the print dialog for the new window
+                    printWindow.print();
+                }
+            </script> -->
+            
     
    
 <script>
@@ -1631,6 +1675,7 @@ function Slip() {
     document.getElementById('slipdiv').style.display = 'block';
     document.getElementById('details').style.display = 'none';
     document.getElementById('whatToPrint3').style.display = 'none';
+    document.getElementById('whatToPrint2').style.display = 'none';
    
 }
 
@@ -1722,6 +1767,65 @@ function Slip() {
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     <script src="https://pingendo.com/assets/bootstrap/bootstrap-4.0.0-alpha.6.min.js"></script>
+
+
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function ($) {
+            $(document).on('click', '#pdflink', function (event) {
+                event.preventDefault();
+
+                print1 = document.getElementById('whatToPrint1')
+                print2 = document.getElementById('whatToPrint2')
+                print3 = document.getElementById('whatToPrint3')
+                print4 = document.getElementById('slipdiv')
+
+                if (print1.style.display !== 'none'){
+                    var element = document.getElementById('printdiv1') 
+                }
+
+                if (print2.style.display !== 'none'){
+                    var element = document.getElementById('printdiv2') 
+                }
+
+                if (print3.style.display !== 'none'){
+                    var element = document.getElementById('printdiv3') 
+                }
+
+                if (print4.style.display !== 'none'){
+                    var element = document.getElementById('printslip') 
+                }
+
+                 
+                // element.style.color = 'black';
+                // element.style.backgroundColor = 'white';
+                var opt =
+                {
+                    margin: 1,
+                    filename: 'DebitNote' + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', }
+                };
+                html2pdf().set(opt).from(element).save();
+            });
+        });
+    </script>
+ <!-- <script>
+    function printSection(sectionId) {
+        var printContent = document.getElementById(sectionId).innerHTML;
+        var originalContent = document.body.innerHTML;
+
+        document.body.innerHTML = printContent;
+
+        window.print();
+
+        document.body.innerHTML = originalContent;
+    }
+</script>  -->
 
 
 {% endif %}

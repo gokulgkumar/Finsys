@@ -36919,7 +36919,10 @@ def viewpurchasedebit(request,id):
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
         pdebt=purchasedebit.objects.get(pdebitid=id,cid=cmp1)
-        pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
+        
+        pdebt1 = purchasedebit1.objects.filter(pdebit=id)
+
+        print('pdebt is this',pdebt)
         comments = debitnotecomments.objects.filter(cid_id=request.session["uid"],debid_id=id)
         
         return render(request,'app1/viewpurchasedebit.html',{'cmp1': cmp1,'pdebt':pdebt,'pdeb':pdebt1,'comments':comments})
@@ -51249,3 +51252,18 @@ def paymentDraftToSave(request, id):
         pay.save()
         return redirect(payment_view, id)
 
+def debit_add_file(request,id):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    debit = purchasedebit.objects.get(pdebitid=id,cid=cmp1)
+
+    if request.method == 'POST':
+        
+        if len(request.FILES) != 0:
+           
+            if debit.file != "default.jpg":
+                 os.remove(debit.file.path)
+                
+            debit.file=request.FILES['file']
+        
+        debit.save()
+        return redirect('viewpurchasedebit',id)

@@ -1618,11 +1618,13 @@ class purchasedebit(models.Model):
     paid_amount = models.FloatField(blank=True,null=True)
     balance_amount = models.FloatField(blank=True,null=True)
     payment_type = models.CharField(max_length=100,null=True)
+    file = models.FileField(upload_to='sales',default="default.jpg")
     debit_status = (
         ('Draft','Draft'),
         ('Save','Save'),
     )
     status =models.CharField(max_length=150,choices=debit_status ,default='Draft')
+    
 
 class purchasedebit1(models.Model):
     pdebit = models.ForeignKey(purchasedebit, on_delete=models.CASCADE,null=True)

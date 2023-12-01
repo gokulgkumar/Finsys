@@ -1354,6 +1354,8 @@ urlpatterns = [
     path('check_user_loan',views.check_user_loan,name='check_user_loan'),
     
     path('payment_draf_to_save/<int:id>',views.paymentDraftToSave, name='paymentDraftToSave'), 
- 
+
+
+    path('debit_add_file/<int:id>/', views.debit_add_file, name='debit_add_file'),
  
 ]
