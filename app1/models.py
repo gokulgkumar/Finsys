@@ -1623,6 +1623,8 @@ class purchasedebit(models.Model):
         ('Draft','Draft'),
         ('Save','Save'),
     )
+    gstnumber=models.CharField(max_length=150 ,default='NULL')
+    gsttype=models.CharField(max_length=150 ,default='NULL')
     status =models.CharField(max_length=150,choices=debit_status ,default='Draft')
     
 

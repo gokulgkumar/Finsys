@@ -1069,6 +1069,17 @@
                                     <label for="validationCustom02">Billing address</label>
                                     <textarea class="form-control" name="address" rows="5" id="mailaddr">{{ pdebt.address }}</textarea>
                                 </div>
+                                <div class="col-md-5 mt-3"></div>
+                                <div class="col-md-5 mt-3">
+                                    <label for="validationCustom02">GST Treatment</label>
+                                    
+                                    <input type="text" class="form-control" name="gst_type" id="gst_type" value="{{ pdebt.gsttype }}" required>
+                                </div>
+                                <div class="col-md-5 mt-3">
+                                    <label for="validationCustom02">GST Number</label>
+                                    
+                                    <input type="text" class="form-control" name="gst_num" id="gst_num" value="{{ pdebt.gstnumber }}" required>
+                                </div>
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Debit Note Date</label>
                                     <input type="date" class="form-control" value="{{ pdebt.debitdate| date:'Y-m-d' }}" name="debitdate">
@@ -1251,24 +1262,37 @@
                         <div class="col-md-6">
                             <label for="">Payment Type</label>
                             <div class="d-flex">
-                                <select class="form-control" name="paytype" id="paytype" required style="width:70%;">
+                                <select class="form-control my-select" name="paytype" id="pay_method" required style="width:70%;">
 
                                     {% if bank %}
-                                    <option value="{{bank.id}}" hidden>{{bank.bankname}}</option>
+                                    <option value="{{i.bankname}}" hidden>{{bank.bankname}}</option>
                                     {% else %}
                                     <option value="{{pdebt.payment_type}}" hidden>{{pdebt.payment_type}}</option>
                                     {% endif %}
                                     
+                                    
+
+                                    <option value="cash">Cash</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="upi">UPI</option>
                                     {% for i in banks %}
-                                    <option value="{{i.id}}">{{i.bankname}}</option>
+                                    <option value="{{i.bankname}}">{{i.bankname}}</option>
                                     {% endfor %}
-                                    <option value="Cash">Cash</option>
-                                    <option value="Cheque">Cheque</option>
-                                    <option value="Creadit Card/Debit Card">Creadit Card/Debit Card</option>
-                                    <option value="Paypal/Other service">Paypal/Other service</option>
                                 </select>
                                 
                             </div> 
+                            <div class="col-md-9 mt-2" style="display:none;margin-left: -1rem;"  id="chequediv">
+                                <label class="col-form-label" >Cheque No</label>
+                                <input type="text" class="form-control" name="cheque_id" id="cheque_id" placeholder="Enter Cheque No" value="">
+                            </div>
+                            <div class="col-md-9 mt-2"  style="display:none;margin-left: -1rem;" id="upidiv">
+                                <label class="col-form-label" >UPI ID</label>
+                                <input type="text" class="form-control" name="upi_id" id="upi_id" placeholder="Enter UPI ID">
+                            </div>
+                            <div class="col-md-9 mt-2"  style="display:none;margin-left: -1rem;" id="bnkdiv">
+                                <label class="col-form-label" >Bank Account</label>
+                                <input type="text" class="form-control" name="bnk_id" id="bnk_id" style="background-color: #43596c;" value="" readonly>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -2056,6 +2080,52 @@
     </script>
 
 
+
+#payment method
+<script>
+    $(document).ready(function() {
+      $("#pay_method").change(function() {
+        var x=$('#pay_method').val();
+        if(x==='cash'){
+          $('#chequediv').hide()
+          $('#bnkdiv').hide()
+          $('#upidiv').hide()
+          document.getElementById('cheque_id').value=null
+          document.getElementById('upi_id').value=null
+        }else if(x==='cheque'){
+          $('#chequediv').show()
+          $('#bnkdiv').hide()
+          $('#upidiv').hide()
+          document.getElementById('upi_id').value=null
+        }else if(x==='upi'){
+          $('#upidiv').show()
+          $('#bnkdiv').hide()
+          $('#chequediv').hide()
+          document.getElementById('cheque_id').value=null
+        }else{
+          $('#bnkdiv').show()
+          $('#chequediv').hide()
+          $('#upidiv').hide()
+          document.getElementById('cheque_id').value=null
+          document.getElementById('upi_id').value=null
+
+          $.ajax({
+              type: "GET",
+              url: "{% url 'bankdata' %}",
+              data: {
+                  id: x,
+              },
+              success: function (response) {
+                  data = response.bank
+                  document.getElementById('cheque_id').value=null
+                  document.getElementById('upi_id').value=null
+                  document.getElementById("bnk_id").value = data
+              }
+          });
+        }
+      });
+    });
+</script>
 
 
  

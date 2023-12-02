@@ -31202,7 +31202,20 @@ def view_item(request,id):
     pdebit_item = purchasedebit1.objects.all()
     dchallan=challan.objects.all()
     dchallanitem=challanitem.objects.all()
-    context = {'item':item,'cmp1': cmp1,'bill':bill,'bitems':bitems,'inv':inv,'iitems':iitems,'sales':sales,'pitems':pitems,'sitems':sitems,'cmp1': cmp1,'purchase':purchase,'est':est,'eitems':eitems,'payment':payments,'payitem':payitem,'creditnote':creditnote,'credititem':credititem,'pdebit':pdebit,'pdebit_item':pdebit_item,'dchallan':dchallan,'dchallanitem':dchallanitem}
+    retinvoices=RetainerInvoices.objects.all()
+    retinvoicesitem=RetainerInvoiceItems.objects.all()
+    recinvoices=  recinvoice.objects.all()
+    recinvoiceitem=recinvoice_item.objects.all()
+    rbill=recurring_bill.objects.all()
+    rbillitems=recurringbill_item.objects.all()
+    e_waybill=e_waybills.objects.all()
+    e_waybillitem=e_waybill_item.objects.all()
+
+
+    context = {'item':item,'cmp1': cmp1,'bill':bill,'bitems':bitems,'inv':inv,'iitems':iitems,'sales':sales,'pitems':pitems,'sitems':sitems,'cmp1': cmp1,'purchase':purchase,'est':est,'eitems':eitems,'payment':payments,'payitem':payitem,
+               'creditnote':creditnote,'credititem':credititem,'pdebit':pdebit,'pdebit_item':pdebit_item,'dchallan':dchallan,
+               'dchallanitem':dchallanitem,'retinvoicesitem':retinvoicesitem,'retinvoices':retinvoices,'recinvoices':recinvoices,'recinvoiceitem':recinvoiceitem,
+               'rbill':rbill,'rbillitems':rbillitems,'e_waybills':e_waybills,'e_waybillitem':e_waybillitem}
     return render(request,'app1/item_view.html',context)
 
 @login_required(login_url='regcomp')
@@ -34500,6 +34513,7 @@ def goeditpurchaseorder(request,id):
         pordr=purchaseorder.objects.get(porderid=id)
         pitem = purchaseorder_item.objects.filter(porder=id)
         banks=bankings_G.objects.filter(cid=cmp1)
+       
         bank_id=pordr.payment_type
         
         if str(bank_id).isnumeric():
@@ -36672,11 +36686,13 @@ def createpurchasedebit(request):
     if 'uid' in request.session:
         if request.session.has_key('uid'):
             uid = request.session['uid']
+            print(uid,'user is')
         else:
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
         if request.method == 'POST':
             vendor = request.POST.get('vendor')
+            
             
             address = request.POST.get('address')
             email=request.POST.get('email')
@@ -36701,6 +36717,8 @@ def createpurchasedebit(request):
             adjustment=request.POST.get('adjustment')
             payment_type=request.POST.get('paytype')
             balance_amount=request.POST.get('bal_due')
+            gstnumber=request.POST['gst_num']
+            gsttype=request.POST['gst_type']
             if 'save_as_billed' in request.POST:
                 status = 'Save'
             elif 'save_as_draft' in request.POST:
@@ -36736,13 +36754,15 @@ def createpurchasedebit(request):
                                     balance_amount=balance_amount,
                                     status=status,
                                     cid=cmp1,
+                                    gstnumber=gstnumber,
+                                    gsttype=gsttype
                                                             
                                 )
             if payment_type == 'Cash':
                  cmp1.cash += float(balance_amount)
                  cmp1.save()
             else:
-                  received_bank = bankings_G.objects.get(bankname=payment_type)
+                  received_bank = bankings_G.objects.get(bankname=payment_type,cid=cmp1)
                   received_bank.balance += float(balance_amount)
                   received_bank.save()
 
@@ -36997,12 +37017,14 @@ def goeditpurchasedebit(request,id):
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
+        banks=bankings_G.objects.filter(cid=cmp1) 
         context = {
                     'cmp1': cmp1,
                     'pdebt':pdebt,
                     'pdebt1':pdebt1,
                     'item':item ,
-                    'vndr':vndr       
+                    'vndr':vndr,
+                    'banks':banks,       
                 }
         return render(request,'app1/editpurchasedebit.html',context)
     return redirect('/')
