@@ -448,6 +448,7 @@
                                         <table class="table">
                                             <thead >
                                             <tr  >
+                                                <th style="text-align: center;"> Sl No.</th>
                                                 <th style="text-align: center;">Type</th>
                                                 <th style="text-align: center; "> Name</th>
                                                 <th style="text-align: center;">Date</th>
@@ -708,6 +709,7 @@
                                          {% if sale.items == a.name %}
                                            
                                                 <tr tr class="clickable-row " data-href="{% url 'viewcredit' sale.scredit.screditid %}"  >
+                                                    
                                                     <td style="text-align: center;"> credit notes</td>
                                                     <td style="text-align: center;"> {{ sale.scredit.customer }}</td>
                                                     <td style="text-align: center;">{{ sale.scredit.creditdate | date:'d-m-Y' }}</td>
@@ -723,12 +725,15 @@
                                        {% endif %} 
                                     {% endfor %}
                                      <!------------------------------------Dedit notes------------------------------------------------------------------>
-                        
+                                     <script> var counter = 0 </script>
+
                                      {% for sale in pdebit_item %}
                                      {% if sale.items == a.name %}
-                                       
+                                     
                                             <tr tr class="clickable-row " data-href="{% url 'viewpurchasedebit' sale.pdebit.pdebitid %}"  >
-                                                <td style="text-align: center;"> Debit notes</td>
+                                            <td id="{{forloop.counter}}">{{ forloop.counter }}</td>
+                                            <td style="text-align: center;"> Debit notes</td>
+                                                
                                                 <td style="text-align: center;"> {{ sale.pdebit.vendor }}</td>
                                                 <td style="text-align: center;">{{ sale.pdebit.debitdate | date:'d-m-Y' }}</td>
                                             <!-- <td style="text-align: center;">{{ sale.pdebit.debit_no }}</td> -->
@@ -741,12 +746,22 @@
                                            
                                         </tr>
                                         </fieldset>
-                                      
+                                        
+                                        
                                    {% endif %} 
                                 {% endfor %}
+                                
                                     </tbody>
                                 </table>
                                 </div>
+                               
+
+                                <script>
+                                    var counter = counter + 1
+                                    var s{{forloop.counter}} = counter
+                                    document.getElementById("{{forloop.counter}}").innerHTML = s{{forloop.counter}};
+                                </script>
+                                             
                              
                           <script>
                             // Assuming you have the stock quantity and purchase cost as variables

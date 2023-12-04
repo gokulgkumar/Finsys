@@ -31184,6 +31184,13 @@ def deleteitem(request, id):
 def view_item(request,id):
     cmp1 = company.objects.get(id=request.session['uid'])
     item = itemtable.objects.filter(id=id)
+    for i in item:
+        a=i.name
+        print(a)
+    
+    
+    
+        
     sales = salesorder.objects.filter(cid=cmp1)
     purchase = purchaseorder.objects.all()
     pitems  = purchaseorder_item.objects.all()
@@ -31212,10 +31219,14 @@ def view_item(request,id):
     e_waybillitem=e_waybill_item.objects.all()
 
 
+# 'pdebitsl':[i for i in pdebit_item if i.items == item.name ]
+     
+
+
     context = {'item':item,'cmp1': cmp1,'bill':bill,'bitems':bitems,'inv':inv,'iitems':iitems,'sales':sales,'pitems':pitems,'sitems':sitems,'cmp1': cmp1,'purchase':purchase,'est':est,'eitems':eitems,'payment':payments,'payitem':payitem,
                'creditnote':creditnote,'credititem':credititem,'pdebit':pdebit,'pdebit_item':pdebit_item,'dchallan':dchallan,
                'dchallanitem':dchallanitem,'retinvoicesitem':retinvoicesitem,'retinvoices':retinvoices,'recinvoices':recinvoices,'recinvoiceitem':recinvoiceitem,
-               'rbill':rbill,'rbillitems':rbillitems,'e_waybills':e_waybills,'e_waybillitem':e_waybillitem}
+               'rbill':rbill,'rbillitems':rbillitems,'e_waybills':e_waybills,'e_waybillitem':e_waybillitem,}
     return render(request,'app1/item_view.html',context)
 
 @login_required(login_url='regcomp')
@@ -36678,7 +36689,50 @@ def addpurchasedebit(request):
         acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
         rbill= recurring_bill.objects.filter(cid=cmp1)
         bank=bankings_G.objects.filter(cid=cmp1)
-        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank} 
+
+
+        ref = purchasedebit.objects.last()
+
+
+        sel = purchasedebit.objects.filter(cid=cmp1).last()
+        print(sel,'select')
+        if sel:
+            deb_no = str(sel.debit_no)
+            print(deb_no,'number')
+            numbers = []
+            stri = []
+            for word in deb_no:
+                if word.isdigit():
+                    numbers.append(word)
+                else:
+                    stri.append(word)
+            
+            num=''
+            for i in numbers:
+                num +=i
+            
+            st = ''
+            for j in stri:
+                st = st+j
+
+            deb_no = int(num)+1
+
+            if num[0] == '0':
+                if deb_no <10:
+                    deb_no = st+'0'+ str(deb_no)
+                else:
+                    deb_no = st+ str(deb_no)
+            else:
+                deb_no = st+ str(deb_no)
+
+        debit_list = ''
+        purdebit = purchasedebit.objects.all()
+        for s in purdebit:
+            debit_list = s.debit_no+ ',' + debit_list
+        
+
+
+        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank,'deb_no':deb_no,'purdebit':purdebit} 
         return render(request,'app1/addpurchasedebit.html',context)
     return redirect('gopurchasedebit') 
 
@@ -37061,6 +37115,8 @@ def editpurchasedebit(request,id):
             pdebt.ship_charge=request.POST['shipcharge']
             pdebt.paid_amount=request.POST['paid']
             pdebt.payment_type=request.POST['paytype']
+            pdebt.gstnumber=request.POST['gst_num']
+            pdebt.gsttype=request.POST['gst_type']
             
             #Convert the floating-point numbers to integers
             grandtotal = int(float(pdebt.grandtotal))

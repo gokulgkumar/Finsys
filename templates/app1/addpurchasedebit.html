@@ -2,7 +2,13 @@
 
 {% block body %}
 
+
+
+
 <style>
+     .error {
+            color: red;
+        }
       .select2-container--default .select2-results__option {
             color: white;
             background-color: black;
@@ -167,10 +173,15 @@ input[name="service-city"] {
                                     <input type="date" class="form-control" name="debitdate" id="date">
                                 </div>
                                 <div class="col-md-5 mt-3">
-                                    <label for="validationCustom02">Debit Note Number</label>
+                                    <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This number is not continous <span class="text-white">)</span></span>
+                                   
+                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
                                     
-                                    <input type="text" class="form-control" name="debitno" id="debitno" pattern="{a-zA-Z}{}" required>
                                 </div>
+
+
+                               
+
                                 
                             </div>
                             <div class="row">
@@ -277,6 +288,15 @@ input[name="service-city"] {
                                         <td>1</td>
                                         <td style="width: 20%;">
                                             <div class="d-flex">
+<!-- 
+                                                <input list="brow" name='items[]' class="form-control " id="product">
+<datalist id="brow" >
+    {% for i in item %}
+    <option value="{{ i.name }}" data-tokens="{{ i.name }}" >{{ i.name }}</option>
+    {% endfor %}
+</datalist>   -->
+
+
                                                 <select name='items[]' id="product" class="form-control">
                                                     <option selected>Choose..</option>
                                                     {% for i in item %}
@@ -1346,6 +1366,8 @@ input[name="service-city"] {
     $('.select2').select2();
 </script> -->
                   
+
+
 
 
 #payment method
@@ -3043,7 +3065,26 @@ function qtychange1(input) {
 
 
 
-
+<script type="text/javascript">
+    $(document).on('change','#deb_no', function() {
+        deb = '{{deb_no}}'
+        deb_value = $('#deb_no').val();
+        if(deb_value != deb){
+            document.getElementById('dangerdiv').style.display = 'block';
+        }else{
+            document.getElementById('dangerdiv').style.display = 'none';
+        }
+        var deb_list = "{{ purdebit}}";
+        deblist = deb_list.split(",");
+        for(let i=0; i<deblist.length; i++){
+            if (deb_value == deblist[i]){
+                alert('Debit Number already in use.')
+                document.getElementById('dangerdiv').style.display = 'none';
+                document.getElementById('deb_no').value = ''
+            }
+        }
+    })
+</script>
 
 
 

@@ -232,6 +232,23 @@
 
 
         @media print {
+
+            .equal-length-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%; /* Make the container fill the height of the column */
+            margin-left: 2vh;
+            margin-right: 2vh;
+        }
+
+        .equal-length-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+
+
         body * {
             visibility: hidden;
         }
@@ -1383,7 +1400,181 @@
 
 
 
-</div>
+
+                <!-- slip# -->
+
+                <div id="slipdiv" style="background-color: #243e54; border-radius: 2vh; display: none; ">
+                    <div class="p-5"  >
+                        <div class="my-5 page" size="A4">
+                            
+                            <div class="row" style="margin-top: 20%;" id="printslip">
+                                <div class="col-md-3"></div>
+                                <div class="col-md-6 ml-3">
+                                    <div class="card bg-white" style="border: 1px dotted black;">
+                                        <div class="mt-2" style="text-align: center;">
+                                            <div class="text-center" style="font-size: 3vh; color: black;">
+                                                <b>{{cmp1.cname}} </b>
+                                            </div>
+                                            <span style="font-size: x-small; color: black;">{{ cmp1.caddress }} <br>
+                                                {{cmp1.city}},
+                                                {{cmp1.state}}
+                                                {{cmp1.pincode}} <br>
+                                                {{ cmp1.phone }} <br>{{ cmp1.cemail }} 
+                                            </span>
+                                        </div>
+                                        <div class="ml-4 mt-2" style="color: black;">
+                                            <div class="row">
+                                                <div class="col-md-6 text-left">Debit No:</div>
+                                                <div class="col-md-5 text-right">{{pdebt.debit_no}}</div>
+                                            </div>
+                                            <!-- <div class="row">
+                                                <div class="col-md-6 text-left">Customer Name:</div>
+                                                <div class="col-md-5 text-right">{{cust.firstname}} {{cust.lastname}}</div>
+                                            </div> -->
+                                            <div class="row">
+                                                <div class="col-md-6 text-left">Debit Date :</div>
+                                                <div class="col-md-5 text-right">{{pdebt.debitdate | date:'d-m-Y'}}</div>
+                                            </div>
+                                            <!-- <div class="row">
+                                                <div class="col-md-6 text-left">Shipment Date:</div>
+                                                <div class="col-md-5 text-right">{{sale.shipmentdate | date:'d-m-Y'}}</div>
+                                            </div> -->
+                                        </div>
+                                        <div><br>
+                                            <div class="equal-length-container" style="color: black; font-weight: bold;">
+                                                <div class="equal-length-item" style=" text-align: center;">
+                                                    Product
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:95%">
+                                                </div>
+                                                <div class="equal-length-item ml-2"  style=" text-align:center;">
+                                                    HSN
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
+                                                </div>
+                                                <div class="equal-length-item ml-2"  style=" text-align:center;">
+                                                    Discount
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
+                                                </div>
+                                                <div class="equal-length-item"  style=" text-align: center; ">
+                                                    Qty
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                </div>
+                                                <div class="equal-length-item"  style=" text-align: center; ">
+                                                    Price
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                </div>
+                                                <div class="equal-length-item"  style=" text-align: center; ">
+                                                    Tax
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                </div>
+                                                <div class="equal-length-item" style=" text-align: center; ">
+                                                    Total
+                                                    <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {% for j in pdeb %}
+                                            <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
+                                                <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
+                                                    {{j.items}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: right;">
+                                                    {{j.hsn}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: right; ">
+                                                    {{j.discount}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: right; ">
+                                                    {{j.quantity}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: right; ">
+                                                    {{j.price}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: center; ">
+                                                    {{j.tax}}
+                                                </div>
+                                                <div class="equal-length-item" style="text-align: center; ">
+                                                    {{j.total}}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+        
+                                        <div><br>
+                                            <div class="row ml-1">
+                                                <div class="col-md-5 text-left" style=" color: black;">
+                                                    Discount
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                    {{ pdebt.discount }}
+                                                </div>
+                                            </div>
+                                            <div class="row ml-1">
+                                                <div class="col-md-5 text-left" style=" color: black;">
+                                                    Subtotal
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                    {{pdebt.subtotal}}
+                                                </div>
+                                            </div>
+                                            {% if pdebt.igst != '0' %}
+                                            <div class="row ml-1">
+                                                <div class="col-md-5 text-left " style=" color: black;">
+                                                    IGST
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                    {{pdebt.igst}}
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="row ml-1">
+                                                <div class="col-md-5 text-left" style=" color: black;">
+                                                    CGST
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                    {{ pdebt.cgst }}
+                                                </div>
+                                            </div>
+                                            <div class="row ml-1">
+                                                <div class="col-md-5 text-left" style=" color: black;">
+                                                    SGST
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="color: black;">
+                                                    {{pdebt.sgst}}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <hr class="ml-2 mr-2" style="color: black; border-bottom: 1px solid black; ">
+                                        </div>
+        
+                                        <div class="mb-2">
+                                            <div class="row">
+                                                <div class="col-md-5 text-left ml-2" style=" font-size: large; color: black; font-weight: bold;">
+                                                    Total
+                                                </div>
+                                                <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
+                                                    {{pdebt.grandtotal}}.0
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3"></div>
+                            </div>
+                       
+        
+        
+        
+             
+                    </div>
+                    
+                </div>              
+            </div>
+
+
+
+
+            </div>
 
         <!-- modal -->
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -1412,176 +1603,11 @@
                
 
                 <!-- SLIP -->
-
+                
                             
-                            <div id="slipdiv" style="background-color: #243e54; border-radius: 2vh; display: none; ">
-                                <div class="p-5"  >
-                                    <div class="my-5 page" size="A4">
-                                        <div class="row" style="margin-top: 20%;" id="printslip">
-                                            <div class="col-md-3"></div>
-                                            <div class="col-md-6 ml-3">
-                                                <div class="card bg-white" style="border: 1px dotted black;">
-                                                    <div class="mt-2" style="text-align: center;">
-                                                        <div class="text-center" style="font-size: 3vh; color: black;">
-                                                            <b>{{cmp1.cname}} </b>
-                                                        </div>
-                                                        <span style="font-size: x-small; color: black;">{{ cmp1.caddress }} <br>
-                                                            {{cmp1.city}},
-                                                            {{cmp1.state}}
-                                                            {{cmp1.pincode}} <br>
-                                                            {{ cmp1.phone }} <br>{{ cmp1.cemail }} 
-                                                        </span>
-                                                    </div>
-                                                    <div class="ml-4 mt-2" style="color: black;">
-                                                        <div class="row">
-                                                            <div class="col-md-6 text-left">Debit No:</div>
-                                                            <div class="col-md-5 text-right">{{pdebt.debit_no}}</div>
-                                                        </div>
-                                                        <!-- <div class="row">
-                                                            <div class="col-md-6 text-left">Customer Name:</div>
-                                                            <div class="col-md-5 text-right">{{cust.firstname}} {{cust.lastname}}</div>
-                                                        </div> -->
-                                                        <div class="row">
-                                                            <div class="col-md-6 text-left">Debit Date :</div>
-                                                            <div class="col-md-5 text-right">{{pdebt.debitdate | date:'d-m-Y'}}</div>
-                                                        </div>
-                                                        <!-- <div class="row">
-                                                            <div class="col-md-6 text-left">Shipment Date:</div>
-                                                            <div class="col-md-5 text-right">{{sale.shipmentdate | date:'d-m-Y'}}</div>
-                                                        </div> -->
-                                                    </div>
-                                                    <div><br>
-                                                        <div class="equal-length-container" style="color: black; font-weight: bold;">
-                                                            <div class="equal-length-item" style=" text-align: center;">
-                                                                Product
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:95%">
-                                                            </div>
-                                                            <div class="equal-length-item ml-2"  style=" text-align:center;">
-                                                                HSN
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
-                                                            </div>
-                                                            <div class="equal-length-item ml-2"  style=" text-align:center;">
-                                                                Discount
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
-                                                            </div>
-                                                            <div class="equal-length-item"  style=" text-align: center; ">
-                                                                Qty
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
-                                                            </div>
-                                                            <div class="equal-length-item"  style=" text-align: center; ">
-                                                                Price
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
-                                                            </div>
-                                                            <div class="equal-length-item"  style=" text-align: center; ">
-                                                                Tax
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
-                                                            </div>
-                                                            <div class="equal-length-item" style=" text-align: center; ">
-                                                                Total
-                                                                <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        {% for j in pdeb %}
-                                                        <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
-                                                            <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
-                                                                {{j.items}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: right;">
-                                                                {{j.hsn}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: right; ">
-                                                                {{j.discount}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: right; ">
-                                                                {{j.quantity}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: right; ">
-                                                                {{j.price}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: center; ">
-                                                                {{j.tax}}
-                                                            </div>
-                                                            <div class="equal-length-item" style="text-align: center; ">
-                                                                {{j.total}}
-                                                            </div>
-                                                        </div>
-                                                        {% endfor %}
-                                                    </div>
-                    
-                                                    <div><br>
-                                                        <div class="row ml-1">
-                                                            <div class="col-md-5 text-left" style=" color: black;">
-                                                                Discount
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ pdebt.discount }}
-                                                            </div>
-                                                        </div>
-                                                        <div class="row ml-1">
-                                                            <div class="col-md-5 text-left" style=" color: black;">
-                                                                Subtotal
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{pdebt.subtotal}}
-                                                            </div>
-                                                        </div>
-                                                        {% if pdebt.igst != '0' %}
-                                                        <div class="row ml-1">
-                                                            <div class="col-md-5 text-left " style=" color: black;">
-                                                                IGST
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{pdebt.igst}}
-                                                            </div>
-                                                        </div>
-                                                        {% else %}
-                                                        <div class="row ml-1">
-                                                            <div class="col-md-5 text-left" style=" color: black;">
-                                                                CGST
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{ pdebt.cgst }}
-                                                            </div>
-                                                        </div>
-                                                        <div class="row ml-1">
-                                                            <div class="col-md-5 text-left" style=" color: black;">
-                                                                SGST
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="color: black;">
-                                                                {{pdebt.sgst}}
-                                                            </div>
-                                                        </div>
-                                                        {% endif %}
-                                                        <hr class="ml-2 mr-2" style="color: black; border-bottom: 1px solid black; ">
-                                                    </div>
-                    
-                                                    <div class="mb-2">
-                                                        <div class="row">
-                                                            <div class="col-md-5 text-left ml-2" style=" font-size: large; color: black; font-weight: bold;">
-                                                                Total
-                                                            </div>
-                                                            <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
-                                                                {{pdebt.grandtotal}}.0
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3"></div>
-                                        </div>
-                                    </div>
-                    
-                    
-                    
                          
-                                </div>
-                            </div>              
 
-
-
-
+                    
 
 
 
@@ -1643,8 +1669,10 @@ function toggleTemplate(templateId,buttonId){
                 $('#'+templateId).css('display','block');
                 $('.templateToggleButtons').removeClass('active');
                 $('#'+buttonId).addClass('active');
+                document.getElementById('slipdiv').style.display = 'block';
                 $("#templatePrintButton").attr("onclick","printSection('"+templateId+"')");
                 document.getElementById('page-content').scrollIntoView();
+                
             }
    
 
