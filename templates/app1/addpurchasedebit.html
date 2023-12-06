@@ -84,19 +84,18 @@ input[name="service-city"] {
     {% endfor %}
 </select>  -->
 
-<input list="brow" class="form-control vendor" id="selected">
+<!-- <input list="brow" class="form-control vendor" id="selected">
 <datalist id="brow" >
     {% for v in vndr %}
     <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
     {% endfor %}
-</datalist>   
+</datalist>    -->
 
-
-<!-- <select class="form-control select2 vendor" data-width="100%" id="selected">
+ <select class="form-control select2 vendor" data-width="100%" id="selected">
     {% for v in vndr %}
     <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
     {% endfor %}
-  </select> -->
+  </select> 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <!-- Include Select2 -->
  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -108,10 +107,45 @@ input[name="service-city"] {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 
- <!-- <script>
+ <script>
     $('.select2').select2();
+    
     console.log("select is 'select2'");
-</script>    -->
+
+    $('#selected').on('change', function() {
+                console.log('hello')
+                
+                select = $('#selected').val();
+                $('#billno').val('');
+                $.ajax({
+                type: "GET",
+                url: "{% url 'getvendordata' %}",
+                data: {
+                    id: select
+                }
+                }).done(function(response) {
+                var json_data = JSON.parse(response);
+                for (key in json_data) {
+                    console.log(json_data[key]['email'])
+                    document.getElementById('email').value = json_data[key]['email'];
+                    document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
+                    document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    document.getElementById('gst_num').value = json_data[key]['gstin'];
+                console.log(json_data[key]['vendorid']);
+                
+                reloadbill(json_data[key]['vendorid']) ;
+                }
+                console.log(json_data);
+                
+                })
+                
+
+            })
+           
+
+
+</script>   
 
  <!-- <script>
     $(document).ready(function() {
@@ -293,18 +327,31 @@ input[name="service-city"] {
 <datalist id="brow" >
     {% for i in item %}
     <option value="{{ i.name }}" data-tokens="{{ i.name }}" >{{ i.name }}</option>
+
+
     {% endfor %}
 </datalist>   -->
 
+<!-- <select class="form-control select2 vendor" data-width="100%" id="selected">
+    {% for v in vndr %}
+    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
+    {% endfor %}
+  </select> 
+ -->
 
-                                                <select name='items[]' id="product" class="form-control">
+                                                <select name='items[]' id="product" class="form-control select2">
                                                     <option selected>Choose..</option>
                                                     {% for i in item %}
-                                                        <option value="{{ i.name }}">
+                                                        <option value="{{ i.name }}" data-tokens="{{ i.name }}">
                                                             {{ i.name }}
                                                         </option>
                                                     {% endfor %}
                                                 </select>
+
+                               
+
+
+
                                                 <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newitem" data-toggle="modal">+</a> 
                                             </div>
                                             <div id="errorLabel" style="color: red;"></div>
@@ -364,6 +411,93 @@ input[name="service-city"] {
                                         <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="addrow" onclick="add_item_row()">+</a></td>
                                     </tr>
                                 </table>
+
+                                <script>
+                                    $('.select2').select2();
+                                    console.log('hi')
+                                    $(document).on('change', '#product', function () {
+                                   
+                                        console.log('hhhhh')
+                                       var select = $('#product').val();
+                                       var vid = $('#billno').val();
+                                       console.log('hhhhh',vid,select)
+                                       $.ajax({
+                                           type: "GET",
+                                           url: "{% url 'itemdatadebit' %}",
+                                           data: {
+                                               id: select,
+                                               vid: vid
+                                           },
+                                           success: function (response) {
+                                            
+                                               if (response.error_flag === 1) {
+                                                   // Show error message in a label
+                                                   $('#errorLabel').text("Item is not purchased for this bill number");
+                                               }else {
+                                                   // Remove the error message if error_flag is zero
+                                                   $('#errorLabel').text("");
+                                               }
+                                                   // Update the HTML elements based on the response
+                                                   var data = response.hsn;
+                                                   var data2 =  response.qty;
+                                                   var data3 = response.price;
+                                                   var data4 = response.gst;
+                                                   var data5 = response.sgst;
+                                                   var data6 = response.quty;
+                                                   var data7 =response.taxs;
+                                                   console.log(data7);
+                                              
+                                                   document.getElementById('hsn1').value = data;
+                                   
+                                       
+                                   
+                                                   document.getElementById('qtyspan').innerHTML = data2 ;
+                                                   document.getElementById('unit1').value = data3;
+                                                   document.getElementById('taxs').value = data7;
+                                                   document.getElementById('quantitys').value = data6;
+                                                  
+                                                   if (place == '{{ cmp1.state }}') {
+                                                       document.getElementById('ta1').value = data4;
+                                                   }
+                                                   document.getElementById('ta5').value = data5;
+                                           
+                                           },
+                                           
+                                       });
+                                   });
+                                   
+                        function reloadbill(vid) {
+                console.log(vid);
+                $.ajax({
+                    url: "{% url 'get_vendor_data_bill' %}",
+                    type: "GET",
+                    dataType: "json",
+                    data:{
+                        id:vid
+                    },
+                    success: function(data) {
+                        var dropdow = $('#billno');
+                        dropdow.empty();
+                        $.each(data, function(key, value) {
+                            dropdow.append($('<option></option>').attr('value', key).text(value).val(value));
+                        });
+                        
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                      
+                    }
+                    
+
+                });
+            }
+                                   
+                                   
+                                                                                   </script>
+                                   
+
+
+
                             </div>
                         </div>
                     </div>
@@ -1500,9 +1634,12 @@ input[name="service-city"] {
                 def.style.display = "none";
             }
         }
-    
+        $('.select2').select2();
         $(document).ready(function () {
-            $('#selected').on('change', function() {
+            // $('.select2').select2();
+            $('#selected').on('select2:select', function() {
+                console.log('hello')
+                
                 select = $('#selected').val();
                 $('#billno').val('');
                 $.ajax({
@@ -1514,6 +1651,7 @@ input[name="service-city"] {
                 }).done(function(response) {
                 var json_data = JSON.parse(response);
                 for (key in json_data) {
+                    console.log(json_data[key]['email'])
                     document.getElementById('email').value = json_data[key]['email'];
                     document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
                     document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
@@ -1808,6 +1946,7 @@ input[name="service-city"] {
         });
     </script>
 
+
     <script>
         $(document).ready(function(){
             var roinc = 0
@@ -1839,12 +1978,17 @@ input[name="service-city"] {
                             <td>${roinc+1}</td>
                             <td style="width: 20%;">
                                 <div class="d-flex">
-                                    <select name='items[]' id="product${roinc}" class="form-control">
-                                        <option value=" " selected>Select Item</option>
-                                        {% for i in item %}
-                                            <option value="{{ i.name }}">{{ i.name }}</option>
-                                        {% endfor %}
-                                    </select>
+
+                                    <select name='items[]' id="product${roinc}" class="form-control select3" onchange="handlechange(${roinc})">
+                                                    <option selected>Choose..</option>
+                                                    {% for i in item %}
+                                                        <option value="{{ i.name }}" data-tokens="{{ i.name }}">
+                                                            {{ i.name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+
+
                                     <a href="#">
                                         <button type="button" class="btn btn-outline-secondary ml-1" data-target="#newitem" data-toggle="modal">+</button>
                                     </a>                    
@@ -1910,9 +2054,12 @@ input[name="service-city"] {
 
 
             var place = document.getElementById('plosu').value;
-           
-          
-            $(document).on('click', '#product', function () {
+            $('.select3').select2();
+            document.addEventListener('DOMContentLoaded', function () {
+            
+
+            function handlechange(){
+                console.log('hiiii')
                 var select = $('#product').val();
                 var vid = $('#billno').val();
 
@@ -1958,7 +2105,60 @@ input[name="service-city"] {
                     },
                     
                 });
-            });
+
+            }
+        });
+          
+            // $(document).on('click', '#product', function () {
+            //     var select = $('#product').val();
+            //     var vid = $('#billno').val();
+
+            //     $.ajax({
+            //         type: "GET",
+            //         url: "{% url 'itemdatadebit' %}",
+            //         data: {
+            //             id: select,
+            //             vid: vid
+            //         },
+            //         success: function (response) {
+            //             if (response.error_flag === 1) {
+            //                 // Show error message in a label
+            //                 $('#errorLabel').text("Item is not purchased for this bill number");
+            //             }else {
+            //                 // Remove the error message if error_flag is zero
+            //                 $('#errorLabel').text("");
+            //             }
+            //                 // Update the HTML elements based on the response
+            //                 var data = response.hsn;
+            //                 var data2 =  response.qty;
+            //                 var data3 = response.price;
+            //                 var data4 = response.gst;
+            //                 var data5 = response.sgst;
+            //                 var data6 = response.quty;
+            //                 var data7 =response.taxs;
+            //                 console.log(data7);
+                       
+            //                 document.getElementById('hsn1').value = data;
+
+                
+
+            //                 document.getElementById('qtyspan').innerHTML = data2 ;
+            //                 document.getElementById('unit1').value = data3;
+            //                 document.getElementById('taxs').value = data7;
+            //                 document.getElementById('quantitys').value = data6;
+                           
+            //                 if (place == '{{ cmp1.state }}') {
+            //                     document.getElementById('ta1').value = data4;
+            //                 }
+            //                 document.getElementById('ta5').value = data5;
+                    
+            //         },
+                    
+            //     });
+            // });
+
+
+            
                 
             $(document).on('click','#product1',function(){
                 select = $('#product1').val();
@@ -2974,29 +3174,59 @@ input[name="service-city"] {
         } 
 //     </script>
 <script>
-function qtychange1(input) {
-    var availableQtyElement;
-    var enteredQty = parseFloat(input.value);
-    var availableQtyElement = document.getElementById("quantitys");
-    var anotherInputField = document.getElementById("anotherQuantityInput"); // Change "anotherQuantityInput" to the actual ID of your input field
-    var availableQty = parseFloat(availableQtyElement.value);
 
-    if (isNaN(enteredQty) || enteredQty < 0) {
-        alert("Please enter a valid quantity.");
-        input.value = 0;
-    } else if (enteredQty > availableQty) {
-        alert("Entered quantity is greater than purchasebill quantity.");
-    } else if (enteredQty <= availableQty) {
-        availableQty -= enteredQty ;
-   
-        
-        // Update another input field with the reduced available quantity
-        anotherInputField.value = availableQty;
+
+// Define a variable to store the initially loaded available quantity
+var initialAvailableQuantity = 0;
+
+// Function to be called on quantity change
+function qtychange1(inputElement) {
+    // Get the entered quantity from the input field
+    var enteredQuantity = parseFloat(inputElement.value) || 0;
+
+    // Check if initialAvailableQuantity is 0 (indicating the first change)
+    if (initialAvailableQuantity === 0) {
+        // Set initialAvailableQuantity to the current available quantity from qtyspan
+        initialAvailableQuantity = parseFloat(document.getElementById('qtyspan').innerText) || 0;
     }
-    
+
+    // Calculate the difference between the initially loaded available quantity and the entered quantity
+    var difference = initialAvailableQuantity- enteredQuantity ;
+
+    // Update qtyspan with the calculated difference
+    document.getElementById('qtyspan').innerText = difference;
+
+    // Update initialAvailableQuantity for subsequent changes
+    initialAvailableQuantity = enteredQuantity;
 }
 
+
+
+
+// function qtychange1(input) {
+//     var availableQtyElement;
+//     var enteredQty = parseFloat(input.value);
+//     var availableQtyElement = document.getElementById("quantitys");
+//     var anotherInputField = document.getElementById("anotherQuantityInput"); // Change "anotherQuantityInput" to the actual ID of your input field
+//     var availableQty = parseFloat(availableQtyElement.value);
+
+//     if (isNaN(enteredQty) || enteredQty < 0) {
+//         alert("Please enter a valid quantity.");
+//         input.value = 0;
+//     } else if (enteredQty > availableQty) {
+//         alert("Entered quantity is greater than purchasebill quantity.");
+//     } else if (enteredQty <= availableQty) {
+//         availableQty -= enteredQty ;
+   
+        
+//         // Update another input field with the reduced available quantity
+//         anotherInputField.value = availableQty;
+//     }
+    
+// }
+
 </script>
+
 <script>
 
     function qtychange2(input) {

@@ -1618,6 +1618,7 @@ class purchasedebit(models.Model):
     paid_amount = models.FloatField(blank=True,null=True)
     balance_amount = models.FloatField(blank=True,null=True)
     payment_type = models.CharField(max_length=100,null=True)
+    
     file = models.FileField(upload_to='sales',default="default.jpg")
     debit_status = (
         ('Draft','Draft'),

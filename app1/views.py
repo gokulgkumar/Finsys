@@ -36997,7 +36997,11 @@ def viewpurchasedebit(request,id):
         pdebt1 = purchasedebit1.objects.filter(pdebit=id)
 
         print('pdebt is this',pdebt)
-        comments = debitnotecomments.objects.filter(cid_id=request.session["uid"],debid_id=id)
+        comments = debitnotecomments.objects.filter(cid_id=cmp1,debid_id=id)
+        print(comments,'comments')
+        for p in pdebt1:
+            a=p.hsn
+            print(a,'a')
         
         return render(request,'app1/viewpurchasedebit.html',{'cmp1': cmp1,'pdebt':pdebt,'pdeb':pdebt1,'comments':comments})
     return redirect('gopurchasedebit')
@@ -47303,8 +47307,9 @@ def debitnotereport(request):
     
 @login_required(login_url='regcomp')
 def debitnote_comments(request, pdebitid):
+    
     if request.method == 'POST':
-        debt = purchasedebit.objects.get(cid_id=request.session["uid"], pdebitid=pdebitid) 
+        debt = purchasedebit.objects.get(pdebitid=pdebitid) 
         cmp = company.objects.get(id=request.session["uid"])
         comments= debitnotecomments(debid=debt,cid=cmp,comment=request.POST['comments'])
         comments.save()
@@ -47313,7 +47318,9 @@ def debitnote_comments(request, pdebitid):
 @login_required(login_url='regcomp')
 def deletedebitcomments(request,pdebitid, commentid):
     try:
-        comment = debitnotecomments.objects.get(cid_id=request.session["uid"],debid = pdebitid,commentid=commentid)
+        company1 = company.objects.get(id=request.session["uid"])
+        comment = debitnotecomments.objects.get(cid_id=company1,debid = pdebitid,commentid=commentid)
+        print('comment',comment)
         comment.delete()
         return redirect('viewpurchasedebit', pdebitid)
     except:
