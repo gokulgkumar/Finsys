@@ -465,6 +465,7 @@
                                                 {% for sale in sitems %}
                                                 {% if sale.product == a.name %}
                                                     <tr tr class="clickable-row " data-href="{% url 'sales_order_view' sale.id %}" >
+                                                        <td style="text-align: center;"></td>
                                                         <td style="text-align: center;"> sales Order</td>
                                                         <td style="text-align: center;"> {{ sale.salesorder.salename }}</td>
                                                         <td style="text-align: center;">{{ sale.salesorder.saledate | date:'d-m-Y' }}</td>
@@ -492,6 +493,7 @@
                                             {% if sale.items == a.name %}
                                                
                                                     <tr tr class="clickable-row " data-href="{% url 'viewpurchaseorder' sale.porder.porderid %}" >
+                                                        <td style="text-align: center;"></td>
                                                         <td style="text-align: center;"> Purchase Order</td>
                                                         <td style="text-align: center;"> {{ sale.porder.vendor_name }}</td>
                                                         <td style="text-align: center;">{{ sale.porder.date | date:'d-m-Y' }}</td>
@@ -518,6 +520,7 @@
                                             {% if sale.item == a.name %}
                                                
                                                     <tr tr class="clickable-row " data-href="{% url 'estimate_view' sale.estimate.estimateid %}" >
+                                                        <td style="text-align: center;"></td>
                                                         <td style="text-align: center;"> Estimate</td>
                                                         <td style="text-align: center;"> {{ sale.estimate.customer }}</td>
                                                         <td style="text-align: center;">{{ sale.estimate.estimatedate | date:'d-m-Y' }}</td>
@@ -544,6 +547,7 @@
                                             {% if sale.product == a.name %}
                                         
                                                     <tr tr class="clickable-row " data-href="{% url 'invoice_view' sale.invoice.invoiceid %}" >
+                                                        <td style="text-align: center;"></td>
                                                         <td style="text-align: center;"> Invoices</td>
                                                         <td style="text-align: center;"> {{ sale.invoice.customername }}</td>
                                                         <td style="text-align: center;">{{ sale.invoice.invoicedate| date:'d-m-Y' }}</td>
@@ -568,6 +572,7 @@
                           {% if sale.items == a.name %}
                              
                                   <tr tr class="clickable-row " data-href="{% url 'viewbill' sale.bill.billid %}"  >
+                                    <td style="text-align: center;"></td>
                                       <td style="text-align: center;"> Bills</td>
                                       <td style="text-align: center;"> {{ sale.bill.vendor_name }}</td>
                                       <td style="text-align: center;">{{ sale.bill.date | date:'d-m-Y' }}</td>
@@ -592,6 +597,7 @@
                        {% if sale.product == a.name %}
                           
                                <tr tr class="clickable-row " data-href=""  >
+                                <td style="text-align: center;"></td>
                                    <td style="text-align: center;">Recurring Invoices</td>
                                    <td style="text-align: center;"> {{ sale.recinvoice.customername }} </td>
                                    <td style="text-align: center;">{{ sale.recinvoice.startdate | date:'d-m-Y' }}</td>
@@ -615,6 +621,7 @@
                    {% if sale.item == a.name %}
                       
                            <tr tr class="clickable-row " data-href=""  >
+                            <td style="text-align: center;"></td>
                                <td style="text-align: center;">Recurring Bills</td>
                                <td style="text-align: center;"> {{ sale.bill.vendor_name }} </td>
                                <td style="text-align: center;">{{ sale.bill.start_date | date:'d-m-Y' }}</td>
@@ -639,6 +646,7 @@
                 {% if sale.item == a.name %}
                    
                         <tr tr class="clickable-row " data-href=""  >
+                            <td style="text-align: center;"></td>
                             <td style="text-align: center;">E-Way Bills</td>
                             <td style="text-align: center;"> {{ sale.bill.customer_name }} </td>
                             <td style="text-align: center;">{{ sale.bill.bill_date | date:'d-m-Y' }}</td>
@@ -668,6 +676,7 @@
                                             {% if sale.product == a.name %}
                                                
                                                     <tr tr class="clickable-row " data-href=""  >
+                                                        <td style="text-align: center;"></td>
                                                         <td style="text-align: center;"> Delivery Challan</td>
                                                         <td style="text-align: center;"> {{ sale.dl.customer.firstname }} {{ sale.dl.customer.lastname }}</td>
                                                         <td style="text-align: center;">{{ sale.dl.challan_date | date:'d-m-Y' }}</td>
@@ -709,7 +718,7 @@
                                          {% if sale.items == a.name %}
                                            
                                                 <tr tr class="clickable-row " data-href="{% url 'viewcredit' sale.scredit.screditid %}"  >
-                                                    
+                                                    <td style="text-align: center;"></td>
                                                     <td style="text-align: center;"> credit notes</td>
                                                     <td style="text-align: center;"> {{ sale.scredit.customer }}</td>
                                                     <td style="text-align: center;">{{ sale.scredit.creditdate | date:'d-m-Y' }}</td>
@@ -724,16 +733,16 @@
                                             </tr>
                                        {% endif %} 
                                     {% endfor %}
-                                     <!------------------------------------Dedit notes------------------------------------------------------------------>
-                                     <script> var counter = 0 </script>
+                                     <!------------------------------------Debit notes------------------------------------------------------------------>
+                                     
 
                                      {% for sale in pdebit_item %}
                                      {% if sale.items == a.name %}
                                      
                                             <tr tr class="clickable-row " data-href="{% url 'viewpurchasedebit' sale.pdebit.pdebitid %}"  >
-                                            <td id="{{forloop.counter}}">{{ forloop.counter }}</td>
+                                            <td style="text-align: center;"></td>
                                             <td style="text-align: center;"> Debit notes</td>
-                                                
+                                               
                                                 <td style="text-align: center;"> {{ sale.pdebit.vendor }}</td>
                                                 <td style="text-align: center;">{{ sale.pdebit.debitdate | date:'d-m-Y' }}</td>
                                             <!-- <td style="text-align: center;">{{ sale.pdebit.debit_no }}</td> -->
@@ -754,13 +763,22 @@
                                     </tbody>
                                 </table>
                                 </div>
-                               
+
 
                                 <script>
-                                    var counter = counter + 1
-                                    var s{{forloop.counter}} = counter
-                                    document.getElementById("{{forloop.counter}}").innerHTML = s{{forloop.counter}};
-                                </script>
+                                    $(document).ready(function() {
+                                        var addSerialNumber = function () {
+                                            $('table tr:gt(0)').each(function(index) {
+                                                $(this).find('td:first').text(index + 1);
+                                            });
+                                        };
+                                    
+                                        addSerialNumber();
+                                    });
+                                    </script>
+                                    
+
+                                
                                              
                              
                           <script>
