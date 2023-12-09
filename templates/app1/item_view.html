@@ -462,6 +462,32 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+
+                                                {% for i in item %}
+                                                {% if i.name == a.name %}
+                                                 {% if i.stock != None and i.stock != 0 %}
+                             
+                                                <tr tr class="clickable-row " data-href=""  >
+                                                 <td style="text-align: center;"></td>
+                                                    <td style="text-align: center;">Opening Stock</td>
+                                                    <td style="text-align: center;"> -  </td>
+                                                    <td style="text-align: center;">{{ i.itmdate | date:'d-m-Y'  }}</td>
+                                                <!-- <td style="text-align: center;">{{ sale.bill.bill_no }}</td> -->
+                                               
+                                                <td style="text-align: center;"> {{ i.stock  }} </td>
+                                                <td style="text-align: center;"> - </td>
+                                                <!-- <td style="text-align: center;">{{ sale.amount }}</td> -->
+                                                <td style="text-align: center;">{{i.status}} </td>
+                                              
+                                               
+                                            </tr>
+                                                 {% endif %}
+                                                {% endif %}
+                                                {% endfor %}
+
+
+
+
                                                 {% for sale in sitems %}
                                                 {% if sale.product == a.name %}
                                                     <tr tr class="clickable-row " data-href="{% url 'sales_order_view' sale.id %}" >
@@ -491,6 +517,10 @@
                                             
                                             {% for sale in pitems %}
                                             {% if sale.items == a.name %}
+
+
+
+                                            
                                                
                                                     <tr tr class="clickable-row " data-href="{% url 'viewpurchaseorder' sale.porder.porderid %}" >
                                                         <td style="text-align: center;"></td>
@@ -506,6 +536,7 @@
                                                       
                                                    
                                                 </tr>
+                                            
                                           {% endif %}
                                         {% endfor %}
                                         
@@ -518,6 +549,10 @@
                                              
                                             {% for sale in eitems %}
                                             {% if sale.item == a.name %}
+
+                                         
+
+                                           
                                                
                                                     <tr tr class="clickable-row " data-href="{% url 'estimate_view' sale.estimate.estimateid %}" >
                                                         <td style="text-align: center;"></td>
@@ -528,11 +563,14 @@
                                                     
                                                     <td style="text-align: center;">{{ sale.quantity }}</td>
                                                     <td style="text-align: center;"> {{ sale.rate }}</td>
-                                                    <td style="text-align: center;">{{ sale.total }}</td>
+                                                    <td style="text-align: center;">{{ sale.estimate.status }}</td>
                                                     <!-- <td style="text-align: center;"> {{ sale.estimate.status }}</td> -->
                                                     
                                                    
                                                 </tr>
+
+                                                
+                                            
                                           {% endif %}
                                         {% endfor %}
                             
@@ -595,6 +633,11 @@
                                             
                        {% for sale in recinvoiceitem %}
                        {% if sale.product == a.name %}
+
+                       
+
+                            
+
                           
                                <tr tr class="clickable-row " data-href=""  >
                                 <td style="text-align: center;"></td>
@@ -610,6 +653,7 @@
                              
                               
                            </tr>
+                           
                      {% endif %}
                    {% endfor %}
                    <!------------------------------------  recurring bills ------------------------------------------------------------------>
@@ -619,6 +663,8 @@
                                             
                    {% for sale in rbillitems %}
                    {% if sale.item == a.name %}
+
+                 
                       
                            <tr tr class="clickable-row " data-href=""  >
                             <td style="text-align: center;"></td>
@@ -634,10 +680,11 @@
                          
                           
                        </tr>
+                    
                  {% endif %}
                {% endfor %}
 
-                <!------------------------------------  recurring bills ------------------------------------------------------------------>
+                <!------------------------------------  E-Way bills ------------------------------------------------------------------>
                         
                         
                         
