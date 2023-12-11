@@ -79,7 +79,7 @@ input[name="service-city"] {
                                     <label for="validationCustom02">Vendor</label>
                                     <div class="d-flex"  >
                                       
-<select class="form-control select2 vendor" data-width="100%" id="selected" style="background-color: #243e54; color: white;">
+<select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;">
     <option selected disabled hidden>Select Vendor</option>
     {% for v in vndr %}
     <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
@@ -94,22 +94,10 @@ input[name="service-city"] {
 
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" ></script>
 
-
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css"
-  integrity="sha512-pTaEn+6gF1IeWv3W1+7X7eM60TFu/agjgoHmYhAfLEU8Phuf6JKiiE8YmsNC0aCgQv4192s4Vai8YZ6VNM6vyQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
-  integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
 
 
 
@@ -1991,7 +1979,7 @@ input[name="service-city"] {
                             <td style="width: 20%;">
                                 <div class="d-flex">
                                     
-                                    <select name='items[]' id="product${roinc}" class="form-control select2" >
+                                    <select name='items[]' id="product${roinc}" class="form-control select2 change" >
                                                     <option selected>Choose..</option>
                                                     {% for i in item %}
                                                         <option value="{{ i.name }}" data-tokens="{{ i.name }}">
@@ -2046,8 +2034,11 @@ input[name="service-city"] {
                     `);
                     
                     $('#items-table-body').append(newRow);
-                    console.log(`#product${roinc}`)
-                        $(`#product${roinc}`).select2({});
+                    // console.log(`#product${roinc}`)
+
+
+                    selectchange(`${roinc}`)
+                        // $(`#product${roinc}`).select2({});
 
                         
                         // $('.select2:last').focus();
@@ -2064,6 +2055,11 @@ input[name="service-city"] {
                
 
             });
+
+            function selectchange(roinc){
+                $(`.change`).select2({});
+                console.log(`#product${roinc}`)
+            }
             
             $(function () {
     $("select").selectize(options);
@@ -2296,7 +2292,7 @@ console.log('product1')
             //     });
             // });
 
-            $(document).on('click','#product2',function(){
+            $(document).on('change','#product2',function(){
                 select = $('#product2').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2339,7 +2335,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product3',function(){
+            $(document).on('change','#product3',function(){
                 select = $('#product3').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2381,7 +2377,7 @@ console.log('product1')
                 });
             });
             
-            $(document).on('click','#product4',function(){
+            $(document).on('change','#product4',function(){
                 select = $('#product4').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2423,7 +2419,7 @@ console.log('product1')
                 });          
             });
 
-            $(document).on('click','#product5',function(){
+            $(document).on('change','#product5',function(){
                 select = $('#product5').val();
                 var vid = $('#billno').val();
 
@@ -2466,7 +2462,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product6',function(){
+            $(document).on('change','#product6',function(){
                 select = $('#product6').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2508,7 +2504,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product7',function(){
+            $(document).on('change','#product7',function(){
                 select = $('#product7').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2549,7 +2545,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product8',function(){
+            $(document).on('change','#product8',function(){
                 select = $('#product8').val();
                 var vid = $('#billno').val();
                 
@@ -2591,7 +2587,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product9',function(){
+            $(document).on('change','#product9',function(){
                 select = $('#product9').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2633,7 +2629,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product10',function(){
+            $(document).on('change','#product10',function(){
                 select = $('#product10').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2674,7 +2670,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product11',function(){
+            $(document).on('change','#product11',function(){
                 select = $('#product11').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2715,7 +2711,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product12',function(){
+            $(document).on('change','#product12',function(){
                 select = $('#product12').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2757,7 +2753,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product13',function(){
+            $(document).on('change','#product13',function(){
                 select = $('#product13').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2799,7 +2795,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product14',function(){
+            $(document).on('change','#product14',function(){
                 select = $('#product14').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2841,7 +2837,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product15',function(){
+            $(document).on('change','#product15',function(){
                 select = $('#product15').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2884,7 +2880,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product16',function(){
+            $(document).on('change','#product16',function(){
                 select = $('#product16').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2926,7 +2922,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product17',function(){
+            $(document).on('change','#product17',function(){
                 select = $('#product17').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -2969,7 +2965,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product18',function(){
+            $(document).on('change','#product18',function(){
                 select = $('#product18').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -3011,7 +3007,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product19',function(){
+            $(document).on('change','#product19',function(){
                 select = $('#product19').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -3053,7 +3049,7 @@ console.log('product1')
                 });
             });
 
-            $(document).on('click','#product120',function(){
+            $(document).on('change','#product120',function(){
                 select = $('#product120').val();
                 var vid = $('#billno').val();
                 $.ajax({
@@ -3416,7 +3412,7 @@ function qtychange1(inputElement) {
 </script>
 
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
 
 
 {% endblock %}
