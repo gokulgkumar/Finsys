@@ -51352,3 +51352,14 @@ def debit_add_file(request,id):
         
         debit.save()
         return redirect('viewpurchasedebit',id)
+
+
+def base(request):
+    items=itemtable.objects.all()
+    count = 0
+    for i in items:
+        if i.stock < i.min_stock:
+            count=count+1
+            print(count,'count')
+
+    return render(request,'base.html',{'items':items,'count':count})
