@@ -37,7 +37,7 @@ input[name="service-city"] {
 
     .form-control.select2.vendor,
     .select2-container--default .select2-selection--single {
-        background-color: #243e54 !important;
+        background-color: #41586bff !important;
         color: white !important;
     }
     .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -349,7 +349,7 @@ input[name="service-city"] {
                                         <td>
                                             <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty" hidden  >
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
-                                            <input type="number" name='quantity[]' onchange="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
+                                            <input type="number" name='quantity[]' oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
                                                     <div><span>Available Qty :</span> <span id="qtyspan"class='text-muted'></span></div>
                                         </td> 
                                         
@@ -1897,6 +1897,7 @@ input[name="service-city"] {
 </script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script>
+
         function state(element) {
             if (element.value == "Kerala" ) {
                 document.getElementById('cgst1').style.display = 'flex';
@@ -1929,7 +1930,41 @@ input[name="service-city"] {
                 var col1=currentRow.find("td:eq(2)").text();
                 alert(col1);
             });
+
+            
+        
+var initialAvailableQuantity2 = 0;
+
+function qtychange2(incval,roinc) {
+    
+    var inputElement =incval.value;
+    console.log(inputElement, 'rownum');
+    var enteredQuantity2 = parseFloat(inputElement) || 0;
+    var qtyspanElement2 = document.getElementById(`qtyspan${roinc}`);
+    console.log(qtyspanElement2.innerText, 'qtyspanElement2');
+    if (initialAvailableQuantity2 === 0) {
+       
+       initialAvailableQuantity2 = parseFloat(qtyspanElement2.textContent) || 0;
+       console.log(initialAvailableQuantity2, 'initialAvailableQuantity2');
+   }
+   var difference = initialAvailableQuantity2 - enteredQuantity2;
+
+   if (enteredQuantity2 > initialAvailableQuantity2) {
+       
+       alert('Error: Entered quantity cannot be greater than the available quantity'); 
+       difference = 0;
+   }
+   qtyspanElement2.textContent= difference;
+
+
+}
+
+            
         });
+
+
+
+
     </script>
 
     <script>
@@ -2003,7 +2038,7 @@ input[name="service-city"] {
 
                                 <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys${roinc}" class="form-control quty" hidden >     
                                 <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput${roinc}" value="0" class="form-control quty" hidden  >
-                                <input type="number" name='quantity[]' onchange="qtychange2(this,${roinc})"  style='margin-top:21px' placeholder='Enter Qty' id="qty2" class="form-control qty" step=0 min=0>
+                                <input type="number" name='quantity[]' oninput="qtychange2(this,${roinc})"   style='margin-top:21px' placeholder='Enter Qty' id="qty3${roinc}" class="form-control qty" step=0 min=0>
                                 <div><span>Available Qty :</span> <span id="qtyspan${roinc}"class='text-muted'></span></div>
                             </td>                
                             <td>
@@ -2033,15 +2068,18 @@ input[name="service-city"] {
                                                     
                     `);
 
-                    
+                   
                     
                     $('#items-table-body').append(newRow);
+
+
+                    
                     // console.log(`#product${roinc}`)
 
 
                     selectchange(`${roinc}`)
                         // $(`#product${roinc}`).select2({});
-
+                        
                         
                         // $('.select2:last').focus();
                    
@@ -2106,8 +2144,12 @@ console.log('product1')
                   document.getElementById('unit11').value = data3
                   document.getElementById('quantitys1').value = data6
                   document.getElementById('taxs1').value = data7;
-               
 
+               var input = document.getElementById('qty31')
+               input.setAttribute('data-quantity',data2)
+               $('#qty31').attr('data-quantity', data2);   
+
+                  
                   if (place == '{{ cmp1.state }}')
                   {
                       document.getElementById('ta11').innerHTML = data4 + ' % GST';
@@ -2115,6 +2157,7 @@ console.log('product1')
                   }
                   document.getElementById('ta51').innerHTML  = data5 + ' % IGST';
                   document.getElementById('ta51').value=data5
+
               }
           });
       });
@@ -2325,7 +2368,11 @@ console.log('product1')
                         document.getElementById('qtyspan2').innerHTML = data1;
                         document.getElementById('unit12').value = data2 
                         document.getElementById('quantitys2').value = data6
-                        document.getElementById('taxs2').value = data7;    
+                        document.getElementById('taxs2').value = data7;
+
+                        var input = document.getElementById('qty32')
+                        input.setAttribute('data-quantity',data1) 
+                       
                         if (place == '{{ cmp1.state }}')
                             {
                                 document.getElementById('ta12').innerHTML = data3 + ' % GST';
@@ -2368,6 +2415,11 @@ console.log('product1')
                         document.getElementById('unit13').value = data2
                         document.getElementById('quantitys3').value = data6
                         document.getElementById('taxs3').value = data7;
+
+                        var input = document.getElementById('qty33')
+                        input.setAttribute('data-quantity',data1)
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta13').innerHTML = data3 + ' % GST';
@@ -2410,6 +2462,12 @@ console.log('product1')
                         document.getElementById('unit14').value = data3
                         document.getElementById('quantitys4').value = data6
                         document.getElementById('taxs4').value = data7
+
+                        
+                        var input = document.getElementById('qty34')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                              document.getElementById('ta14').innerHTML = data4 + ' % GST';
@@ -2454,6 +2512,12 @@ console.log('product1')
                         document.getElementById('unit15').value = data3
                         document.getElementById('quantitys5').value = data6
                         document.getElementById('taxs5').value = data7;
+
+                        
+                        var input = document.getElementById('qty35')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta15').innerHTML = data4 + ' % GST';
                             document.getElementById('ta15').value=data4
@@ -2496,6 +2560,12 @@ console.log('product1')
                         document.getElementById('unit16').value = data3
                         document.getElementById('quantitys6').value = data6
                         document.getElementById('taxs6').value = data7;
+
+                        
+                        var input = document.getElementById('qty36')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta16').innerHTML = data4 + ' % GST';
                             document.getElementById('ta16').value=data4
@@ -2537,6 +2607,12 @@ console.log('product1')
                         document.getElementById('unit17').value = data3
                         document.getElementById('quantitys7').value = data6
                         document.getElementById('taxs7').value = data7;
+
+                        
+                        var input = document.getElementById('qty37')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta17').innerHTML = data4 + ' % GST';
                             document.getElementById('ta17').value=data4
@@ -2579,6 +2655,12 @@ console.log('product1')
                         document.getElementById('unit18').value = data3
                         document.getElementById('quantitys8').value = data6
                         document.getElementById('taxs8').value = data7;
+
+                        
+                        var input = document.getElementById('qty38')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta18').innerHTML = data4 + ' % GST';
                             document.getElementById('ta18').value=data4
@@ -2620,7 +2702,14 @@ console.log('product1')
                         document.getElementById('qtyspan9').innerHTML = data2;
                         document.getElementById('unit19').value = data3   
                         document.getElementById('quantitys9').value = data6 
-                        document.getElementById('taxs9').value = data7;    
+                        document.getElementById('taxs9').value = data7; 
+                        
+                        
+                        var input = document.getElementById('qty39')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta19').innerHTML = data4 + ' % GST';
                             document.getElementById('ta19').value=data4
@@ -2661,7 +2750,13 @@ console.log('product1')
                         document.getElementById('qtyspan10').innerHTML = data2;
                         document.getElementById('unit110').value = data3  
                         document.getElementById('quantitys10').value = data6
-                        document.getElementById('taxs10').value = data7;      
+                        document.getElementById('taxs10').value = data7; 
+
+                        
+                        var input = document.getElementById('qty3`0')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta110').innerHTML = data4 + ' % GST';
                             document.getElementById('ta110').value=data4    
@@ -2702,7 +2797,13 @@ console.log('product1')
                         document.getElementById('qtyspan11').innerHTML = data2;
                         document.getElementById('unit111').value = data3   
                         document.getElementById('quantitys11').value = data6   
-                        document.getElementById('taxs11').value = data7;  
+                        document.getElementById('taxs11').value = data7; 
+
+                        
+                        var input = document.getElementById('qty311')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta111').innerHTML = data4 + ' % GST';
                             document.getElementById('ta111').value=data4
@@ -2744,6 +2845,12 @@ console.log('product1')
                         document.getElementById('unit112').value = data3
                         document.getElementById('quantitys12').value = data6
                         document.getElementById('taxs12').value = data7;
+
+                        
+                        var input = document.getElementById('qty312')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta112').innerHTML = data4 + ' % GST';
@@ -2785,7 +2892,14 @@ console.log('product1')
                         document.getElementById('qtyspan13').innerHTML = data2;
                         document.getElementById('unit113').value = data3 
                         document.getElementById('quantitys13').value = data6 
-                        document.getElementById('taxs13').value = data7;      
+                        document.getElementById('taxs13').value = data7; 
+                        
+                        
+                        var input = document.getElementById('qty313')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta113').innerHTML = data4 + ' % GST';
@@ -2827,7 +2941,13 @@ console.log('product1')
                         document.getElementById('qtyspan14').innerHTML = data2;
                         document.getElementById('unit114').value = data3 
                         document.getElementById('quantitys14').value = data6 
-                        document.getElementById('taxs14').value = data7;      
+                        document.getElementById('taxs14').value = data7;
+
+                        
+                        var input = document.getElementById('qty314')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta114').innerHTML = data4 + ' % GST';
@@ -2872,6 +2992,12 @@ console.log('product1')
                         document.getElementById('unit115').value = data3
                         document.getElementById('quantitys15').value = data6
                         document.getElementById('taxs15').value = data7;
+
+                        
+                        var input = document.getElementById('qty315')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}'){
                             document.getElementById('ta115').innerHTML = data4 + ' % GST';
                             document.getElementById('ta115').value=data4
@@ -2913,6 +3039,13 @@ console.log('product1')
                         document.getElementById('unit116').value = data3   
                         document.getElementById('quantitys16').value = data6  
                         document.getElementById('taxs16').value = data7;   
+
+                        
+                        var input = document.getElementById('qty316')
+                        input.setAttribute('data-quantity',data2)
+
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta116').innerHTML = data4 + ' % GST';
@@ -2955,6 +3088,13 @@ console.log('product1')
                         document.getElementById('unit117').value = data3
                         document.getElementById('quantitys17').value = data6
                         document.getElementById('taxs17').value = data7;
+
+                        
+                        var input = document.getElementById('qty317')
+                        input.setAttribute('data-quantity',data2)
+
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta117').innerHTML = data4 + ' % GST';
@@ -2997,7 +3137,13 @@ console.log('product1')
                         document.getElementById('qtyspan18').innerHTML = data2;
                         document.getElementById('unit118').value = data3 
                         document.getElementById('quantitys18').value = data6 
-                        document.getElementById('taxs18').value = data7;      
+                        document.getElementById('taxs18').value = data7;  
+
+                        
+                        var input = document.getElementById('qty318')
+                        input.setAttribute('data-quantity',data2)
+                        
+                        
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta118').innerHTML = data4 + ' % GST';
@@ -3039,7 +3185,13 @@ console.log('product1')
                             document.getElementById('qtyspan19').innerHTML = data2;
                             document.getElementById('unit119').value = data3
                             document.getElementById('quantitys19').value = data6 
-                            document.getElementById('taxs19').value = data7;       
+                            document.getElementById('taxs19').value = data7;   
+
+                            
+                        var input = document.getElementById('qty319')
+                        input.setAttribute('data-quantity',data2)
+                            
+                            
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta119').innerHTML = data4 + ' % GST';
@@ -3082,6 +3234,12 @@ console.log('product1')
                         document.getElementById('unit120').value = data3
                         document.getElementById('quantitys20').value = data6
                         document.getElementById('taxs20').value = data7;
+
+                        
+                        var input = document.getElementById('qty320')
+                        input.setAttribute('data-quantity',data2)
+
+
                         if (place == '{{ cmp1.state }}')
                         {
                             document.getElementById('ta120').innerHTML = data4 + ' % GST';
@@ -3327,26 +3485,7 @@ function qtychange1(inputElement) {
 <script>
 
 // QUANTITY CHANGE ON INPUT //
-var initialAvailableQuantity2 = 0;
 
-function qtychange2(inputElement, roinc) {
-    console.log(roinc, 'rownum');
-    var enteredQuantity2 = parseFloat(inputElement.value) || 0;
-    var qtyspanElement2 = document.getElementById(`qtyspan${roinc}`);
-    console.log(qtyspanElement2, 'qtyspanElement2');
-    if (initialAvailableQuantity2 === 0) {
-       
-       initialAvailableQuantity2 = parseFloat(qtyspanElement2.innerText) || 0;
-       console.log(initialAvailableQuantity2, 'initialAvailableQuantity2');
-   }
-   var difference = initialAvailableQuantity2 - enteredQuantity2;
-
-   if (enteredQuantity2 > initialAvailableQuantity2) {
-       
-       alert('Error: Entered quantity cannot be greater than the available quantity'); 
-       difference = 0;
-   }
-   qtyspanElement2.innerText= difference;
 
 
 
@@ -3371,28 +3510,28 @@ function qtychange2(inputElement, roinc) {
     // }
 
     // qtyspanElement.innerText = difference;
-}
+// }
 
    
-// var initialQuantity2 = 0;
-//     function qtychange2(inputElement,roinc) {
-        
-//         console.log(roinc,'rownum')
-//     var enteredQuantity2 = parseFloat(inputElement.value) || 0;
+var initialQuantity2 = 0;
+    function qtychange2(inputElement,roinc) {
+        var initialQuantity2 = inputElement.getAttribute('data-quantity')
+        console.log(initialQuantity2,'initialQuantity2')
+    var enteredQuantity2 = parseFloat(inputElement.value) || 0;
 
-//     if (initialQuantity2 === 0) {
-//         initialQuantity2 = parseFloat(document.getElementById(`qtyspan${roinc}`).innerText) || 0;
-//     }
+    if (initialQuantity2 === 0) {
+        initialQuantity2 = parseFloat(document.getElementById(`qtyspan${roinc}`).innerText) || 0;
+    }
 
-//     var difference2 = initialQuantity1 - enteredQuantity2;
+    var difference2 = initialQuantity2 - enteredQuantity2;
 
-//     if (enteredQuantity2 > initialQuantity2) {
-//         alert('Error: Entered quantity cannot be greater than the available quantity');
-//         difference2 = 0;
-//     }
+    if (enteredQuantity2 > initialQuantity2) {
+        alert('Error: Entered quantity cannot be greater than the available quantity');
+        difference2 = 0;
+    }
 
-//     document.getElementById(`qtyspan${roinc}`).innerText = difference2;
-// }
+    document.getElementById(`qtyspan${roinc}`).innerText = difference2;
+}
 
 // function qtychange2(inputElement,roinc) {
 //     var enteredQuantity = parseFloat(inputElement.value) || 0;
@@ -3431,9 +3570,27 @@ function qtychange2(inputElement, roinc) {
     // }
 
  </script>
+
+
+
    
+
 <script>
+
+document.getElementById('qty3').addEventListener('change', function(event) {
+    v = event.target.value;
+    console.log('Value: ' + v);
+});
+
+
+
+
+
     $(document).ready(function() {
+
+
+        
+
 
         // Function to update tax options based on the place of supply
         function updateTaxOptions() {
