@@ -36695,6 +36695,7 @@ def addpurchasedebit(request):
 
 
         sel = purchasedebit.objects.filter(cid=cmp1).last()
+        deb_no = ''
         print(sel,'select')
         if sel:
             deb_no = str(sel.debit_no)
@@ -36714,6 +36715,8 @@ def addpurchasedebit(request):
             st = ''
             for j in stri:
                 st = st+j
+            
+            deb_no = ''
 
             deb_no = int(num)+1
 
@@ -36730,8 +36733,8 @@ def addpurchasedebit(request):
         for s in purdebit:
             debit_list = s.debit_no+ ',' + debit_list
         
-
-
+asdasdasdasdasdasdasdasdadadadadadasdasdasdasdasdasdasdas
+asdas
         context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank,'deb_no':deb_no,'purdebit':purdebit} 
         return render(request,'app1/addpurchasedebit.html',context)
     return redirect('gopurchasedebit') 
