@@ -458,11 +458,11 @@ aria-hidden="true">
         
                                     <div class="dropdown p-0 nav-item mx-1 "  style="margin-top: 10px;">
                                       <li  class=" dropdown-toggle btn btn-outline-info rounded-pill text-grey p-1"data-toggle="dropdown"> &nbsp;<i class="fa fa-share-alt"></i>&nbsp;Share&nbsp;&nbsp;</li>
-                                      <ul class="dropdown-menu" style="background-color: black;">
+                                      <ul class="dropdown-menu" style="background-color: black;" aria-labelledby="dropdownMenuButton">
               
                                           
-                                          <li style="margin-left: 50px;" > {% post_to_whatsapp object_or_url "WhatsApp" %}</li>
-                                          <li style="margin-left: 50px;" >{% send_email object.title "New Song: {{object.title}}. Check it out!" object_or_url "Email" %}</li>
+                                        <a class="dropdown-item" style="cursor: pointer;" onclick="shareViaWhatsApp()">Whatsapp</a>
+                                        <a class="dropdown-item" style="cursor: pointer;" data-target="#shareBillEmail" data-toggle="modal">Email</a>
                                           
                                       </ul>
                                     </div>
@@ -735,7 +735,7 @@ aria-hidden="true">
                                 
                             </div>
                             <hr class="my-4" style="background-color: #fff;">
-                            <table style="width: 100%;">
+                            <table style="width: 100%;" >
                                 <tr >
                                     <td style="font-size: 20px;">Grand Total</td>
                                     <td style="font-size: 18px;">{{ pdebt.grandtotal }}</td>
@@ -856,7 +856,7 @@ aria-hidden="true">
                             </section>
                 
                             <section class="product-area mt-4">
-                                <table class=" table table-primary table-hover table-bordered " id="table1">
+                                <table class=" table table-primary table-hover table-bordered " id="myTable">
                                     <thead >
                                         <tr class="table-primary">
                                         <th class="text-center" style="color:#000">Items</th>
@@ -1072,7 +1072,7 @@ aria-hidden="true">
                               </section>
                   
                               <section class="product-area mt-2">
-                                  <table class="table table-hover table-bordered  template2table" id="table2">
+                                  <table class="table table-hover table-bordered  template2table" id="myTable">
                                       <thead >
                                           <tr class="template3tablehead">
                                             <th class="text-center bg-dark" style="color:black">Items</th>
@@ -1264,7 +1264,7 @@ aria-hidden="true">
                                 </div>
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10"><br>
-                                    <table class="table table-hover table-bordered  template3table" id="table3">
+                                    <table class="table table-hover table-bordered  template3table" id="myTable">
                                         <thead >
                                             <tr class="template3tablehead">
                                                 <th class="text-center bg-dark"  style="color:black">Items</th>
@@ -1730,6 +1730,48 @@ aria-hidden="true">
         
     </div>
 
+      <!--  -->
+      <div class="modal fade" id="shareBillEmail">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content" style="background: #243e54;border-radius: 20px;">
+            <div class="modal-header" style="background: #243e54;">
+              <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                  aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" style="background: #243e54;">
+              <div class="card p-3 m-3">
+                <form action="" method="post" class="needs-validation"
+                  id="share_to_email_form" autocomplete="off">
+                  {% csrf_token %}
+                  <input name="FromD" class="inputdate form-control"  id="date1"  type="date" hidden >
+                  <input name="ToD" class="inputdate form-control"  id="date2" type="date" hidden>
+                  <div class="form-group">
+                    
+                    <label for="emailIds">Email IDs</label>
+                    <textarea class="form-control text-light" name="email_ids" id="emailIds" rows="5"
+                      placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="item_unitname">Message(optional)</label>
+                    <textarea name="email_message" id="email_message" class=" form-control text-light" cols=""
+                      rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+                  </div>
+                
+              </div>
+              <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+                <input type="submit" id="generateAndSendPdf" class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" style="background-color: #0d2b46;padding: 7px 0;" value="SEND MAIL">
+              </div>
+            </div></form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!--  -->
+    
+
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <script type="text/javascript">
@@ -1994,7 +2036,46 @@ aria-hidden="true">
     } else {
         document.getElementById("convertDropdown").style.display = "none";
     }
+
+
+
+
+
+    
+
+    function shareViaWhatsApp() {
+                    // Collect data from the table or any other relevant information
+                    var tableData = getTableData(); // Implement the function to fetch table data
+
+                    // Create a message to be shared on WhatsApp
+                    var message = "Check out the Recurring Bill Details:\n" + tableData;
+
+                    // Create a link with the WhatsApp API format
+                    var whatsappLink = "https://wa.me/?text=" + encodeURIComponent(message);
+
+                    // Open the link in a new tab or window
+                    window.open(whatsappLink, "_blank");
+                }
+                function getTableData() {
+                    // Implement this function to fetch and format your table data
+                    // You can iterate through the table rows and cells to collect the necessary information
+                    // Return a formatted string containing the data you want to share
+                    var table = document.getElementById('myTable');
+                    var data = "";
+                    // Example: Iterate through rows and cells
+                    for (var i = 0; i < table.rows.length; i++) {
+                        for (var j = 0; j < table.rows[i].cells.length; j++) {
+                            data += table.rows[i].cells[j].textContent + "\t";
+                        }
+                        data += "\n";
+                    }
+                    return data;
+                }
+
+
 </script>
+
+
 
 
     {% endif %}

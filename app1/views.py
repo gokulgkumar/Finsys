@@ -36674,6 +36674,7 @@ def gopurchasedebit(request):
         return render(request,'app1/gopurchasedebit.html',{'cmp1': cmp1,'pdebit':pdebit})
     return redirect('gopurchasedebit') 
 
+
 def addpurchasedebit(request):
     if 'uid' in request.session:
         if request.session.has_key('uid'):
@@ -36693,10 +36694,11 @@ def addpurchasedebit(request):
 
         ref = purchasedebit.objects.last()
 
-
+        
         sel = purchasedebit.objects.filter(cid=cmp1).last()
         deb_no = ''
         print(sel,'select')
+
         if sel:
             deb_no = str(sel.debit_no)
             print(deb_no,'number')
@@ -36716,8 +36718,8 @@ def addpurchasedebit(request):
             for j in stri:
                 st = st+j
             
+            
             deb_no = ''
-
             deb_no = int(num)+1
 
             if num[0] == '0':
@@ -36733,11 +36735,13 @@ def addpurchasedebit(request):
         for s in purdebit:
             debit_list = s.debit_no+ ',' + debit_list
         
-asdasdasdasdasdasdasdasdadadadadadasdasdasdasdasdasdasdas
-asdas
-        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank,'deb_no':deb_no,'purdebit':purdebit} 
+
+
+        context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank,'purdebit':purdebit} 
         return render(request,'app1/addpurchasedebit.html',context)
-    return redirect('gopurchasedebit') 
+    return redirect('gopurchasedebit')
+
+
 
 def createpurchasedebit(request):
     if 'uid' in request.session:
