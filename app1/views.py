@@ -51370,3 +51370,107 @@ def base(request):
             print(count,'count')
 
     return render(request,'base.html',{'items':items,'count':count})
+
+
+
+
+
+    
+def purchaseDebitToEmail(request,id):
+  
+    if request.user:
+            try:
+                if request.method == 'POST':
+                    fromdate = request.POST['FromD']
+                    todate = request.POST['ToD']
+                    emails_string = request.POST['email_ids']
+                    if fromdate == '' and todate == '' :
+                        data = purchasedebit.objects.filter(cid_id=request.user.id)
+                        print(data,'data 1')
+                    else:
+                        data = purchasedebit.objects.filter(cid_id=request.user.id,start_date__gte=fromdate, start_date__lte=todate)
+                        print(data,'data 2')
+
+
+                    pdebt=purchasedebit.objects.filter(pdebitid=id)
+                    pid=''
+                    for p in pdebt:
+                        pid =p.pdebitid
+                    
+
+                    # Split the string by commas and remove any leading or trailing whitespace
+                    emails_list = [email.strip() for email in emails_string.split(',')]
+                    email_message = request.POST['email_message']
+
+                    pdf_data = request.POST.get('pdf_data')
+                    pdf_binary = base64.b64decode(pdf_data)
+                    pdf_file = ContentFile(pdf_binary, name='DebitNote.pdf')
+                    
+                    cmp = company.objects.get(id_id=request.user.id)
+                    
+                    # print(cmp,'cmp 1')
+                    # context = {'cmp': cmp, 'data': data, 'email_message': email_message}
+                    # print('context working')
+                    # template_path = 'app1/viewpurchasedebit.html'
+                    # print('tpath working')
+                    # template = get_template(template_path)
+                    # print('template working')
+                    # html = template.render(context)
+                    # print('html working')
+                    # result = BytesIO()
+                    # print('bytes working')
+                    # pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                    # print('pisa working')
+
+
+                    # pdf_data_base64 = request.POST.get('pdf_data', '')
+
+                    #     Decode base64 and process the PDF data
+                    # pdf_data = base64.b64decode(pdf_data_base64)
+
+                        
+                    # output = BytesIO()
+                    # output.write(pdf_data)
+                    # output.seek(0)
+
+                        # Send the PDF data via email
+                    filename = f'purchasedebit-{cmp.cname}.pdf'
+                    subject = f"purchasedebit_details - {cmp.cname}"
+                    email_message = request.POST.get('email_message', '')  # Adjust as needed
+
+                        # Retrieve the list of email addresses from the form
+                    emails_list = request.POST.get('email_ids', '').split(',')
+
+                        # Create an EmailMessage instance
+                    email = EmailMessage(
+                            subject,
+                            f"Hi, \n{email_message} -of -{cmp.cname}. ",
+                            from_email=settings.EMAIL_HOST_USER,
+                            to=emails_list
+                    )
+
+                        # Attach the PDF file to the email
+                    email.attach(filename, pdf_file.read(), "application/pdf")
+
+                        # Send the email
+                    email.send(fail_silently=False)
+
+
+
+                    # if pdf.err:
+                    #     raise Exception(f"PDF generation error: {pdf.err}")
+
+                    # pdf = result.getvalue()
+                    # print('')
+                    # filename = f'purchasedebit-{cmp.cname}.pdf'
+                    # subject = f"purchasedebit_details - {cmp.cname}"
+                    # email = EmailMessage(subject, f"Hi, \n{email_message} -of -{cmp.cname}. ", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                    # email.attach(filename, pdf, "application/pdf")
+                    # email.send(fail_silently=False)
+
+                    messages.success(request, 'Report has been shared via email successfully..!')
+                    return redirect('viewpurchasedebit',pid)
+            except Exception as e:
+                messages.error(request, f'Error while sending report: {e}')
+                return redirect('viewpurchasedebit',pid)
+                
