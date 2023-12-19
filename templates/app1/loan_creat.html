@@ -30,10 +30,10 @@
     </div>
     
     <div class="row">
-        <div class="col-md-5 d-flex p-2"><select name="acc_name" id="acc_name" class="form-control text-white">
+        <div class="col-md-5 d-flex p-2"><select name="acc_name" id="acc_name" class="form-control text-white" >
           <option value="cash">Select Name</option>
           {% for i in accounts %}
-            <option data-acc-number="{{ i.account_number }}" value="{{ i.holder_name }}">{{ i.holder_name }}</option>
+            <option data-acc-number="{{ i.account_number }}" value="{{ i.holder.name }}">{{ i.holder.name }}</option>
           {% endfor %}
         </select>
         <a class="btn btn-outline-secondary ml-1" href="#"  id="open-modal"
@@ -61,11 +61,20 @@
         <div class="col-md-5 p-2"><input class="form-control" type="text" name="desc" value=""></div>
     </div>
     <script>
-      document.querySelector("#acc_name").addEventListener("change", function() {
-  document.querySelector("#acc_number").value = this.selectedOptions[0].dataset.accNumber;
-});
-
-    </script>
+      document.addEventListener("DOMContentLoaded", function () {
+          var accNameSelect = document.getElementById("acc_name");
+          var accNumberInput = document.getElementById("acc_number");
+  
+          accNameSelect.addEventListener("change", function () {
+              var selectedOption = accNameSelect.options[accNameSelect.selectedIndex];
+              var accNumber = selectedOption.getAttribute("data-acc-number");
+  
+              // Update the account number input field
+              accNumberInput.value = accNumber;
+          });
+      });
+  </script>
+  
     <div class="row">
         <div class="col-md-5 p-2">CURRENT BALANCE</div>
         <div class="col-md-2"></div>

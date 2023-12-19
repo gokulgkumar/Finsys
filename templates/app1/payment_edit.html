@@ -234,9 +234,12 @@
                                                 <br>
                                                 <input type="text" name="duedate[]" value="{{i.duedate}}"hidden> <span >duedate : {{i.duedate}}</span>
                                             </td>
-                                            <td><input type="text" name='inv_type[]' id="" value="{{i.invtype}}" class="form-control"/></td>
+                                            <td>
+                                                <input type="text" readonly name='inv_type[]' id="" value="{{i.invtype}}" class="form-control"/>
+                                                <input type="text" hidden name='inv_id[]' id="" value="{{i.invid}}"/>
+                                            </td>
                                             <td><input type="text" name='trans_no[]' value="{{i.invno}}" id="" class="form-control"/></td>
-                                            <td><input type="number" readonly name='inv_amount[]' id="inv_amount{{forloop.counter}}" value="{{i.invamount}}" class="form-control"/></td>
+                                            <td><input type="number" readonly name='inv_amount[]' id="inv_amount{{forloop.counter}}" value="{{i.invamount|floatformat:2}}" class="form-control"/></td>
                                             <td><input type="number" name='payment[]' value="{{i.paymentamount}}" onkeyup="calcBalance(`{{forloop.counter}}`)" id="payment{{forloop.counter}}" placeholder='0.00' min="0" step="any" class="form-control total pymnt_rcvd"/></td>
                                             <td><input type="number" readonly name='balance[]' value="{{i.balamount}}" id="balance{{forloop.counter}}" placeholder='0.00' class="form-control total blnc_amnts"/></td>
                                         </tr>
@@ -343,6 +346,9 @@
         function calcBalance(rowId){
             var amount = $('#inv_amount'+rowId).val();
             var paid = $('#payment'+rowId).val();
+            if(paid == ""){
+                paid = 0
+            }
             bal = $('#balance'+rowId);
 
             var balAmount = parseFloat(amount) - parseFloat(paid)
@@ -629,11 +635,14 @@
                                         <input type="text" name="duedate[]" value="${invdata[key]['date']}"hidden>
                                         <div style="position: absolute;" class="d-flex"><span>duedate : ${invdata[key]['date']} </span></div>
                                     </td>
-                                    <td><input type="text" name='inv_type[]' id="" value="${invdata[key]['inv_type']}" class="form-control"/></td>
+                                    <td>
+                                        <input type="text" readonly name='inv_type[]' id="" value="${invdata[key]['inv_type']}" class="form-control"/>
+                                        <input type="text" hidden name='inv_id[]' id="" value="${invdata[key]['id']}"/>
+                                    </td>
                                     <td><input type="text" name='trans_no[]' value="${invdata[key]['trans_no']}" id="" class="form-control"/></td>
                                     <td><input type="number" readonly name='inv_amount[]' id="inv_amount${parseInt(key)+1}" value="${invdata[key]['inv_amount']}" class="form-control"/></td>
-                                    <td><input type="number" name='payment[]' onkeyup="calcBalance(${parseInt(key)+1})" min-="0" step="any" id="payment${parseInt(key)+1}" placeholder='0.00' class="form-control total pymnt_rcvd"/></td>
-                                    <td><input type="number" readonly name='balance[]' id="balance${parseInt(key)+1}" placeholder='0.00' class="form-control total blnc_amnts"/></td>
+                                    <td><input type="number" name='payment[]' onkeyup="calcBalance(${parseInt(key)+1})" min="0" step="any" id="payment${parseInt(key)+1}" value=0 placeholder='0.00' class="form-control total pymnt_rcvd"/></td>
+                                    <td><input type="number" readonly name='balance[]' id="balance${parseInt(key)+1}" value="${invdata[key]['inv_amount']}" placeholder='0.00' class="form-control total blnc_amnts"/></td>
                                 </tr>
                             `
                         )

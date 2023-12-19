@@ -1354,8 +1354,20 @@ urlpatterns = [
     path('check_user_loan',views.check_user_loan,name='check_user_loan'),
     
     path('payment_draf_to_save/<int:id>',views.paymentDraftToSave, name='paymentDraftToSave'), 
+    
+    # Harikrishnan-urls------------------------------------
+    
+    path('purchase_order_details',views.purchase_order_details,name='purchase_order_details'),
+    path('purchase_orderby_vendor',views.purchase_orderby_vendor,name='purchase_orderby_vendor'),
+    path('recurring_bill_report',views.recurring_bill_report,name='recurring_bill_report'),
+    #End
+    
+    path('recurringBillDetailsToEmail',views.recurringBillDetailsToEmail,name="recurringBillDetailsToEmail"),
+    path('purchaseOrderByVendorToEmail',views.purchaseOrderByVendorToEmail,name="purchaseOrderByVendorToEmail"),
+    path('purchaseOrderDetailsToEmail',views.purchaseOrderDetailsToEmail,name="purchaseOrderDetailsToEmail"),
 
-
+    path('purchaseDebitToEmail/<int:id>/',views.purchaseDebitToEmail,name='purchaseDebitToEmail'),
+    
     path('debit_add_file/<int:id>/', views.debit_add_file, name='debit_add_file'),
  
 ]

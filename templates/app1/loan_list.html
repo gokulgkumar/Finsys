@@ -104,6 +104,7 @@
                     </thead>
                     <tbody>
                         {% for a in loan_tr %}
+                        {% if a.loan_amount != 0 %}
                 <tr >              
                     <td >{{ a.loan_date }}</td>
                     {% if a.bank_type == 'PROCESSING FEE' %}
@@ -118,7 +119,8 @@
                                 
                                 
                                 <td>{{a.loan_amount}}</td>
-                                <td>{{a.loan_intrest}}</td>
+                                <td>{{a.loan_intrest|default:0}}</td>
+
                                 <td>{{a.total}}</td>
                                 <td>
                                     <div class="dropdown">
@@ -150,7 +152,8 @@
                                 function shoAlert(bankType) {
                                     alert("You can't delete this transaction with bank type: " + bankType);
                                 }
-                            </script>         
+                            </script>  
+                            {% endif %}       
 {% endfor %}
 </tbody>
                        

@@ -1201,6 +1201,7 @@ class paymentitems(models.Model):
     # inv = models.ForeignKey(invoice, on_delete=models.CASCADE,null=True)
     invdate = models.CharField(max_length=100, default='')
     invtype = models.CharField(max_length=100, null=True, blank = True) #added shemeem
+    invid = models.BigIntegerField(null=True, blank = True) #added shemeem
     invno = models.CharField(max_length=100, default='')
     duedate = models.CharField(max_length=100, default='')
     invamount = models.CharField(max_length=100, default='')
@@ -1627,7 +1628,6 @@ class purchasedebit(models.Model):
     gstnumber=models.CharField(max_length=150 ,default='NULL')
     gsttype=models.CharField(max_length=150 ,default='NULL')
     status =models.CharField(max_length=150,choices=debit_status ,default='Draft')
-    
 
 class purchasedebit1(models.Model):
     pdebit = models.ForeignKey(purchasedebit, on_delete=models.CASCADE,null=True)
@@ -1800,6 +1800,7 @@ class RetainerInvoices(models.Model):
     reference_number = models.IntegerField(null=True)
     place_of_supply = models.CharField(max_length=100,null=True)
     total_amount = models.FloatField(max_length=100,null=True)
+    balance = models.FloatField(null = True, blank = True) #added shemeem - for payment received module work
     customer_notes = models.CharField(max_length=100,null=True)
     terms_conditions = models.CharField(max_length=100,null=True)
     comments = models.CharField(max_length=100,null=True)
@@ -2387,13 +2388,13 @@ class loan_account(models.Model):
     account_number=models.TextField(max_length=100)
     lenderbank=models.TextField(max_length=100)
     recieced_bank=models.TextField(max_length=100)
-    intrest=models.TextField(max_length=100)
+    intrest=models.TextField(max_length=100,null=True,blank=True)
     term=models.TextField(max_length=100)
     loan_amount=models.TextField(max_length=100)
-    processing=models.TextField(max_length=100)
-    paid=models.TextField(max_length=100)
+    processing=models.TextField(max_length=100,null=True,blank=True)
+    paid=models.TextField(max_length=100,null=True,blank=True)
     status=models.TextField(max_length=100)
-    desc=models.TextField(max_length=100)
+    desc=models.TextField(max_length=100,null=True,blank=True)
     cid = models.ForeignKey(company, on_delete=models.CASCADE)
     balance=models.IntegerField(default=0)    
     date=models.DateField(blank=True,null=True)
@@ -2409,7 +2410,7 @@ class loan_transaction(models.Model):
     loan_amount=models.IntegerField(default=0,blank=True,null=True)
     loan_desc=models.TextField(blank=True,null=True)
     loan_date=models.DateField(blank=True,null=True)
-    loan_intrest=models.TextField(max_length=100,default=0)
+    loan_intrest=models.TextField(max_length=100,default=0,blank=True,null=True)
     balance=models.IntegerField(default=0)   
     type=models.TextField(max_length=100)
     total = models.IntegerField(default=0)

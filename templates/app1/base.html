@@ -40,14 +40,6 @@
  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
 
- <!-- iconify-icon -->
- <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-
- 
-
-
-
-
   <link rel="stylesheet" href="{% static 'assets/css/app.css' %}" />
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -272,22 +264,6 @@
                         </div>
                       </div>
                     </a>
-                    
-
-                    
-                    <a class="dropdown-item" href="javascript:;">
-                      <div class="media align-items-center">
-                        <div class="notify bg-light-warning text-red" ><iconify-icon icon="healthicons:rdt-result-out-stock-outline"></iconify-icon>
-                        </div>
-                        <div class="media-body">
-                          <h6 class="msg-name">Out of Stock<span class="msg-time float-right">35 min
-                              ago</span></h6>
-                          <p class="msg-info">{{ count }}items are out of stock</p>
-                        </div>
-                      </div>
-                    </a>
-                    
-                    
                   </div>
                   <a href="javascript:;">
                     <div class="text-center msg-footer">View All Notifications</div>
@@ -552,6 +528,9 @@
               <li id="stocksummary"><a href="{% url 'stocksummary' %}"><i class="bx bx-right-arrow-alt"></i>Stock Summary </a></li>
               <li id="stockvaluation"><a href="{% url 'stockvaluation' %}"><i class="bx bx-right-arrow-alt"></i>Stock Valuation</a></li>
               <li id="salessummaryreport"><a href="{% url 'salessummaryreport' %}"><i class="bx bx-right-arrow-alt"></i>Sales Summary Report</a></li>
+              <li id="salessummaryreport"><a href="{% url 'purchase_order_details' %}"><i class="bx bx-right-arrow-alt"></i>Purchase Order Details</a></li>
+              <li id="salessummaryreport"><a href="{% url 'purchase_orderby_vendor' %}"><i class="bx bx-right-arrow-alt"></i>Purchase Order By Vendor</a></li>
+              <li id="salessummaryreport"><a href="{% url 'recurring_bill_report' %}"><i class="bx bx-right-arrow-alt"></i> Recurring Bill Report</a></li>
             </ul>
           </li>
           <!-- <li>
