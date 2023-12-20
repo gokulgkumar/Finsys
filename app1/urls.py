@@ -1365,9 +1365,10 @@ urlpatterns = [
     path('recurringBillDetailsToEmail',views.recurringBillDetailsToEmail,name="recurringBillDetailsToEmail"),
     path('purchaseOrderByVendorToEmail',views.purchaseOrderByVendorToEmail,name="purchaseOrderByVendorToEmail"),
     path('purchaseOrderDetailsToEmail',views.purchaseOrderDetailsToEmail,name="purchaseOrderDetailsToEmail"),
-
-    path('purchaseDebitToEmail/<int:id>/',views.purchaseDebitToEmail,name='purchaseDebitToEmail'),
     
     path('debit_add_file/<int:id>/', views.debit_add_file, name='debit_add_file'),
+    path('shareGstrToEmail',views.shareGstrToEmail, name='shareGstrToEmail'),
+    
+    path('purchaseDebitToEmail/<int:id>/',views.purchaseDebitToEmail,name='purchaseDebitToEmail'),
  
 ]

@@ -438,7 +438,7 @@
                                     <tbody>
                                    
                                {% for a in bnk %}
-                               
+                               {% if a.loan_amount != 0 %}
                                         <tr>
                                             {% if a.type == 'LOAN ADJ'   %}
                                             <td>{{a.loan_date}}</td>
@@ -485,7 +485,7 @@
                                        
                                         <div class="modal fade" id="deleteModal{{ a.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
                                          
-                                            
+                                      {% endif %}    
                                      {% endfor %}
                                         
                                   

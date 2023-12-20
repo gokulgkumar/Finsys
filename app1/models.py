@@ -1585,7 +1585,9 @@ class purchasepayment1(models.Model):
     billamount = models.CharField(max_length=100,null=True)
     duedate = models.CharField(max_length=100,null=True)
     amountdue = models.CharField(max_length=100,null=True)
-    payments = models.CharField(max_length=100,null=True)
+    payments = models.CharField(max_length=100,null=True) # Payment field
+    payment_id = models.IntegerField(null=True)
+    payment_type = models.CharField(max_length=100,null=True)
     
 class paymentmethod(models.Model):
     cid = models.ForeignKey(company, on_delete=models.CASCADE,null=True)
