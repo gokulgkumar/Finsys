@@ -31444,6 +31444,7 @@ def update_item(request, id):
             item.inter_st = request.POST.get('inter_st')
             item.inventry = request.POST.get('invacc')
             item.stock = request.POST.get('stock')
+            item.min_stock=request.POST.get('min_stock')
             # print(request.POST.get('status'))
             item.status = request.POST.get('status')
             item.stock_rate = request.POST.get('stock_rate')#reshna added
@@ -31455,7 +31456,7 @@ def update_item(request, id):
             #     print("Error while saving item:", str(e))
 
             item.save()
-            return redirect('goitem')
+            return redirect('view_item',item.id)
         return render(request,'app1/item_view.html',{'cmp1': cmp1})    
     except:
         return redirect('goitem')
@@ -36967,7 +36968,7 @@ def createpurchasedebit(request):
         cmp1 = company.objects.get(id=request.session['uid'])
         if request.method == 'POST':
             vendor = request.POST.get('vendor')
-            
+            print('vendor is ',vendor)
             
             address = request.POST.get('address')
             email=request.POST.get('email')
@@ -36991,6 +36992,8 @@ def createpurchasedebit(request):
             paid_amount=request.POST.get('paid')
             adjustment=request.POST.get('adjustment')
             payment_type=request.POST.get('paytype')
+            cheque_no=request.POST.get('cheque_id')
+            upi_no=request.POST.get('upi_id')
             balance_amount=request.POST.get('bal_due')
             gstnumber=request.POST['gst_num']
             gsttype=request.POST['gst_type']
@@ -37021,11 +37024,13 @@ def createpurchasedebit(request):
             
                                     balance_due=balance_due,
                                     amtrecvd=amtrecvd,
-           
+
                                     total_discount=total_discount,
                                     ship_charge=ship_charge,
                                     paid_amount=paid_amount,
                                     payment_type=payment_type,
+                                    cheque_no=cheque_no,
+                                    upi_no=upi_no,
                                     balance_amount=balance_amount,
                                     status=status,
                                     cid=cmp1,
@@ -37308,17 +37313,34 @@ def goeditpurchasedebit(request,id):
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
         pdebt=purchasedebit.objects.get(pdebitid=id)
+        
+        print(pdebt.pdebitid,'pdebt')
+        vendor_name=pdebt.vendor
+        print(vendor_name)
+        acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
+        acc2 = accounts1.objects.filter(cid=cmp1,acctype='Sales')
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
+        banks=bankings_G.objects.filter(cid=cmp1)
+        vndr_gst=''
+        for v in vndr:
+            if v.gsttype=='unregistered Business':
+                vndr_gst= 'unregistered Business'
+        print(vndr_gst)
         context = {
                     'cmp1': cmp1,
                     'pdebt':pdebt,
                     'pdebt1':pdebt1,
                     'item':item ,
-                    'vndr':vndr       
+                    'vndr':vndr,
+                    'vendor_name':vendor_name,
+                    'vndr_gst':vndr_gst,
+                    'banks':banks,
+                    'acc1':acc1,
+                    'acc2':acc2   
                 }
-        return render(request,'app1/editpurchasedebit.html',context)
+        return render(request,'app1/editpurchasedebit2.html',context)
     return redirect('/')
 
 def editpurchasedebit(request,id):
@@ -37331,6 +37353,7 @@ def editpurchasedebit(request,id):
         if request.method == 'POST':
             pdebt=purchasedebit.objects.get(pdebitid=id)
             pdebt.vendor = request.POST['vendor']
+            print(request.POST['vendor'],'gfgdfgdfgfdgd')
             pdebt.address = request.POST['address']
             pdebt.debit_no= request.POST['debit_no']
             pdebt.supply=request.POST['supply']
@@ -47627,21 +47650,53 @@ def deletedebitcomments(request,pdebitid, commentid):
         return redirect('viewpurchasedebit', pdebitid) 
         
         
+# def get_vendor_data_bill(request):
+#     company1 = company.objects.get(id=request.session["uid"])
+#     id = request.GET.get('id')
+#     options = {}
+#     vendor_object= vendor.objects.get(vendorid=id)
+#     print(vendor_object.email,'vendor_object')
+#     vendor_recurring = recurring_bill.objects.filter(vendor_mail=vendor_object.email)
+#     print(vendor_recurring)
+#     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
+   
+    
+#     print(option_objects,'option objects')
+#     if option_objects:
+#         for option in option_objects:
+            
+#             options[option.billid] = [option.bill_no]
+#     else:
+#         options={"null"}
+#     return JsonResponse(options, safe=False)
+    
+
 def get_vendor_data_bill(request):
     company1 = company.objects.get(id=request.session["uid"])
     id = request.GET.get('id')
     options = {}
-    vendor_object= vendor.objects.get(vendorid=id)
+    vendor_object = vendor.objects.get(vendorid=id)
+    print(vendor_object.email, 'vendor_object')
+    email=vendor_object.email
+    vendor_recurring = recurring_bill.objects.filter(vendor_mail=email)
+    print(vendor_recurring)
     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
-    print(option_objects)
+    
+    print(option_objects, 'option objects')
     if option_objects:
         for option in option_objects:
-            
             options[option.billid] = [option.bill_no]
     else:
-        options={"null"}
-    return JsonResponse(options)
-    
+        options = {}  
+    if vendor_recurring:
+        for option in vendor_recurring:
+            options[option.rbillid] = [option.billno]
+    else:
+        options = {}  
+
+    print('options',options)
+
+    return JsonResponse(options, safe=False)
     
 ##reshna-holiday
 
@@ -48909,6 +48964,7 @@ def itemdatadebit(request):
         print(cmp1.state)
         
         id = request.GET.get('id')
+        print(id,'id')
         vid_param = request.GET.get('vid')
        
         print(vid_param)
@@ -48936,27 +48992,44 @@ def itemdatadebit(request):
                 'places': places,
                 'price': price,
                 'gst': gst,
-                'sgst': sgst,
-            
-            
+                'sgst': sgst, 
                 })
 
             return redirect('/')
         else:
-            try:
-                
-                pbill = purchasebill.objects.get(bill_no=vid_param)
-                print(pbill)
-            except purchasebill.DoesNotExist:
-                return JsonResponse({'error_msg': 'Purchase bill not found'})
+            
+            from django.core.exceptions import ObjectDoesNotExist
 
             try:
-                pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
-                quty = pb.quantity
-                taxs = pb.tax
+                # Try to get the purchasebill object with the specified bill_no
+                pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
+                print(pbill, 'pbill')
 
-            except purchasebill_item.DoesNotExist:
-                error_flag = 1
+                # Try to get the purchasebill_item object with the specified conditions
+                try:
+                    pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
+                    print('pb', pb)
+                    quty = pb.quantity
+                    taxs = pb.tax
+                    error_flag = 0
+                except ObjectDoesNotExist:
+                    error_flag = 1
+
+            except ObjectDoesNotExist:
+                # If purchasebill object is not found, try to get the recurring_bill object
+                try:
+                    rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
+                    re = recurringbill_item.objects.get(bill=rebill, item=id)
+                    quty = re.qty
+                    taxs = re.tax
+                    error_flag = 0
+                except ObjectDoesNotExist:
+                    error_flag = 1
+
+            # Handle the error_flag accordingly
+
+            
+        print(error_flag,'err')
 
         toda = date.today()
         tod = toda.strftime("%Y-%m-%d")
@@ -51903,3 +51976,62 @@ def purchaseDebitToEmail(request,id):
             return JsonResponse({'message':''})
         else:        
             return JsonResponse({'message':''})
+
+
+
+
+def create_item4(request,pdebit_id):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+            print(uid,'uid')
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        try:
+            pdebit = purchasedebit.objects.get(pdebitid=pdebit_id)
+            pd=pdebit.pdebitid
+        except purchasedebit.DoesNotExist:
+            return redirect('/') 
+        if request.method == 'POST':
+            cmp1 = company.objects.get(id=request.session['uid'])
+            iname = request.POST['name']
+            itype = request.POST['type']
+            iunit = request.POST.get('unit')
+            ihsn = request.POST['hsn']
+            itax = request.POST['taxref']
+            ipcost = request.POST['pcost']
+            iscost = request.POST['salesprice']
+            itmdate = request.POST['itmdate']
+            #itrate = request.POST['tax']
+            ipuracc = request.POST['pur_account']
+            isalacc = request.POST['sale_account']
+            ipurdesc = request.POST['pur_desc']
+            isaledesc = request.POST['sale_desc']
+            iintra = request.POST['intra_st']
+            iinter = request.POST['inter_st']
+            iinv = request.POST.get('invacc')
+            istock = request.POST.get('stock')
+            istatus = request.POST['status']
+            item = itemtable(name=iname,item_type=itype,unit=iunit,
+                                hsn=ihsn,tax_reference=itax,
+                                purchase_cost=ipcost,
+                                sales_cost=iscost,
+                                itmdate=itmdate,
+                                #tax_rate=itrate,
+                                acount_pur=ipuracc,
+                                account_sal=isalacc,
+                                pur_desc=ipurdesc,
+                                sale_desc=isaledesc,
+                                intra_st=iintra,
+                                inter_st=iinter,
+                                inventry=iinv,
+                                stockin=istock,
+                                stock=istock,
+                                status=istatus,
+                                cid=cmp1)
+            item.save()
+            return redirect('goeditpurchasedebit',pd)
+        return render(request,'app1/editpurchasedebit2.html')
+    return redirect('/') 
+

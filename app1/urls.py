@@ -646,6 +646,7 @@ urlpatterns = [
     re_path(r'^createvendor3$',views.createvendor3,name='createvendor3'),
     re_path(r'^createvendor4$',views.createvendor4,name='createvendor4'),
 
+
     re_path(r'^createcustomer1$', views.createcustomer1, name='createcustomer1'),
     re_path(r'^createcustomer2$', views.createcustomer2, name='createcustomer2'),
     re_path(r'^createcustomer3$', views.createcustomer3, name='createcustomer3'),
@@ -653,6 +654,7 @@ urlpatterns = [
     re_path(r'^create_item1$',views.create_item1,name='create_item1'),
     re_path(r'^create_item2$',views.create_item2,name='create_item2'),
     re_path(r'^create_item3$',views.create_item3,name='create_item3'),
+    re_path(r'^create_item4/(?P<pdebit_id>\d+)/$', views.create_item4, name='create_item4'),
 
     re_path(r'^create_unit1$',views.create_unit1,name='create_unit1'),
 
@@ -1370,5 +1372,8 @@ urlpatterns = [
     path('shareGstrToEmail',views.shareGstrToEmail, name='shareGstrToEmail'),
     
     path('purchaseDebitToEmail/<int:id>/',views.purchaseDebitToEmail,name='purchaseDebitToEmail'),
+
+
+   
  
 ]

@@ -57,14 +57,14 @@ input[name="service-city"] {
     <!--<h1>Taxes</h1>-->
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 
-    <form action="createpurchasedebit" method="post" class="needs-validation" novalidate>
+    <form action="{% url 'editpurchasedebit' pdebt.pdebitid %}" method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="page-content">
             <!--breadcrumb-->
             <div class="card radius-15">
                 <div class="card-body">
                     <div class="card-title">
-                        <center><h3 class="mb-0" id="invnumb">DEBIT NOTE</h3></center>
+                        <center><h3 class="mb-0" id="invnumb">EDIT DEBIT NOTE</h3></center>
                     </div>
                     <hr/>
                 </div>
@@ -80,7 +80,7 @@ input[name="service-city"] {
                                     <div class="d-flex"  >
                                       
 <select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
-    <option selected disabled hidden>Select Vendor</option>
+    <option selected  value="{{ pdebt.vendor }}" > {{ pdebt.vendor }}</option>
     {% for v in vndr %}
     <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
     {% endfor %}
@@ -144,7 +144,7 @@ input[name="service-city"] {
                     }
 
 
-                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    
                     
                 console.log(json_data[key]['vendorid']);
                 
@@ -187,37 +187,54 @@ input[name="service-city"] {
                                 </div>
                                 <div class="col-md-5 mt-3">
                                     <label>Email</label>&nbsp;
-                                    <input type="text" id="email" name="email" placeholder='Email' class="form-control">
+                                    <input type="text" id="email" name="email" placeholder='Email' class="form-control" value="{{ pdebt.email }}">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Billing address</label>
-                                    <textarea class="form-control" name="address" rows="5" id="mailaddr"></textarea>
+                                    <textarea class="form-control" name="address" rows="5" id="mailaddr">{{ pdebt.address }}</textarea>
                                 </div>
                                 <div class="col-md-5 mt-3"></div>
+                              
+
+                        
+                                
+                                
+
                                 <div class="col-md-5 mt-3">
-                                    <label for="validationCustom02">GST Treatment</label>
+                                    <label for="validationCustom02" >GST Treatment</label>
                                     
-                                    <input type="text" class="form-control" name="gst_type" id="gst_type" required>
+                                    <input type="text" class="form-control" name="gst_type" id="gst_type" value="{{ pdebt.gsttype }}" required>
                                 </div>
-                                <div class="col-md-5 mt-3" id="gstDiv">
+                                
+                                {% if pdebt.gsttype  == 'unregistered Business' %}
+                                    <div class="col-md-5 mt-3" id="gstDiv" style="display: none;">
+                                        <label for="validationCustom02">GST Number</label>
+                                        <input type="text" class="form-control" name="gst_num" id="gst_num" required>
+                                    </div>
+                                    <div class="col-md-5 mt-3" id="showdiv1" >
+                                    </div>
+                                {% else %}
+                                <div class="col-md-5 mt-3" id="gstDiv" >
                                     <label for="validationCustom02">GST Number</label>
-                                    
                                     <input type="text" class="form-control" name="gst_num" id="gst_num" required>
                                 </div>
-
                                 <div class="col-md-5 mt-3" id="showdiv1" style="display: none;">
                                 </div>
-
+                           
+                                {% endif %}
+                                    <!-- <div class="col-md-5 mt-3" id="showdiv1" style="display: none;">
+                                    </div> -->
+                               
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Debit Note Date</label>
-                                    <input type="date" class="form-control" name="debitdate" id="date">
+                                    <input type="date" class="form-control" name="debitdate" id="date" value="{{ pdebt.debitdate| date:'Y-m-d' }}">
                                 </div>
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This number is not continous <span class="text-white">)</span></span>
                                    
-                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
+                                     <input type="text" class="form-control" name="debitno" id="deb_no"  value="{{ pdebt.debit_no }}" required>
                                     
                                 </div>
 
@@ -231,7 +248,7 @@ input[name="service-city"] {
                                     <label>Place of supply</label>&nbsp;
                                     <select type="text" class="form-control" id="plosu" name="supply" onchange="state(this)">
                                         
-                                        <option  selected > </option>
+                                        <option value="{{ pdebt.supply }}"> {{ pdebt.supply }}</option>
                                         <option value="[AN] Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
                                     <option value="[AD] Andhra Predhesh">[AD] Andhra Predhesh</option>
                                     <option value="[AR] Arunachal Predesh">[AR] Arunachal Predesh</option>
@@ -275,7 +292,7 @@ input[name="service-city"] {
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Bill Number</label>
                                     <select name="billno" id="billno" class="form-control">
-                                        <option selected>No Bill</option>
+                                        <option value="{{ pdebt.billno }}">{{ pdebt.billno }}</option>
                                         <option ></option>
                                         <!-- {% for r in rbill %}
                                         <option>{{ r.billno }}</option>
@@ -296,7 +313,7 @@ input[name="service-city"] {
                             <div class="row">
                                 <div class="col-md-4"></div>
                                 <div class="col-md-8">
-                                    <input type="text" name="creditamount" id="baldue" placeholder='0.00' class="form-control"
+                                    <input type="text" name="creditamount" id="baldue" value="{{ pdebt.grandtotal }}" class="form-control"
                                     readonly style="font-size: 50px; background-color: #243e54; border: 0px; color: white;">
                                 </div>
                             </div>
@@ -327,6 +344,7 @@ input[name="service-city"] {
                                     </tr>
                                     </thead>
                                     <tbody id="items-table-body">
+                                    {%for pro in pdebt1%}
                                     <tr id='addr0'>
                                         <td>1</td>
                                         <td style="width: 20%;">
@@ -349,7 +367,7 @@ input[name="service-city"] {
  -->
 
                                                 <select name='items[]' id="product" class="form-control select2">
-                                                    <option selected>Choose..</option>
+                                                    <option selected>{{pro.items}}</option>
                                                     {% for i in item %}
                                                         <option value="{{ i.name }}" data-tokens="{{ i.name }}">
                                                             {{ i.name }}
@@ -366,27 +384,28 @@ input[name="service-city"] {
                                             <div id="errorLabel" style="color: red;"></div>
                                         </td>
                                         <td>
-                                            <input type="text" name='hsn[]' id="hsn1" placeholder='HSN'
+                                            <input type="text" name='hsn[]' id="hsn1" placeholder='HSN' value="{{pro.hsn}}"
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
                                             <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty" hidden  >
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
-                                            <input type="number" name='quantity[]' oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
+                                            <input type="number" name='quantity[]' value="{{pro.quantity}}" oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
                                                     <div><span>Available Qty :</span> <span id="qtyspan"class='text-muted'></span></div>
                                         </td> 
                                         
                                         <td>
                                             
-                                            <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'
+                                            <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price' value="{{pro.price}}"
                                             class="form-control price" step="0.00" min="0"/>
                                         </td>
                                         
                                         <td>
-                                            <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
+                                            <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price' 
                                             class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
-                                                <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
+                                                {% if pdebt.supply == cmp1.state %}
+                                                <option id="ta1" value= {{ pro.tax }} text={{ cmp1.state }} hidden>{{pro.tax}} % GST</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
                                                 <option value=5 text={{ cmp1.state }}>05% GST(05%)</option>
@@ -394,27 +413,30 @@ input[name="service-city"] {
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
                                                 
+                                                {% else %}
+                                                <option id="ta5" value={{ pro.tax }} text=" " hidden>{{ pro.tax }} % IGST</option>
                                                 
-                                                <option id="ta5" value=0 text=" " hidden>Select</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
                                                 <option value=5 text=" ">05.0% IGST(05%)</option>
                                                 <option value=12 text=" ">12.0% IGST(12%)</option>
                                                 <option value=18 text=" ">18.0% IGST(18%)</option>
                                                 <option value=28 text=" ">28.0% IGST(28%)</option>
+                                                {% endif %}
                                           </select>
                                         </td>
-                                        <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce" 
+                                        <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce"  value="{{pro.discount}}"
                                             placeholder="0" step="any" value="0">
                                         </td> 
                                         
                                         <td>
-                                            <input type="number" name='total[]' id="total1" placeholder='0' class="form-control total" step="any" readonly>
+                                            <input type="number" name='total[]' id="total1" placeholder='0' class="form-control total" step="any" readonly value="{{pro.tax}}">
                                         </td>
                                         <td style="display: none;">
-                                            <input type="text" name='taxamount1' id="taxamount1" class="form-control taxamount"/>
+                                            <input type="text" name='taxamount1' id="taxamount1" value="{{pro.total}}" class="form-control taxamount"/>
                                         </td>
                                     </tr>
+                                    {% endfor %}
                                     </tbody>
                                     <tr>
                                         <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="addrow" onclick="add_item_row()">+</a></td>
@@ -438,7 +460,6 @@ input[name="service-city"] {
                                                vid: vid
                                            },
                                            success: function (response) {
-                                            console.log(response,'res')
                                             
                                                if (response.error_flag === 1) {
                                                    // Show error message in a label
@@ -486,7 +507,6 @@ input[name="service-city"] {
                         id:vid
                     },
                     success: function(data) {
-                        console.log(data,'hie')
                         var dropdow = $('#billno');
                         dropdow.empty();
                         $.each(data, function(key, value) {
@@ -517,7 +537,11 @@ input[name="service-city"] {
                             <label for="">Payment Type</label>
                             <div class="d-flex">
                                 <select class="form-control my-select" name="paytype" id="pay_method" required style="width:70%;">
-                                    <option value="" hidden>Select</option>
+                                    {% if bank %}
+                                    <option value="{{i.bankname}}" hidden>{{bank.bankname}}</option>
+                                    {% else %}
+                                    <option value="{{pdebt.payment_type}}" hidden>{{pdebt.payment_type}}</option>
+                                    {% endif %}
                                     
                                     <option value="Cash">Cash</option>
                                     <option value="cheque">Cheque</option>
@@ -565,7 +589,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label class="text-center" for="a">Sub Total</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" step="any" name='subtotal' placeholder=0 
-                                        class="form-control" id="sub_total">
+                                        class="form-control" id="sub_total" value="{{ pdebt.subtotal }}">
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -573,7 +597,7 @@ input[name="service-city"] {
                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Total Discount</label></div>
                                         <div class="col-sm-1 mt-2">:</div>
                                         <div class="col-sm-7 mt-2"><input type="number" step="any" name='tot_dis' placeholder=0 
-                                            class="form-control" id="tot_dis">
+                                            class="form-control" id="tot_dis"  value="{{pdebt.total_discount}}">
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
                                     </div>
@@ -581,7 +605,7 @@ input[name="service-city"] {
                                         <div class="col-sm-4 mt-2"><label for="a" class="text-center">Discount</label></div>
                                         <div class="col-sm-1 mt-2">:</div>
                                         <div class="col-sm-7 mt-2"><input type="number" name='discount' step="any" id="disc1" placeholder=0 
-                                            class="form-control disc"/>
+                                            class="form-control disc"  value="{{ pdebt.discount }}" />
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
                                     </div>
@@ -589,7 +613,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='igst' step="any" id="igst" placeholder=0 
-                                        class="form-control"/>
+                                        class="form-control"  value="{{ pdebt.igst }}"/>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -597,7 +621,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='cgst' step="any" id="cgst" placeholder=0 
-                                        class="form-control"/>
+                                        class="form-control"   value="{{ pdebt.cgst }}"/>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -605,7 +629,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='sgst' step="any" id="sgst" placeholder=0 
-                                        class="form-control"/>
+                                        class="form-control"  value="{{ pdebt.sgst }}"/>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -613,7 +637,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Tax Amount</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='tax_amount' id="tax_amount" placeholder='0' 
-                                        class="form-control" readonly />
+                                        class="form-control"  value="{{ pdebt.taxamount }}" />
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -622,7 +646,7 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Shipping Charge</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" step="any" name='shipcharge' placeholder=0 
-                                        class="form-control" id="shipcharge" value="0" required>
+                                        class="form-control" id="shipcharge" value="{{pdebt.ship_charge}}" required>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -633,7 +657,7 @@ input[name="service-city"] {
                                     <div class="col-sm-7 mt-2">
                                         <div class="d-flex">
                                             <select name="tcs" class="form-control" id="tcs1" onchange="calc_tcs()">
-                                                <option value="" selected>Select a Tax</option>
+                                                <option value="{{ pdebt.tcs }}">{{ pdebt.tcs }}</option>
                                                 <option value="1">Cess 1%</option>
                                             </select>
                                             <input type="number" id="tcs_amount" name='tcs_amount' placeholder='0' class="form-control">
@@ -650,14 +674,14 @@ input[name="service-city"] {
                                 <div class="row container-fluid p-2 m-0">
                                     <div class="col-sm-4 mt-2"><a class="text-center">Adjustments</a></div>
                                     <div class="col-sm-1 mt-2">:</div>
-                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off" value="0" placeholder=0 
-                                        class="form-control" />
+                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off" value="{{ pdebt.round_off }}" placeholder=0 
+                                        class="form-control"  />
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div><hr>
                                 <div class="row container-fluid  p-2 m-0" style="display: none;">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Balance Due</label></div>
-                                    <div class="col-sm-8 mt-2"><input type="number" name='balance_due' id="due" placeholder="0" step="any" 
+                                    <div class="col-sm-8 mt-2"><input type="number" name='balance_due' id="due" placeholder="0" step="any" value="{{ pdebt.balance_due }}"
                                         class="form-control" readonly>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
@@ -665,7 +689,7 @@ input[name="service-city"] {
                                 <div class="row container-fluid  p-2 m-0" style="display: none;">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Amount Received</label></div>
                                     <div class="col-sm-8 mt-2"><input type="number" name='amtrecvd' id="" value="0" step="any" 
-                                        class="form-control" readonly>
+                                        class="form-control"  value="{{ pdebt.amtrecvd }}" readonly>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
@@ -676,24 +700,24 @@ input[name="service-city"] {
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Grand Total</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='grandtotal' id="grandtotal" placeholder='0.00' readonly
-                                        class="form-control"readonly>
+                                        class="form-control"  value="{{ pdebt.grandtotal }}"  readonly>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
                             </div>
-
+                            {% if pdebt.paid_amount %}
                             <div class="row container-fluid  p-2 m-0">
                                         
                                         <div class="col-sm-4 mt-2">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" id="invalidCheck">
+                                                <input class="form-check-input" type="checkbox" value="" id="invalidCheck" checked>
                                                 <label>Paid</label>
                                                 
                                             </div>
                                         </div>
                                         <div class="col-sm-1 mt-2"></div>
                                         <div class="col-sm-7 mt-2">
-                                            <input type="number" name='paid' id="paid" placeholder="0" value="0" step="any" 
+                                            <input type="number" name='paid' id="paid" placeholder="0" value="{{pdebt.paid_amount}}" step="any" 
                                             class="form-control">
                                             <p id="error-message" class="mt-1" style="color: red;"></p>
                                         </div>
@@ -704,11 +728,31 @@ input[name="service-city"] {
                                         <div class="col-sm-1 mt-2"></div>
                                         <div class="col-sm-7 mt-2">
                                             <input type="number" name='bal_due' id="bal_due" placeholder="0" step="any" 
-                                            class="form-control"  readonly>
+                                            class="form-control" value="{{pdebt.balance_amount}}" readonly>
                                             
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
                                     </div>
+                                {% else %}
+                                <div class="row container-fluid  p-2 m-0">
+                                    
+                                    <div class="col-sm-4 mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck">
+                                            <label>Paid</label>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 mt-2"></div>
+                                    <div class="col-sm-7 mt-2">
+                                        <input type="number" name='paid' id="paid" placeholder="0" value="0" step="any" 
+                                        class="form-control">
+                                        <p id="error-message" class="mt-1" style="color: red;"></p>
+                                    </div>
+                                    <div class="col-sm-4 m-0 p-0"></div>
+                                </div> 
+                                {% endif %}
+                                
                         </div>
                     </div>
                     
@@ -751,7 +795,7 @@ input[name="service-city"] {
    
     </form>
 
-    <div class="modal fade" id="newvendor">
+    <!-- <div class="modal fade" id="newvendor">
         <div class="modal-dialog modal-xl">
             <div class="modal-content" style="background-color: #213b52;">
                 <div class="modal-header">
@@ -762,7 +806,7 @@ input[name="service-city"] {
                 </div>
                 <div class="modal-body">
                     <div class="card p-3 m-3">
-                        <form action="createvendor4" method="post" class="needs-validation" novalidate autocomplete="off">
+                        <form action="" method="post" class="needs-validation" novalidate autocomplete="off">
                             {% csrf_token %}
                             {% if user.is_authenticated %}
                                 <div class="row">
@@ -1153,7 +1197,7 @@ input[name="service-city"] {
                 </div>
             </div>
         </div>  
-    </div> 
+    </div>  -->
 
     <div class="modal fade" id="crperiod">
         <div class="modal-dialog">
@@ -1195,7 +1239,7 @@ input[name="service-city"] {
                 </div>
                 <div class="modal-body">
                     <div class="card p-3 m-3">
-                        <form action="{% url 'create_item3' %}" method="post" class="needs-validation" novalidate autocomplete="off">
+                        <form action="{% url 'create_item4' pdebt.pdebitid%}" method="post" class="needs-validation" novalidate autocomplete="off">
                             {% csrf_token %}
     
                             <div class="row">
