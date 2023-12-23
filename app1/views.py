@@ -47671,30 +47671,63 @@ def deletedebitcomments(request,pdebitid, commentid):
 #     return JsonResponse(options, safe=False)
     
 
+# def get_vendor_data_bill(request):
+#     company1 = company.objects.get(id=request.session["uid"])
+#     id = request.GET.get('id')
+#     options = {}
+#     vendor_object = vendor.objects.get(vendorid=id)
+#     print(vendor_object.email, 'vendor_object')
+#     email=vendor_object.email
+#     vendor_recurring = recurring_bill.objects.filter(vendor_mail=email)
+#     print(vendor_recurring)
+#     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
+    
+#     print(option_objects, 'option objects')
+#     if option_objects:
+#         for option in option_objects:
+#             options[option.billid] = [option.bill_no]
+#     else:
+#         options = {}  
+#     if vendor_recurring:
+#         for option in vendor_recurring:
+#             options[option.rbillid] = [option.billno]
+#     else:
+#         options = {}  
+
+#     print('options',options)
+
+#     return JsonResponse(options, safe=False)
+
+
 def get_vendor_data_bill(request):
     company1 = company.objects.get(id=request.session["uid"])
     id = request.GET.get('id')
     options = {}
     vendor_object = vendor.objects.get(vendorid=id)
-    print(vendor_object.email, 'vendor_object')
-    email=vendor_object.email
+    
+   
+    email = vendor_object.email.strip()
+    print(email, 'vendor_object email')
+
     vendor_recurring = recurring_bill.objects.filter(vendor_mail=email)
     print(vendor_recurring)
-    option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
-    
+
+    option_objects = purchasebill.objects.filter(vendor_mail=email)
     print(option_objects, 'option objects')
+
     if option_objects:
         for option in option_objects:
             options[option.billid] = [option.bill_no]
     else:
-        options = {}  
+        options = {}
+
     if vendor_recurring:
         for option in vendor_recurring:
             options[option.rbillid] = [option.billno]
     else:
-        options = {}  
+        options = {}
 
-    print('options',options)
+    print('options', options)
 
     return JsonResponse(options, safe=False)
     
