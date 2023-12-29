@@ -69,9 +69,9 @@
                     <div class="card-title">
                         <center><h2 class="mb-0">MANUAL JOURNALS</h2></center>
                         <hr>
-                        <!-- <div class="btn-group col-md-2" style="float: right;">
+                        <div class="btn-group col-md-2" style="float: right;">
                             <a class="btn btn-outline-info text-grey" onclick="ExportToExcel('xlsx')">Export To Excel</a>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                                     <a class="dropdown-item" href="{% url 'gomjoural' %}"
                                         style="height: 40px; font-size: 15px; color: white; text-align: center;" >All</a>
                                 <a class="dropdown-item" href="{% url 'sort_contactname' %}"
-                                    style="height: 40px; font-size: 15px; color: white; text-align: center;" >Contact Name </a>
+                                    style="height: 40px; font-size: 15px; color: white; text-align: center;" >Amount </a>
                                 <!-- <a class="dropdown-item  " href="{% url 'sales_num_desc' %}"
                                     style="height: 40px; font-size: 15px; color: white; text-align: center;" >Sales Order Number <icon class=" fas fa-arrow-up"></icon></a> -->
 
@@ -125,7 +125,7 @@
                             <a class="dropdown-item" href="{% url 'mjdraft' %}"
                                style="height: 40px; font-size: 15px; color: white;">Draft</a>
                             <a class="dropdown-item" href="{% url 'mjpublish' %}"
-                               style="height: 40px; font-size: 15px; color: white;">Published</a>
+                               style="height: 40px; font-size: 15px; color: white;">Save</a>
                             
                     </div>  
                             </div>
@@ -143,10 +143,13 @@
                                 <tr>
                                     <th style="text-transform: uppercase;">DATE</th>
                                     <th style="text-transform: uppercase;">JOURNAL NO</th>
-                                    <th style="text-transform: uppercase;">CONTACT NAME</th>
-                                    <th style="text-transform: uppercase;">STATUS</th>
+                                    <!-- <th style="text-transform: uppercase;">CONTACT NAME</th> -->
+                                    <th style="text-transform: uppercase;">REFERENCE NUMBER</th>
                                     <th style="text-transform: uppercase;text-align: center;">NOTES</th>
                                     <th style="text-transform: uppercase;">AMOUNT</th>
+                                    <th style="text-transform: uppercase;">STATUS</th>
+                                    
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,13 +157,20 @@
                                     <tr class='clickable-row' data-href="view_mj/{{ a.id }}">
                                         <td>{{ a.date }}</td>
                                         <td>{{ a.mj_no }}</td>
-                                        <td>
+                                        <!-- <td>
                                             {% for a1 in a.mjournal1_set.all %}
                                                 {{ a1.contact }}
                                             {% empty %}
                                                 Contact Not Found
                                             {% endfor %}
-                                        </td>
+                                        </td> -->
+                                        <td>{{ a.ref_no }}</td>
+                                        <td>
+                                            <div style="list-style: none;text-align: center;" data-toggle="tooltip" data-placement="top" title="{{ a.notes }}">
+                                                <i class="fa fa-commenting" aria-hidden="true"></i>
+                                            </div>
+                                          </td>
+                                          <td>{{ a.total_deb }}</td>
                                         <td>
                                             {% if a.status == 'Publish' %}
                                                 Published
@@ -174,13 +184,9 @@
 
                                             </div>
                                         </td> -->
-                                        <td>
-                                            <div style="list-style: none;text-align: center;" data-toggle="tooltip" data-placement="top" title="{{ a.notes }}">
-                                                <i class="fa fa-commenting" aria-hidden="true"></i>
-                                            </div>
-                                          </td>
+                                      
                                           
-                                        <td>{{ a.total_deb }}</td>
+                                        
                                     </tr>
                                 {% endfor %}
                             </tbody>

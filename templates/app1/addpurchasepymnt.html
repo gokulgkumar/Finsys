@@ -373,7 +373,8 @@
                     $('#tab_logic #billdata').empty();
                  
     
-                    if (response.opb != null) {
+                    if (response.opb != null && response.obdue > 0) {
+                        
                         // Display opening balance bill
                         $('#tab_logic #vendordata').append(
                             `<tr id='addr1'>
@@ -390,6 +391,9 @@
     
                     // Display regular purchase bills
                     for (let i = 0; i < response.purchase_bills.length; i++) {
+                        if (response.purchase_bills[i].balance_amount > 0) {
+                            // Display only if the Amount Due is greater than 0
+                    
                         $('#tab_logic #billdata').append(
                             `<tr id='addr${i + 2}'>
                                 <td>${i + 2}</td>
@@ -397,12 +401,13 @@
                                 <td><input type="hidden" name='payment1[]' value="purchasebill_balance"/><input type="text" name="billdate[]" value="${response.purchase_bills[i].date}" class="form-control"/></td>
                                 <td><input type="hidden" name='payment2[]' value="${response.purchase_bills[i].billid}" ><input type="text" name='billno[]' value="${response.purchase_bills[i].bill_no}" class="form-control"/></td>
                                 <td><input type="text" name='billamount[]' value="${response.purchase_bills[i].grand_total}" class="form-control qty" step="0" min="0"/></td>
-                                <td><input type="text" name="duedate[]" value="${response.purchase_bills[i].deliver_date}" class="form-control"/></td>
+                                <td><input type="text" name="duedate[]" value="${response.purchase_bills[i].due_date}" class="form-control"/></td>
                                 <td><input type="number" name='amountdue[]' value="${response.purchase_bills[i].balance_amount}" class="form-control price" step="0.00" min="0"/></td>
                                 <td><input type="number" id='payment_${i + 1}' name='payment[]' onchange="addagain()" value="0" class="form-control total"/></td>
                             </tr>`
                         );
                     } 
+                }
 
 
 

@@ -82,6 +82,8 @@ class customer(models.Model):
     status =models.CharField(max_length=150,choices=customer_status,default='Active')
     receivables  = models.FloatField(null=True)
     file = models.FileField(upload_to='Customer',default="default.jpg")
+    pay_method = models.CharField(max_length=100,null=True)
+    price_list = models.IntegerField(null=True)
 
     class meta:
         db_table = "customer"
@@ -1596,7 +1598,7 @@ class paymentmethod(models.Model):
 class purchasedebit(models.Model):
     pdebitid = models.AutoField(('pdid'), primary_key=True)
     cid = models.ForeignKey(company, on_delete=models.CASCADE,null=True)
-    debit_no = models.CharField(max_length=100,null=True)
+    debit_no = models.CharField(max_length=100,null=True, default='')
     vendor = models.CharField(max_length=100,null=True)
     address = models.TextField(null=True)
     debitdate = models.DateField(null=True)
@@ -1872,6 +1874,8 @@ class challan(models.Model):
     ref=models.TextField(max_length=100)
     shipping=models.IntegerField()
     adjustment=models.FloatField(default=0)
+    converted_inv = models.CharField(max_length = 1000,null = True)
+    converted_rec = models.CharField(max_length = 1000,null = True)
     
 
 
@@ -1885,6 +1889,7 @@ class challanitem(models.Model):
     rate=models.FloatField()
     dl=models.ForeignKey(challan,on_delete=models.CASCADE)
     cid = models.ForeignKey(company, on_delete=models.CASCADE)
+    item = models.ForeignKey(itemtable,on_delete= models.CASCADE,null=True)
     discount=models.FloatField(default=0)
     
     
@@ -2380,7 +2385,7 @@ class attendance(models.Model):
     date = models.DateField(null=True,blank=True)
     employee= models.CharField(max_length=100,null=True,blank=True)
     status = models.CharField(max_length=100,null=True,blank=True,default='Present')
-    
+    reason = models.CharField(max_length=100,null=True,blank=True)
     
 class man_Journal_comment(models.Model):
     comment=models.CharField(max_length=300)

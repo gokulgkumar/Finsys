@@ -285,42 +285,128 @@ footer p {
     }
 
     }
+/* Template 1 Specific Styles */
+#whatToPrint1 {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+}
 
+#whatToPrint1 .header {
+    background-color: #f8f9fa;
+    color: #007bff;
+    padding: 20px;
+    text-align: center;
+}
 
+#whatToPrint1 table {
+    border-collapse: collapse;
+    width: 100%;
+}
 
+#whatToPrint1 th, #whatToPrint1 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
 
+#whatToPrint1 tr:nth-child(even) {background-color: #f2f2f2;}
+#whatToPrint2 {
+    font-family: 'Georgia', serif;
+    color: #2f4f4f;
+}
 
+#whatToPrint2 .card {
+    background-color: #fafafa;
+    border: 2px solid #d3d3d3;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+#whatToPrint2 .container {
+    padding: 20px;
+}
+
+#whatToPrint2 table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#whatToPrint2 th, #whatToPrint2 td {
+    border: 1px solid #a9a9a9;
+    padding: 10px;
+    text-align: left;
+}
+
+#whatToPrint2 tr:hover {background-color: #f5f5f5;}
+#whatToPrint3 {
+    font-family: 'Arial', sans-serif;
+    color: #000;
+}
+
+#whatToPrint3 .header {
+    background-color: #ff4500;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+#whatToPrint3 .entry {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#whatToPrint3 .footer {
+    background-color: #303030;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+#whatToPrint3 table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#whatToPrint3 th, #whatToPrint3 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#whatToPrint3 tr:nth-child(even) {background-color: #f2f2f2;}
+
+  
     </style>
 
 <script>
-
-
+    // This function identifies the active template and generates a PDF from it.
     async function generatePDF() {
-        // document.getElementById("downloadButton").innerHTML = "Currently downloading, please wait";
+        var activeTemplateId = getActiveTemplateId(); // Get the active template's ID.
+        var activeTemplate = document.getElementById(activeTemplateId); // Get the active template element.
+        var doc = new jsPDF('p', 'pt', 'a4');
 
-        //Downloading
-        var downloading = document.getElementById("whatToPrint");
-        var doc = new jsPDF('l', 'pt');
+        await html2canvas(activeTemplate).then((canvas) => {
+            // This will create a 'snapshot' of the active template.
+            doc.addImage(canvas.toDataURL("image/png"), 'PNG', 15, 15, 560, 0);
+        });
 
-        await html2canvas(downloading, {
-            //allowTaint: true,
-            //useCORS: true,
-            // width: 600
-            
-        }).then((canvas) => {
-            //Canvas (convert to PNG)
-            doc.addImage(canvas.toDataURL("image/png"), 'PNG', 15, 10, 700, 850);
-        })
-
-        doc.save("Document.pdf");
-
-        //End of downloading
-
-        // document.getElementById("downloadButton").innerHTML = "Click to download";
+        doc.save("Document.pdf"); // Save the PDF with a dynamic name based on the template or other data if needed.
     }
 
-    
+    // This function returns the ID of the currently active template.
+    function getActiveTemplateId() {
+        var templates = document.getElementsByClassName('printTemplates');
+        for (var i = 0; i < templates.length; i++) {
+            if (templates[i].style.display === 'block') {
+                return templates[i].id; // Return the ID of the active template.
+            }
+        }
+        return null; // In case no template is active, though this shouldn't happen.
+    }
 </script>
+
 
 
 	
@@ -369,8 +455,14 @@ footer p {
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
+                    <div class="view-toggle-buttons">
+                        <button id="show-overview">Show Overview</button>
+                        <button id="show-details">Show Details</button>
+                    </div>
                     <div class="collapse navbar-collapse" id="navbarScroll">
                         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                           
+                            
                           <li class="nav-item mx-1">
                             <a href="{% url 'mj_edit_page' sale.id  %}" role="button" class=" btn btn-outline-info rounded-pill text-grey p-1"> &nbsp;&nbsp;Edit&nbsp;&nbsp;</a>
 
@@ -379,25 +471,64 @@ footer p {
                             <a  href="{% url 'deletemj' sale.id %}" role="button"id="deleteButton" class=" btn btn-outline-info rounded-pill text-grey p-1">&nbsp;&nbsp;Delete&nbsp;&nbsp; 
                             </a>
                           </li>
+                          <div class="dropdown p-0 nav-item mx-1 "  style="margin-top: 10px;">
+                            <li  class=" dropdown-toggle btn btn-outline-info rounded-pill text-grey p-1"data-toggle="dropdown">&nbsp;&nbsp;Attach file&nbsp;&nbsp;</li>
+                            <ul class="dropdown-menu" style="background-color: black;">
+                                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal" data-target="#exampleModal">Attach file</a>
+                                {% if sale.file != "default.jpg" %}
+                                <a class="dropdown-item fas fa-download" style="cursor: pointer;"download  href="{{ sale.file.url }}" >Download file</a>
+                                {% endif %}
+                            </ul>
+                        </div>
                             <li class="nav-item active mx-1" >
                             <a class="nav-link text-light  btn btn-outline-info rounded-pill text-grey p-1" role="button" onclick="window.print()">&nbsp;&nbsp;Print&nbsp;&nbsp;<span class="sr-only">(current)</span></a>
                             </li>
       
                             <li class="nav-item mx-1">
-                              <a class="btn btn-outline-info rounded-pill text-grey p-1" role="button" href="{% url 'm_journal_pdf' sale.id %}" id="downloadButton" >&nbsp;&nbsp;PDF&nbsp;&nbsp;</a>
+                                <a class="btn btn-outline-info rounded-pill text-grey p-1" role="button" href="javascript:void(0);" onclick="generatePDF()" id="downloadButton">&nbsp;&nbsp;PDF&nbsp;&nbsp;</a>
+
                             </li>
+                            <li class="nav-item mx-1 dropdown">
+                                <a class="btn btn-outline-info rounded-pill text-grey p-1 dropdown-toggle" role="button" id="shareDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Share
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="shareDropdown">
+                                    <a class="dropdown-item" style="cursor: pointer;" data-target="#shareBillWhatsApp" data-toggle="modal">{% post_to_whatsapp object_or_url "WhatsApp" %}</a>
+                                    <a class="dropdown-item" style="cursor: pointer;" data-target="#shareBillEmail" data-toggle="modal">Email</a>
+                                </div>
+                            </li>
+                            
+                           
+<script>
+    function shareViaWhatsApp() {
+    // Collect data from the table or any other relevant information
+    var tableData = getTableData(); // Implement the function to fetch table data
 
-                            <div class="dropdown p-0 nav-item mx-1 " style="margin-top: 10px;">
-                              <li  class="btn btn-outline-info rounded-pill text-grey p-1  dropdown-toggle  "data-toggle="dropdown"> &nbsp;&nbsp;Convert&nbsp;&nbsp;</li>
-                                <ul class="dropdown-menu" style="background-color: black;">
-                                    <a class="dropdown-item " href="{% url 'm_journal_convert1' sale.id  %}"> &nbsp;Published </a>
-                                    <!-- {% if sale.status != 'Invoice' %}
-                                    <a class="dropdown-item " href="{% url 'sale_convert2' sale.id  %}"> &nbsp;Invoice</a>
-                                    {% endif %} -->
-                                </ul>
-                              
-                            </div>
+    // Create a message to be shared on WhatsApp
+    var message = "Check out the Purchase Order Details:\n" + tableData;
 
+    // Create a link with the WhatsApp API format
+    var whatsappLink = "https://wa.me/?text=" + encodeURIComponent(message);
+
+    // Open the link in a new tab or window
+    window.open(whatsappLink, "_blank");
+    }
+
+    function shareViaGmail() {
+    // Collect data from the table or any other relevant information
+    var tableData = getTableData(); // Implement the function to fetch table data
+
+    // Create email subject and body
+    var emailSubject = "Recurring Bill Details";
+    var emailBody = "Check out the Recurring Bill Details:\n" + tableData;
+
+    // Create a mailto link with subject and body for Gmail
+    var gmailLink = "https://mail.google.com/mail/?view=cm&fs=1&to=&su=" + encodeURIComponent(emailSubject) + "&body=" + encodeURIComponent(emailBody);
+
+    // Open the link in a new tab or window
+    window.open(gmailLink, "_blank");
+}
+</script>
                             
 
                             <li class="nav-item mx-1">
@@ -405,37 +536,65 @@ footer p {
                                 data-comment="{{ inv.comments }}" data-inv-id="{{ inv.id }}">&nbsp;&nbsp;Comment&nbsp;&nbsp;</a>
                           
                             </li>
-
-                            <!-- <div class="dropdown p-0 nav-item mx-1 "  style="margin-top: 10px;">
-                              <li  class=" dropdown-toggle btn btn-outline-info rounded-pill text-grey p-1"data-toggle="dropdown"> &nbsp;&nbsp;Share&nbsp;&nbsp;</li>
-                              <ul class="dropdown-menu" style="background-color: black;">
-      
-                                  <li style="margin-left: 50px;"  ></i>{% post_to_facebook object_or_url "Facebook!" %}</li>
-                                  <li style="margin-left: 50px;" > {% post_to_whatsapp object_or_url "WhatsApp" %}</li>
-                                  <li style="margin-left: 50px;" >{% send_email object.title "New Song: {{object.title}}. Check it out!" object_or_url "Email" %}</li>
-                                  
-                              </ul>
-                            </div>
+                            <div class="dropdown p-0 nav-item mx-1 " style="margin-top: 10px;">
+                                <li  class="btn btn-outline-info rounded-pill text-grey p-1  dropdown-toggle  "data-toggle="dropdown"> &nbsp;&nbsp;Convert&nbsp;&nbsp;</li>
+                                  <ul class="dropdown-menu" style="background-color: black;">
+                                      <a class="dropdown-item " href="{% url 'm_journal_convert1' sale.id  %}"> &nbsp;Published </a>
+                                      <!-- {% if sale.status != 'Invoice' %}
+                                      <a class="dropdown-item " href="{% url 'sale_convert2' sale.id  %}"> &nbsp;Invoice</a>
+                                      {% endif %} -->
+                                  </ul>
+                                
+                              </div>
+                            
   
-                            <div class="dropdown p-0 nav-item mx-1 "  style="margin-top: 10px;">
-                                <li  class=" dropdown-toggle btn btn-outline-info rounded-pill text-grey p-1"data-toggle="dropdown">&nbsp;&nbsp;Attach file&nbsp;&nbsp;</li>
-                                <ul class="dropdown-menu" style="background-color: black;">
-                                    <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal" data-target="#exampleModal">Attach file</a>
-                                    {% if sale.file != "default.jpg" %}
-                                    <a class="dropdown-item fas fa-download" style="cursor: pointer;"download  href="{{ sale.file.url }}" >Download file</a>
-                                    {% endif %}
-                                </ul>
-                            </div> -->
+                          
                         </ul>
                     </div>
                 </nav>
                 
             </div>
         </div>
-        
+        <div class="modal fade" id="shareBillEmail">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content" style="background: #243e54;border-radius: 20px;">
+                <div class="modal-header" style="background: #243e54;">
+                  <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                      aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body" style="background: #243e54;">
+                  <div class="card p-3 m-3">
+                    <form action="{% url 'purchaseOrderDetailsToEmail' %}" method="post" class="needs-validation"
+                      id="share_to_email_form" autocomplete="off">
+                      {% csrf_token %}
+                      <input name="FromD" class="inputdate form-control"  id="date1"  type="date" hidden >
+                      <input name="ToD" class="inputdate form-control"  id="date2" type="date" hidden>
+                      <div class="form-group">
+                        
+                        <label for="emailIds">Email IDs</label>
+                        <textarea class="form-control text-light" name="email_ids" id="emailIds" rows="5"
+                          placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+                      </div>
+                      <div class="form-group mt-2">
+                        <label for="item_unitname">Message(optional)</label>
+                        <textarea name="email_message" id="email_message" class=" form-control text-light" cols=""
+                          rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+                      </div>
+                    
+                  </div>
+                  <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+                    <input type="submit" id="generateAndSendPdf" class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" style="background-color: #0d2b46;padding: 7px 0;" value="SEND MAIL">
+                  </div>
+                </div></form>
 
-        
-        <div  id="whatToPrint" class="print-only">
+              </div>
+            </div>
+          </div> 
+          <div id="templatediv" style=" background-color: #243e54; border-radius: 2vh;" >
+          <div id="detailed-view" style="display:none;">
+            <div id="detailsSection" class="detail-section template1">
+        <div  id="whatToPrint1" class="print-only printTemplates" style="display: none;">
             
                 <div class="my-5 page" size="A4" >
                     <div class="p-5">
@@ -491,7 +650,7 @@ footer p {
                         </section>
             
                         <section class="product-area mt-4">
-                            <table class="table table-hover">
+                            <table class="table table-hover table-info">
                                 <thead>
                                     <tr>
                                         <td style="color:black;font-weight:bold">ACCOUNT</td>
@@ -506,21 +665,22 @@ footer p {
                                     <tr>
                                         <td style="color:black">{{j.account}}</td>
                                         <td style="color:black">{{j.contact}}</td>
-                                        <td style="color:black">{{j.debit}}.00</td>
-                                        <td style="color:black">{{j.credit}}.00 </td>
+                                        <td style="color:black">{{j.debit|default_if_none:"0.00"|floatformat:2}}</td>
+                                        <td style="color:black">{{j.credit|default_if_none:"0.00"|floatformat:2}}</td>
+                                        
                                     
                                     </tr>
                                     {% endfor %}
                                     <tr></tr>
                                     <tr style="width: 100%;margin-top: 1px;color:black; font-weight:bold"  >
                                         <td colspan="2" class="table-head" style="font-size:13px;color:black; font-weight:bold">Sub Total</td>
-                                        <td class="pcs-total-section-value text-align-center" style="color: #000000;">₹{{ sale.s_totaldeb }}.00</td>
-                                        <td class="pcs-total-section-value text-align-right" style="color: #000000;">₹{{ sale.s_totalcre }}.00</td>
+                                        <td class="pcs-total-section-value text-align-center" style="color: #000000;">₹{{ sale.s_totaldeb }}</td>
+                                        <td class="pcs-total-section-value text-align-right" style="color: #000000;">₹{{ sale.s_totalcre }}</td>
                                     </tr>
                                     <tr  style="height:40px;" class="pcs-balance">
                                         <td colspan="2"  style="padding:5px 10px 5px 0;font-size:16px;color:black; font-weight:bold"><b>Total</b></td>
-                                        <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_deb }}.00</b></td>
-                                        <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_cre }}.00</b></td>
+                                        <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_deb }}</b></td>
+                                        <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_cre }}</b></td>
                                     </tr>
 
                                 </tbody>
@@ -615,10 +775,382 @@ footer p {
                         </footer> -->
                     </div>
                 </div>
+                </div>
+                <div  id="whatToPrint2" class="print-only printTemplates" style="display: none;">
+            
+                    <div class="my-5 page" size="A4" >
+                        <div class="p-5">
+                            <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
+                                <div class="ribbon-inner ribbon-open" style="color:black;font-weight:bold">{{sale.status}}</div>
+                            </div>
+                            <!-- <section class="top-content bb d-flex justify-content-between">
+                                <div class="logo">
+                                  
+                                </div>
+                                <div class="top-left">
+                                    <div class="graphic-path">
+                                        <p>Sales Order</p>
+                                    </div>
+                                    <div class="position-relative">
+                                        <p>Sales Order No. <span>{{ sale.saleno }}</span></p>
+                                    </div>
+                                </div>
+                            </section> -->
+                
+                            <section class="store-user mt-5">
+                                <div class="col-12">
+                                    <div class="row bb pb-3">
+                                        <div class="col-7">
+                                            <p>FROM,</p>
+                                            <h5>{{cmp1.cname }}</h5>
+                                            <p class="address "> {{cmp1.caddress}}<br>
+                                                {{cmp1.city}},
+                                                {{cmp1.state}}<br>
+                                                {{cmp1.pincode}}<br>
+                                            </p>
+                                            
+                                        </div>
+                                        <div class="col-5">
+                                            
+                                            <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Journal No :{{ sale.mj_no }}</p>
+                                            <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Date :{{ sale.date }}</p>
+                                            <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Amount :{{ sale.total_deb }}</p>
+                                            <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Reference No :{{ sale.ref_no }}</p>
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="row extra-info pt-3">
+                                        <div class="col-7">
+                                            <p>NOTES : <span>{{sale.notes}}</span></p>
+                                        </div>
+                                        <!-- <div class="col-5">
+                                            <p>Expected Shipment Date : <span>{{sale.shipmentdate | date:'d-m-Y'}}</span></p>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </section>
+                
+                            <section class="product-area mt-4">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <td style="color:black;font-weight:bold">ACCOUNT</td>
+                                            <td style="color:black;font-weight:bold">CONTACT</td>
+                                            <td style="color:black;font-weight:bold">DEBITS</td>
+                                            <td style="color:black;font-weight:bold">CREDITS</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+    
+                                        {% for j in saleitem %}
+                                        <tr>
+                                            <td style="color:black">{{j.account}}</td>
+                                            <td style="color:black">{{j.contact}}</td>
+                                            <td style="color:black">{{j.debit|default_if_none:"0.00"|floatformat:2}}</td>
+<td style="color:black">{{j.credit|default_if_none:"0.00"|floatformat:2}}</td>
 
+                                        
+                                        </tr>
+                                        {% endfor %}
+                                        <tr></tr>
+                                        <tr style="width: 100%;margin-top: 1px;color:black; font-weight:bold"  >
+                                            <td colspan="2" class="table-head" style="font-size:13px;color:black; font-weight:bold">Sub Total</td>
+                                            <td class="pcs-total-section-value text-align-center" style="color: #000000;">₹{{ sale.s_totaldeb }}</td>
+                                            <td class="pcs-total-section-value text-align-right" style="color: #000000;">₹{{ sale.s_totalcre }}</td>
+                                        </tr>
+                                        <tr  style="height:40px;" class="pcs-balance">
+                                            <td colspan="2"  style="padding:5px 10px 5px 0;font-size:16px;color:black; font-weight:bold"><b>Total</b></td>
+                                            <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_deb }}</b></td>
+                                            <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_cre }}</b></td>
+                                        </tr>
+    
+                                    </tbody>
+                                </table>
+                            </section>
+                
+                            <!-- <section class="balance-info">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <p class="m-0 font-weight-bold" style="color:black"> Note: </p>
+                                        <p style="color:black">{{sale.note}}</p>
+                                    </div>
+                                    <div class="col-4">
+                                        <table class="table border-0 table-hover">
+                                            <tr >
+                                                <td style="color:black; font-weight:bold">Sub Total :</td>
+                                                <td style="color:black; font-weight:bold">{{sale.subtotal}}</td>
+                                            </tr>
+                                            <tr class="d-none" >
+                                                <td id="cmp">
+                                                    {{cmp1.state}}
+                                                </td>
+                                                <td id="sply">
+                                                    {{sale.placeofsupply}}
+                                                </td>
+                                            </tr>
+                                            <tr id="igstrow" style="display:none;">
+                                                <td style="color:black;font-weight:bold">IGST</td>
+                                                <td style="color:black; font-weight:bold" id="igst">{{sale.taxamount}}</td>
+                                            </tr>
+                                            <tr id="cgstrow" style="display: none;">
+                                                <td style="color:black; font-weight:bold">CGST</td>
+                                                <td style="color:black; font-weight:bold" id="cgst"></td>
+                                            </tr>
+                                            <tr id="sgstrow" style="display: none;">
+                                                <td style="color:black; font-weight:bold">SGST</td>
+                                                <td style="color:black; font-weight:bold" id="sgst"></td>
+                                            </tr>
+                                       
+                                            <tr>
+                                                <td style="color:black; font-weight:bold">Tax Amount</td>
+                                                <td style="color:black; font-weight:bold">{{sale.taxamount}}</td>
+                                            </tr>
+    
+                                            <tr>
+                                                <td style="color:black; font-weight:bold">Shipping Charge</td>
+                                                <td style="color:black; font-weight:bold">{{sale.shipping_charge}}</td>
+                                            </tr>
+                                            <tfoot>
+                                                <tr>
+                                                    <td style="color:black; font-weight:bold">Sale Total:</td>
+                                                    <td style="color:black; font-weight:bold ;">{{sale.salestotal}}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                
+                                        
+                                    </div>
+                                </div>
+                            </section> -->
+                
+                            <!-- Cart BG -->
+                            <!-- <img src="cart.jpg" class="img-fluid cart-bg" alt=""> -->
+                
+                            <!-- <footer>
+                                <hr>
+                                <p class="m-0 text-center">
+                                    View THis Invoice Online At - <a href="#!"> invoice/saburbd.com/#868 </a>
+                                </p>
+                                <div class="social pt-3">
+                                    <span class="pr-2">
+                                        <i class="fas fa fa-mobile-alt"></i>
+                                        <span>0123456789</span>
+                                    </span>
+                                    <span class="pr-2">
+                                        <i class="fas fa fa-envelope"></i>
+                                        <span>me@saburali.com</span>
+                                    </span>
+                                    <span class="pr-2">
+                                        <i class="fab fa-facebook-f"></i>
+                                        <span>/sabur.7264</span>
+                                    </span>
+                                    <span class="pr-2">
+                                        <i class="fab fa-youtube"></i>
+                                        <span>/abdussabur</span>
+                                    </span>
+                                    <span class="pr-2">
+                                        <i class="fab fa-github"></i>
+                                        <span>/example</span>
+                                    </span>
+                                </div>
+                            </footer> -->
+                        </div>
+                    </div>
+                    </div>
+                    <div  id="whatToPrint3" class="print-only printTemplates" style="display: none;">
+            
+                        <div class="my-5 page" size="A4" style="background-image: linear-gradient(#1b83e8, black); color: white;">
+                            <div class="p-5">
+                                <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
+                                    <div class="ribbon-inner ribbon-open" style="color:black;font-weight:bold">{{sale.status}}</div>
+                                </div>
+                                <!-- <section class="top-content bb d-flex justify-content-between">
+                                    <div class="logo">
+                                      
+                                    </div>
+                                    <div class="top-left">
+                                        <div class="graphic-path">
+                                            <p>Sales Order</p>
+                                        </div>
+                                        <div class="position-relative">
+                                            <p>Sales Order No. <span>{{ sale.saleno }}</span></p>
+                                        </div>
+                                    </div>
+                                </section> -->
+                    
+                                <section class="store-user mt-5">
+                                    <div class="col-12">
+                                        <div class="row bb pb-3">
+                                            <div class="col-7">
+                                                <p>FROM,</p>
+                                                <h5>{{cmp1.cname }}</h5>
+                                                <p class="address "> {{cmp1.caddress}}<br>
+                                                    {{cmp1.city}},
+                                                    {{cmp1.state}}<br>
+                                                    {{cmp1.pincode}}<br>
+                                                </p>
+                                                
+                                            </div>
+                                            <div class="col-5">
+                                                
+                                                <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Journal No :{{ sale.mj_no }}</p>
+                                                <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Date :{{ sale.date }}</p>
+                                                <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Amount :{{ sale.total_deb }}</p>
+                                                <p class="address " style="padding:4px 10px 4px 0px;font-size:12pt;">Reference No :{{ sale.ref_no }}</p>
+                                                
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="row extra-info pt-3">
+                                            <div class="col-7">
+                                                <p>NOTES : <span>{{sale.notes}}</span></p>
+                                            </div>
+                                            <!-- <div class="col-5">
+                                                <p>Expected Shipment Date : <span>{{sale.shipmentdate | date:'d-m-Y'}}</span></p>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                </section>
+                    
+                                <section class="product-area mt-4">
+                                    <table class="table table-hover table-info">
+                                        <thead>
+                                            <tr>
+                                                <td style="color:black;font-weight:bold">ACCOUNT</td>
+                                                <td style="color:black;font-weight:bold">CONTACT</td>
+                                                <td style="color:black;font-weight:bold">DEBITS</td>
+                                                <td style="color:black;font-weight:bold">CREDITS</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+        
+                                            {% for j in saleitem %}
+                                            <tr>
+                                                <td style="color:black">{{j.account}}</td>
+                                                <td style="color:black">{{j.contact}}</td>
+                                                <td style="color:black">{{j.debit|default_if_none:"0.00"|floatformat:2}}</td>
+<td style="color:black">{{j.credit|default_if_none:"0.00"|floatformat:2}}</td>
+
+                                            
+                                            </tr>
+                                            {% endfor %}
+                                            <tr></tr>
+                                            <tr style="width: 100%;margin-top: 1px;color:black; font-weight:bold"  >
+                                                <td colspan="2" class="table-head" style="font-size:13px;color:black; font-weight:bold">Sub Total</td>
+                                                <td class="pcs-total-section-value text-align-center" style="color: #000000;">₹{{ sale.s_totaldeb }}</td>
+                                                <td class="pcs-total-section-value text-align-right" style="color: #000000;">₹{{ sale.s_totalcre }}</td>
+                                            </tr>
+                                            <tr  style="height:40px;" class="pcs-balance">
+                                                <td colspan="2"  style="padding:5px 10px 5px 0;font-size:16px;color:black; font-weight:bold"><b>Total</b></td>
+                                                <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_deb }}</b></td>
+                                                <td style="font-size:16px;color:black; font-weight:bold"><b>₹{{ sale.total_cre }}</b></td>
+                                            </tr>
+        
+                                        </tbody>
+                                    </table>
+                                </section>
+                    
+                                <!-- <section class="balance-info">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <p class="m-0 font-weight-bold" style="color:black"> Note: </p>
+                                            <p style="color:black">{{sale.note}}</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <table class="table border-0 table-hover">
+                                                <tr >
+                                                    <td style="color:black; font-weight:bold">Sub Total :</td>
+                                                    <td style="color:black; font-weight:bold">{{sale.subtotal}}</td>
+                                                </tr>
+                                                <tr class="d-none" >
+                                                    <td id="cmp">
+                                                        {{cmp1.state}}
+                                                    </td>
+                                                    <td id="sply">
+                                                        {{sale.placeofsupply}}
+                                                    </td>
+                                                </tr>
+                                                <tr id="igstrow" style="display:none;">
+                                                    <td style="color:black;font-weight:bold">IGST</td>
+                                                    <td style="color:black; font-weight:bold" id="igst">{{sale.taxamount}}</td>
+                                                </tr>
+                                                <tr id="cgstrow" style="display: none;">
+                                                    <td style="color:black; font-weight:bold">CGST</td>
+                                                    <td style="color:black; font-weight:bold" id="cgst"></td>
+                                                </tr>
+                                                <tr id="sgstrow" style="display: none;">
+                                                    <td style="color:black; font-weight:bold">SGST</td>
+                                                    <td style="color:black; font-weight:bold" id="sgst"></td>
+                                                </tr>
+                                           
+                                                <tr>
+                                                    <td style="color:black; font-weight:bold">Tax Amount</td>
+                                                    <td style="color:black; font-weight:bold">{{sale.taxamount}}</td>
+                                                </tr>
+        
+                                                <tr>
+                                                    <td style="color:black; font-weight:bold">Shipping Charge</td>
+                                                    <td style="color:black; font-weight:bold">{{sale.shipping_charge}}</td>
+                                                </tr>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td style="color:black; font-weight:bold">Sale Total:</td>
+                                                        <td style="color:black; font-weight:bold ;">{{sale.salestotal}}</td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                    
+                                            
+                                        </div>
+                                    </div>
+                                </section> -->
+                    
+                                <!-- Cart BG -->
+                                <!-- <img src="cart.jpg" class="img-fluid cart-bg" alt=""> -->
+                    
+                                <!-- <footer>
+                                    <hr>
+                                    <p class="m-0 text-center">
+                                        View THis Invoice Online At - <a href="#!"> invoice/saburbd.com/#868 </a>
+                                    </p>
+                                    <div class="social pt-3">
+                                        <span class="pr-2">
+                                            <i class="fas fa fa-mobile-alt"></i>
+                                            <span>0123456789</span>
+                                        </span>
+                                        <span class="pr-2">
+                                            <i class="fas fa fa-envelope"></i>
+                                            <span>me@saburali.com</span>
+                                        </span>
+                                        <span class="pr-2">
+                                            <i class="fab fa-facebook-f"></i>
+                                            <span>/sabur.7264</span>
+                                        </span>
+                                        <span class="pr-2">
+                                            <i class="fab fa-youtube"></i>
+                                            <span>/abdussabur</span>
+                                        </span>
+                                        <span class="pr-2">
+                                            <i class="fab fa-github"></i>
+                                            <span>/example</span>
+                                        </span>
+                                    </div>
+                                </footer> -->
+                            </div>
+                        </div>
+            
             </div>
             
-        
+        </div>
+        <div style="text-align: center;">
+            <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint1','toggleTemplate1')" class="btn btn-outline-light btn-sm m-2 active templateToggleButtons">Template 1</button>
+            <button id="toggleTemplate2" onclick="toggleTemplate('whatToPrint2','toggleTemplate2')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">Template 2</button>
+            <button id="toggleTemplate3" onclick="toggleTemplate('whatToPrint3','toggleTemplate3')" class="btn btn-outline-light btn-sm m-2 templateToggleButtons">Template 3</button>
+        </div> 
+    </div>
+    
+    </div>
             </div>
 <!-- 
             <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -714,9 +1246,9 @@ aria-hidden="true">
 <!-- modal end -->
             
 
-            <li class="nav-item mx-1">
+            <!-- <li class="nav-item mx-1">
                 <a href="#" class="btn btn-outline-info rounded-pill text-grey p-1" data-toggle="modal" data-target="#commentModal" data-comment="" data-inv-id="">&nbsp;&nbsp;Comment&nbsp;&nbsp;</a>
-            </li>
+            </li> -->
 
             
             
@@ -788,7 +1320,188 @@ aria-hidden="true">
             }
         });
     </script> 
+<script>
+    document.getElementById('show-overview').addEventListener('click', function() {
+        document.getElementById('overview-section').style.display = 'block';
+        document.getElementById('detailed-view').style.display = 'none';
+    });
 
+    document.getElementById('show-details').addEventListener('click', function() {
+        document.getElementById('overview-section').style.display = 'none';
+        document.getElementById('detailed-view').style.display = 'block';
+    });
+</script>
+<div id="overview-section" style="padding: 20px;  border-radius: 10px; margin: 20px 0; color: #1c72b4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div id="details">
+        <div class="row g-0" style="margin-left: 1px; margin-right: 1px;">
+            <div class="col-lg-8" style="background-color: #243e54; border-top-left-radius: 2vh; border-bottom-left-radius: 2vh;">
+                <div class="p-5">
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-4 mt-3">
+                            <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Company Details</h5>
+                        </div>
+                        <div class="col-md-4 mt-3"></div>
+                        <div class="col-md-4 mt-3"></div>
+
+                        <div class="col-md-2 mt-3">
+                            <h6 class="mb-0">Company</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.cname}}</p>
+                        </div>
+                        <div class="col-md-2 mt-3 vl">
+                            <h6 class="mb-0">Email</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.cemail }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-2 mt-3">
+                            <h6 class="mb-0">Mobile</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.phone }}</p>
+                        </div>
+                        <div class="col-md-2 mt-3 vl">
+                            <h6 class="mb-0">Address</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.caddress }} <br>
+                                {{cmp1.city}},
+                                {{cmp1.state}}
+                                {{cmp1.pincode}}</p>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-4 mt-3">
+                            <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Journal Details</h5>
+                        </div>
+                        <div class="col-md-4 mt-3"></div>
+                        <div class="col-md-4 mt-3"></div>
+
+                        <div class="col-md-3 mt-3">
+                            <h6 class="mb-0">Journal #</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ sale.mj_no }}</p>
+                        </div>
+
+                        <div class="col-md-3 mt-3 vl">
+                            <h6 class="mb-0">Date</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ sale.date }}</p>
+                        </div>
+                        
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-3 mt-3">
+                            <h6 class="mb-0">Reference #</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ sale.ref_no }}</p>
+                        </div>
+
+                        <div class="col-md-3 mt-3 vl">
+                            <h6 class="mb-0">Notes</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ sale.notes }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-start align-items-center">
+                        <div class="col-md-3 mt-3"> 
+                            <h6 class="mb-0">Currency</h6>
+                        </div>
+                        <div class="col-md-3 mt-3 vr">
+                            <p class="mb-0">{{ sale.currency }}</p>
+                        </div>
+                        <div class="col-md-6 mt-3 vl">
+                            <h6 class="mb-0">&nbsp;</h6>
+                        </div>
+                    </div>
+                    <hr>
+                   
+                </div>
+            </div>
+            <div class="col-md-4" style="background-color: rgba(22,37,50,255); border-top-right-radius:2vh; border-bottom-right-radius: 2vh;">
+                <div class="p-5">
+                    <h3 class="fw-bold mb-3 mt-2 pt-1">DEBIT/CREDIT</h3>
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Bill status</h5>
+                        <h6>{{ sale.status }}</h6>
+                    </div>
+                    <hr class="my-4" style="background-color: #fff;">
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Debit Amount</h5>
+                        <h6>{{ sale.total_deb }}</h6>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Credit Amount</h5>
+                        <h6>{{ sale.total_cre }}</h6>
+                    </div>
+                    {%if sale.IGST != '0' %}
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Total Debit</h5>
+                        <h6>{{ sale.s_totaldeb }}</h6>
+                    </div>
+                    {%endif%}
+                    {%if sale.CGST != '0.00' %}
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Total Credit</h5>
+                        <h6>{{ sale.s_totalcre }}</h6>
+                    </div>
+                    {%endif%}
+                    {%if sale.SGST != '0.00' %}
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Difference</h5>
+                        <h6>{{ sale.difference }}</h6>
+                    </div>
+                    {%endif%}
+                    <!-- <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Contact</h5>
+                        <h6></h6>
+                    </div> -->
+                    {% if sale.adjust %}
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="">Adjustment</h5>
+                        <h6>{{sale.adjust }}</h6>
+                    </div>
+                    {% endif %}
+                    <hr class="my-4" style="background-color: #fff;">
+                    <div class="d-flex justify-content-between mb-4">
+                        <!-- <h5 class="">Comments</h5>
+                        <h6>{{ sale.comments }}</h6> -->
+                    </div><br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleTemplate(templateId, buttonId){
+        // Hide all templates
+        var templates = document.getElementsByClassName('printTemplates');
+        for(var i = 0; i < templates.length; i++) {
+            templates[i].style.display = 'none';
+        }
+
+        // Show the selected template
+        document.getElementById(templateId).style.display = 'block';
+
+        // Update button appearance
+        var buttons = document.getElementsByClassName('templateToggleButtons');
+        for(var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('active');
+        }
+        document.getElementById(buttonId).classList.add('active');
+    }
+
+    // Initialize with the first template visible
+    toggleTemplate('whatToPrint1','toggleTemplate1');
+</script>
 
 
     {% endif %}

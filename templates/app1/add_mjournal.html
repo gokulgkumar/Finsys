@@ -102,11 +102,13 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
-                                                <label class="col-form-label">Journal no * </label>
-                                                <input type="text" class="form-control"   id="jno" name="jnum"  required> </div>
+                                                <label class="col-form-label">Journal no * </label><span class="text-danger mt-1 ml-3" id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This Number Should be Continous <span class="text-white">)</span></span>
+                                                <input type="text" class="form-control"   id="jno" name="jnum" placeholder="{{j_no}}" required> </div>
+                                               
+                                    
                                             <div class="col-md-3">
                                                 <label class="col-form-label">Reference no  </label>
-                                                <input type="text" class="form-control"  id="rjno" name="rjnum">
+                                                <input type="text" class="form-control"  id="rjno" value="{{ref_no}}" name="rjnum">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -135,10 +137,10 @@
                                         <div class="row">
                                             <div class="col-md-4" >
                             
-                                                <label class="col-form-label">Journal Type </label>
+                                                <!-- <label class="col-form-label">Journal Type </label>
                                                 <input style="margin-left:90px;" type="checkbox" 
                                                        name="jtype" id="jtype" value="Cash based journal">
-                                                       <label for="jtype" class="col-form-label">Cash based journal</label>
+                                                       <label for="jtype" class="col-form-label">Cash based journal</label> -->
                                             </div>
                                     </div><br>
                                         <div class="row">
@@ -329,10 +331,10 @@
                                     </div>
                                     <div class="row mt-5 mb-5">
                                         <div class="col-md-4">
-                                            <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light"
+                                            <!-- <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light"
                                             >
                                             BACK
-                                         </a>
+                                         </a> -->
                                         </div>
 
                                         <div class="" style="margin-bottom: 20rem;">
@@ -400,8 +402,29 @@
                                                     <label for="acctyp">Account Type</label>
                                                     <select name="acctype" id="select1" class="custom-select-md form-control w-100">
     
-                                                        <option>Expenses</option>
-                                                        <option>Other Expenses</option>
+                                                        <optgroup label="Assets" style="background-color: rgb(114, 114, 244);">Assets</optgroup>
+                                                        <option style="padding-left:15px" value="Other Asset"> Other Asset </option>
+                                                        <option style="padding-left:15px" value="Other Current Asset"> Other Current Asset </option>
+                                                        <option style="padding-left:15px" value="Cash"> Cash </option>
+                                                        <option style="padding-left:15px" value="Bank"> Bank </option>
+                                                        <option style="padding-left:15px" value="Fixed Asset"> Fixed Asset </option>
+                                                        <option style="padding-left:15px" value="Stock"> Stock</option>
+                                                        <option style="padding-left:15px" value="Payment Clearing"> Payment Clearing</option>
+                                                        <optgroup label="Liability" style="background-color: rgb(114, 114, 244);">Liability</optgroup>
+                                                        <option style="padding-left:30px" value="Other Current Liability">Other Current Liability </option>
+                                                        <option style="padding-left:15px" value="Credit Card"> Credit Card </option>
+                                                        <option style="padding-left:15px" value="Long Term Liability"> Long Term Liability </option>
+                                                        <option style="padding-left:15px" value="Other Liability"> Other Liability </option>
+                                                        <option style="padding-left:15px" value="Overseas Tax Payable"> Overseas Tax Payable </option>
+                                                        <optgroup label="Equity" style="background-color: rgb(114, 114, 244);">Equity</optgroup>
+                                                        <option style="padding-left:15px" value="Equity"> Equity </option>
+                                                        <optgroup label="Income" style="background-color: rgb(114, 114, 244);">Income</optgroup>
+                                                        <option style="padding-left:15px" value="Income"> Income </option>
+                                                        <option style="padding-left:15px" value="Other Income"> Other Income </option>
+                                                        <optgroup label="Expense"style="background-color: rgb(114, 114, 244);">Expense</optgroup>
+                                                        <option style="padding-left:15px" value="Expense"> Expense </option>
+                                                        <option style="padding-left:15px" value="Cost Of Goods Sold"> Cost Of Goods Sold </option>
+                                                        <option style="padding-left:15px" value="Other Expense"> Other Expense </option>
     
                                                     </select>
                                                 </div>
@@ -426,8 +449,10 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6 mt-2">
+                                                    <!-- <textarea class="form-control mt-2" name="Type details" cols="20"
+                                                    rows="10" style="font-size: small;" disabled>Use Cash and Cash Equivalents to track cash or assets that can be converted into cash immediately. For example, marketable securities and Treasury bills.</textarea> -->
                                                     <textarea class="form-control mt-2" name="Type details" cols="20"
-                                                    rows="10" style="font-size: small;" disabled>Use Cash and Cash Equivalents to track cash or assets that can be converted into cash immediately. For example, marketable securities and Treasury bills.</textarea>
+                                                    rows="10" style="font-size: small;" disabled>Track special assets like goodwill and other intangible assets</textarea>
                                                 </div>
                                                 <div class="col-md-6 mt-2">
                                                     <div class="mt-2">
@@ -470,41 +495,47 @@
             $('#date').val(new Date().toJSON().slice(0,10));
         </script>
 
-        <script>
-            var item_row_counter = 1
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var item_row_counter = 1;
 
-            function add_item_row() {
-                old_item_row_count = item_row_counter
-                item_row_counter++;
+        // Function to update row numbering
+        function updateRowNumbers() {
+            var rowCount = 1;
+            $("#items-table-body tr").each(function() {
+                $(this).find("td:first").text(rowCount);
+                rowCount++;
+            });
+            item_row_counter = rowCount - 1;
+        }
 
-                $('#items-table-body >tr:last').clone(true).insertAfter('#items-table-body >tr:last');
-                $('#items-table-body >tr:last input').val('');
+        // Add new item row
+        function add_item_row() {
+            var lastRow = $('#items-table-body > tr:last');
+            lastRow.clone(true).insertAfter(lastRow);
+            $('#items-table-body > tr:last input').val('');
+            updateRowNumbers();
+        }
 
-                $('#items-table-body >tr:last td')[0].innerHTML = item_row_counter
-                update_amounts($('#items-table-body input[name=jcredit2]:last'));
-            }
+        // Bind the add row function to the "Add Row" button
+        $("#addrow").off('click').on('click', function(e) {
+            e.preventDefault();
+            add_item_row();
+        });
 
-            function setup_rows() {
-                $("#addrow").click(function(event) {
-                event.preventDefault();
-                add_item_row();
-                });
-
-                for (var i = 0; i <= 4; i++) {
-                    add_item_row();
+        // Delete selected row and update numbering
+        $(".delete-row").click(function() {
+            $("table tbody").find('input[name="record"]').each(function() {
+                if ($(this).is(":checked")) {
+                    $(this).closest("tr").remove();
                 }
-            }
+            });
+            updateRowNumbers();
+        });
+    });
+</script>
 
-            $(document).ready(function(){
-                $(".delete-row").click(function(){
-                    $("table tbody").find('input[name="record"]').each(function(){
-            	        if($(this).is(":checked")){
-                            $(this).parents("tr").remove();
-                        }
-                    });
-                });
-            });   
-        </script>
 
         <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
         <script>
@@ -615,7 +646,27 @@
             
             
         </script>
-
+        
+<script type="text/javascript">
+    $(document).on('change','#j_no', function() {
+        inv = '{{j_no}}'
+        inv_value = $('#j_no').val();
+        if(inv_value != inv){
+            document.getElementById('dangerdiv').style.display = 'block';
+        }else{
+            document.getElementById('dangerdiv').style.display = 'none';
+        }
+        var inv_list = "{{ inv_list}}";
+        invlist = inv_list.split(",");
+        for(let i=0; i<invlist.length; i++){
+            if (inv_value == invlist[i]){
+                alert('Invoice Number Number already in use.')
+                document.getElementById('dangerdiv').style.display = 'none';
+                document.getElementById('j_no').value = ''
+            }
+        }
+    })
+</script>
         <!-- <script>
             // Initialize Select2 on your select element
             $(document).ready(function () {

@@ -56,7 +56,11 @@ from django.db.models import Max
 from itertools import zip_longest
 from .models import company, purchasepayment, purchasepayment1, purchasebill, vendor, vendor_statment, balance_sheet
 import base64
-from django.core.files.base import ContentFile      
+from django.core.files.base import ContentFile   
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.exceptions import ObjectDoesNotExist
 
 def index(request):
     return render(request, 'app1/index.html')
@@ -719,7 +723,6 @@ def godash(request):
         cmp1 = company.objects.get(id=request.session['uid'])
     except:
         return redirect('/')
-
     try:
 
         cmp1 = company.objects.get(id=request.session['uid'])
@@ -786,8 +789,6 @@ def godash(request):
                 data_2.append(bal.balance)
                 inc += bal.balance
 
-
-
         invoice1 = invoice.objects.order_by('baldue')
         for inv in invoice1:
             if (inv.cid == cmp1 and inv.baldue != 0):
@@ -805,14 +806,36 @@ def godash(request):
         for pay in payment1:
             if (pay.cid == cmp1 and pay.amtreceived != 0):
                 p += float(pay.amtreceived)
-
+        
+        userId=company.objects.get(id=request.session["uid"])
+        if not PaymentTerms.objects.filter(term='NET 30',cid=userId).exists():
+            PaymentTerms(term='NET 30',cid=userId ,days = 30).save()
+        if not PaymentTerms.objects.filter(term='NET 60',cid=userId).exists():
+            PaymentTerms(term='NET 60',cid=userId,days = 60).save()
+        if not PaymentTerms.objects.filter(term='Due on Receipt',cid=userId).exists():
+            PaymentTerms(term='Due on Receipt',cid=userId).save()
 
         context = {'cmp1': cmp1,'label_1':label_1,'data_1':data_1,'label_2':label_2,'data_2':data_2,'label_3':label_3,'data_3':data_3,'balance':balance,'balance1':balance1,'exp':exp,'inc':inc,'invoice1':invoice1,'invoice2':invoice2,'up':up,'p':p,'s':s}
         return render(request, 'app1/dashbord.html', context)
     except:
         return redirect('/')
 
+@login_required(login_url='regcomp')
+def payment_term_for_cust(request):
+    user=company.objects.get(id=request.session["uid"])
 
+    if request.method == 'POST':
+        terms = json.loads(request.POST.get('terms', '[]'))
+        days = json.loads(request.POST.get('days', '[]'))
+        pay_term=terms[0]
+        if len(terms) == len(days):
+            for term, day in zip(terms, days):
+                
+                created = PaymentTerms.objects.get_or_create(term=term, days=day,cid=user)
+            payment=PaymentTerms.objects.filter(cid=request.session["uid"]).last()
+            pay_id = payment.id
+
+            return JsonResponse({"message": "success","pay_term":pay_term,"pay_id":pay_id})
 
 def logout(request):
     request.session["uid"] = ""
@@ -1038,21 +1061,25 @@ def customers(request):
                             f"Customer {firstname} {lastname} already exists. Please provide a different name.")
             return redirect('gocustomers')
         else:
+            if request.POST['p_list'] == "":
+                p_list = None
+            else:
+                p_list = request.POST['p_list']
             toda = date.today()
             tod = toda.strftime("%Y-%m-%d")
             customer1 = customer(title=request.POST['title'], firstname=request.POST['firstname'],
                                     lastname=request.POST['lastname'], company=request.POST['company'],
-                                    location=request.POST['location'], gsttype=request.POST['gsttype'],
+                                    location=request.POST['location'],placesupply = request.POST['placeof_supply'], gsttype=request.POST['gsttype'],
                                     gstin=request.POST['gstin'], panno=request.POST['panno'],
-                                    email=request.POST['email'],
+                                    email=request.POST['email'],price_list = p_list,
                                     website=request.POST['website'], mobile=request.POST['mobile'],
                                     street=request.POST['street'], city=request.POST['city'],
-                                    state=request.POST['state'],
+                                    state=request.POST['state'],pay_method=request.POST['pay_term'],
                                     pincode=request.POST['pincode'], country=request.POST['country'],
                                     shipstreet=request.POST['shipstreet'], shipcity=request.POST['shipcity'],
                                     shipstate=request.POST['shipstate'],
                                     shippincode=request.POST['shippincode'], shipcountry=request.POST['shipcountry'],
-                                    cid=cmp1,placesupply = request.POST['placeof_supply'])
+                                    cid=cmp1)
 
             customer1.save()
             
@@ -1099,7 +1126,10 @@ def editcustomer(request, id):
     try:
         cmp1 = company.objects.get(id=request.session["uid"])
         custo = customer.objects.get(customerid=id, cid=cmp1)
-        context = {'customer': custo, 'cmp1': cmp1}
+        p_list = Pricelist.objects.filter(id = custo.price_list)
+        pay_terms = PaymentTerms.objects.filter(cid=request.session["uid"])
+        price_list = Pricelist.objects.filter(cid=request.session["uid"])
+        context = {'customer': custo, 'cmp1': cmp1, 'pay_terms':pay_terms, 'price_list':price_list, 'p_list':p_list}
         return render(request, 'app1/editcustomer.html', context)
     except:
         return redirect('gocustomers')
@@ -1118,6 +1148,12 @@ def updatecustomer(request, id):
     if 'gstin' in request.POST :
         custom.gstin = request.POST['gstin']
 
+    custom.placesupply = request.POST['placeof_supply']
+    custom.pay_method = request.POST['pay_term']
+    if request.POST['p_list'] == "":
+        custom.price_list = None
+    else:
+        custom.price_list = request.POST['p_list']
     custom.panno = request.POST['panno']
     custom.email = request.POST['email']
     custom.website = request.POST['website']
@@ -1386,10 +1422,12 @@ def goprintinvoice(request):
 def goaddcust(request):
     try:
         cmp1 = company.objects.get(id=request.session["uid"])
-        context = {'cmp1': cmp1}
+        pay_terms = PaymentTerms.objects.filter(cid=request.session["uid"])
+        price_list = Pricelist.objects.filter(cid = request.session["uid"])
+        context = {'cmp1': cmp1,'price_list':price_list,'pay_terms':pay_terms}
         return render(request, 'app1/addcust.html', context)
     except:
-        return redirect('godash')
+       return redirect('godash')
 
 
 @login_required(login_url='regcomp')
@@ -9977,35 +10015,18 @@ def suppacttime(request):
 def getdata(request):
     cmp1 = company.objects.get(id=request.session['uid'])
     id = request.GET.get('id')
-    x = id.split()
-    x.append(" ")
-    a = x[0]
-    b = x[1]
-    if x[2] is not None:
-        b = x[1] + " " + x[2]
-        custobject = customer.objects.get(firstname=a, lastname=b, cid=cmp1)
-        list = []
-        dict = {'customerid': custobject.customerid, 'title': custobject.title, 'firstname': custobject.firstname,
-                'lastname': custobject.lastname, 'company': custobject.company, 'location': custobject.location,
-                'gsttype': custobject.gsttype,
-                'gstin': custobject.gstin, 'panno': custobject.panno, 'email': custobject.email,
-                'website': custobject.website,
-                'mobile': custobject.mobile, 'street': custobject.street, 'city': custobject.city,
-                'state': custobject.state,
-                'pincode': custobject.pincode, 'country': custobject.country}
-        list.append(dict)
-    else:
-        custobject = customer.objects.get(firstname=a, lastname=b, cid=cmp1)
-        list = []
-        dict = {'customerid': custobject.customerid, 'title': custobject.title, 'firstname': custobject.firstname,
-                'lastname': custobject.lastname, 'company': custobject.company, 'location': custobject.location,
-                'gsttype': custobject.gsttype,
-                'gstin': custobject.gstin, 'panno': custobject.panno, 'email': custobject.email,
-                'website': custobject.website,
-                'mobile': custobject.mobile, 'street': custobject.street, 'city': custobject.city,
-                'state': custobject.state,
-                'pincode': custobject.pincode, 'country': custobject.country}
-        list.append(dict)
+   
+    custobject = customer.objects.get(customerid = id, cid=cmp1)
+    list = []
+    dict = {'customerid': custobject.customerid, 'title': custobject.title, 'firstname': custobject.firstname,
+            'lastname': custobject.lastname, 'company': custobject.company, 'location': custobject.location,
+            'gsttype': custobject.gsttype,'placeofsupply': custobject.placesupply,
+            'gstin': custobject.gstin, 'panno': custobject.panno, 'email': custobject.email,
+            'website': custobject.website,
+            'mobile': custobject.mobile, 'street': custobject.street, 'city': custobject.city,
+            'state': custobject.state,
+            'pincode': custobject.pincode, 'country': custobject.country}
+    list.append(dict)
     return JsonResponse(json.dumps(list), content_type="application/json", safe=False)
 
 
@@ -26662,6 +26683,11 @@ def gstverification(request):
 def customer_profile(request,id):
     cmp1 = company.objects.get(id=request.session["uid"])
     custo = customer.objects.get(customerid=id, cid=cmp1)
+    p_list = custo.price_list
+    if p_list is not None:
+        pp_list = Pricelist.objects.get(id = p_list)
+    else:
+        pp_list = '0'
     fn =custo.firstname
     ln = custo.lastname
     su = fn+ ' ' +ln
@@ -26685,15 +26711,12 @@ def customer_profile(request,id):
         if j.Payments:
             prepayment += j.Payments
     
-
     prebalance = preamount-prepayment
-
 
     statment = cust_statment.objects.filter(customer=su,Date=tod)
     bal=0
     if prebalance !=0:
         bal=prebalance
-
 
     for i in statment:
         if i.Transactions =="Invoice" or "Customer Opening Balance":
@@ -26703,7 +26726,6 @@ def customer_profile(request,id):
         if i.Transactions =="Payment Received":
             i.Balance = bal-i.Payments
             
-
         i.save() 
          
     invoiced=0
@@ -26737,7 +26759,7 @@ def customer_profile(request,id):
     payme = payment.objects.filter(cid=cmp1,customer=su).all()  
     ret_inv = RetainerInvoices.objects.filter(cid=cmp1,customer=su).all()
     deli = challan.objects.filter(cid=cmp1,customer=id).all()
-    recc_inv = recinvoice.objects.filter(cid=cmp1,customername=su).all()
+    recc_inv = recinvoice.objects.filter(cid=cmp1,customername=str(id)+ " " +su).all()
     mjour = mjournal1.objects.filter(cid=cmp1,contact=su).all()
     context = {'customer': custo,
                 'cmp1': cmp1,
@@ -26762,7 +26784,8 @@ def customer_profile(request,id):
                 'ret_inv':ret_inv,
                 'deli':deli,
                 'recc_inv':recc_inv,
-                'mjour':mjour
+                'mjour':mjour,
+                'pp_list':pp_list
             }
     return render(request, 'app1/customer_view.html', context)
 
@@ -30660,20 +30683,17 @@ def getitems2(request):
     cmp1 = company.objects.get(id=request.session["uid"])
     id = request.GET.get('id')
 
-    item = itemtable.objects.get(name=id,cid=cmp1)
-    
+    item = itemtable.objects.get(id=id,cid=cmp1)
+    itemid = item.id
+    name = item.name
     hsn = item.hsn
     desp = item.sale_desc
     qty = item.stock
-    price = item.sales_cost
+    price = item.purchase_cost
     gst = item.intra_st
     sgst = item.inter_st
-    stock = item.stock
 
-    
-    return JsonResponse({"status":" not",'hsn':hsn,'desp':desp,'qty':qty,'price':price,'gst':gst,'sgst':sgst,'stock':stock,
-        
-        })
+    return JsonResponse({"status":" not",'hsn':hsn,'desp':desp,'qty':qty,'price':price,'gst':gst,'sgst':sgst, 'name':name, 'itemid':itemid})
 
 #----------------------------------------------------------------------------------------
 @login_required(login_url='regcomp')
@@ -31479,14 +31499,75 @@ def add_mjournal(request):
         vndr = vendor.objects.filter(cid=cmp1)
         employee=payrollemployee.objects.filter(cid_id=cmp1)
         
-        context = {'acc':acc,'cmp1':cmp1,'cust':cust,'vndr':vndr,'employee':employee}
+
+        ref = mjournal.objects.last()
+
+        if ref:
+            ref_no = int(ref.ref_no) + 1
+            j_no = 1000+ref_no
+
+        else:
+            ref_no = 1
+            j_no = 1000
+
+        sel = mjournal.objects.filter(cid=cmp1).last()
+        if sel:
+            j_no = str(sel.mj_no)
+            numbers = []
+            stri = []
+            for word in j_no:
+                if word.isdigit():
+                    numbers.append(word)
+                else:
+                    stri.append(word)
+            
+            num=''
+            for i in numbers:
+                num +=i
+            
+            st = ''
+            for j in stri:
+                st = st+j
+
+            j_no = int(num)+1
+
+            if num[0] == '0':
+                if j_no <10:
+                    j_no = st+'0'+ str(j_no)
+                else:
+                    j_no = st+ str(j_no)
+            else:
+                j_no = st+ str(j_no)
+
+        inv_list = ''
+        inv_ord = mjournal.objects.all()
+        for s in inv_ord:
+            inv_list = s.mj_no+ ',' + inv_list
+
+        context = {'acc':acc,'cmp1':cmp1,'cust':cust,'vndr':vndr,'employee':employee,'ref_no':ref_no, 'j_no':j_no,'ref':ref,'sel':sel,'inv_ord':inv_ord,'inv_list':inv_list,}
         return render(request,'app1/add_mjournal.html',context)   
         
 
     except:
-        return redirect('gomjoural')       
+        return redirect('gomjoural')   
 
+def journal_details(request):
+    cmp1 = company.objects.get(id=request.user)
+    details = mjournal1.objects.all()
+    # defaultCount = purchaseorder.objects.filter(cid_id = request.user.id).count()
+    defaultAmount = 0
+    for i in details:
+        credit = float(i.credit) if i.credit is not None else 0
+        defaultAmount += credit
 
+    defaultAmountb = 0
+    for i in details:
+        debit = float(i.debit) if i.debit is not None else 0
+        defaultAmountb += debit
+
+    # return render(request,'app1/journal_details.html',{'details':details,'cmp1':cmp1,'defaultCount':defaultCount})
+    return render(request,'app1/journal_details.html',{'details':details,'cmp1':cmp1,'defaultAmount':defaultAmount,'defaultAmountb':defaultAmountb})
+    
 @login_required(login_url='regcomp')
 def create_mjournal(request):
     if 'uid' in request.session:
@@ -31529,8 +31610,12 @@ def create_mjournal(request):
                 acc = request.POST.getlist('account[]')
                 desc = request.POST.getlist('jdesc[]')
                 cont = request.POST.getlist('jcontact[]')
-                deb = request.POST.getlist('jdebit[]')
-                cred = request.POST.getlist('jcredit[]')
+                deb_raw = request.POST.getlist('jdebit[]')
+                cred_raw = request.POST.getlist('jcredit[]')
+
+                # Convert empty strings in 'cred_raw' to None (or 0.0 if that's preferred)
+                cred = [None if x == '' else float(x) for x in cred_raw]
+                deb = [None if x == '' else float(x) for x in deb_raw]
                 
                 mj=mjournal.objects.get(id=mjrnl1.id)
 
@@ -36223,7 +36308,8 @@ def getbilldata(request):
             b += " " + x[2]
 
         venobject = vendor.objects.values().filter(firstname=a, lastname=b, cid=cmp1)
-        purchase_bills = purchasebill.objects.values().filter(vendor_name=vendor_name, cid=cmp1, status='Billed')
+        purchase_bills = purchasebill.objects.values().filter(vendor_name=vendor_name, cid=cmp1)
+        
 
         venopenbl = vendor.objects.get(firstname=a, lastname=b, cid=cmp1)
 
@@ -36281,7 +36367,7 @@ def addpurchasepymnt(request):
         latest_pymntid = request.session.get('latest_pymntid', max_pymntid or 1)
 
         # Calculate the ref_no dynamically
-        ref_no = latest_pymntid + 1
+        ref_no = latest_pymntid
 
         context = {
             'cmp1': cmp1,
@@ -36915,10 +37001,11 @@ def addpurchasedebit(request):
 
         sel = purchasedebit.objects.filter(cid=cmp1).last()
         deb_no = ''
-        print(sel,'select')
+        print(deb_no,'deb_no')
+
         if sel:
             deb_no = str(sel.debit_no)
-            print(deb_no,'number')
+            print(deb_no, 'number')
             numbers = []
             stri = []
             for word in deb_no:
@@ -36926,37 +37013,31 @@ def addpurchasedebit(request):
                     numbers.append(word)
                 else:
                     stri.append(word)
-            
-            num=''
-            for i in numbers:
-                num +=i
-            
-            st = ''
-            for j in stri:
-                st = st+j
-            
-            deb_no = ''
 
-            deb_no = int(num)+1
+            num = ''.join(numbers)
+            st = ''.join(stri)
 
-            if num[0] == '0':
-                if deb_no <10:
-                    deb_no = st+'0'+ str(deb_no)
+            if num:
+                deb_no = int(num) + 1
+
+                if num[0] == '0':
+                    if deb_no < 10:
+                        deb_no = st + '0' + str(deb_no)
+                    else:
+                        deb_no = st + str(deb_no)
                 else:
-                    deb_no = st+ str(deb_no)
-            else:
-                deb_no = st+ str(deb_no)
+                    deb_no = st + str(deb_no)
 
+        print(deb_no, 'deb_no')
         debit_list = ''
         purdebit = purchasedebit.objects.all()
         for s in purdebit:
             debit_list = s.debit_no+ ',' + debit_list
-        
 
-
+    
         context = {'cmp1': cmp1,'vndr':vndr,'item':item,'unit':unit,'pbill':pbill,'acc1':acc1,'acc2':acc2,'rbill':rbill,'bank':bank,'deb_no':deb_no,'purdebit':purdebit} 
         return render(request,'app1/addpurchasedebit.html',context)
-    return redirect('gopurchasedebit') 
+    return redirect('gopurchasedebit')  
 
 def createpurchasedebit(request):
     if 'uid' in request.session:
@@ -37340,7 +37421,7 @@ def goeditpurchasedebit(request,id):
                     'acc1':acc1,
                     'acc2':acc2   
                 }
-        return render(request,'app1/editpurchasedebit2.html',context)
+        return render(request,'app1/editpurchasedebit.html',context)
     return redirect('/')
 
 def editpurchasedebit(request,id):
@@ -37353,7 +37434,6 @@ def editpurchasedebit(request,id):
         if request.method == 'POST':
             pdebt=purchasedebit.objects.get(pdebitid=id)
             pdebt.vendor = request.POST['vendor']
-            print(request.POST['vendor'],'gfgdfgdfgfdgd')
             pdebt.address = request.POST['address']
             pdebt.debit_no= request.POST['debit_no']
             pdebt.supply=request.POST['supply']
@@ -40456,8 +40536,25 @@ def goadd_dl_challan(request):
             if latest_bill:
                 last_number = int(latest_bill.ref)
                 new_number = last_number + 1
+                last_billno = latest_bill.chal_no
+                last_two_numbers = int(last_billno[-2:])+1
+                remaining_characters = last_billno[:-2]
+                if remaining_characters == '':
+                    if last_two_numbers < 10:
+                        cbillno = '0'+str(last_two_numbers)
+                    else:
+                        cbillno = str(last_two_numbers)
+                else: 
+                    if last_two_numbers < 10:
+                        cbillno = remaining_characters+'0'+str(last_two_numbers)
+                    else:
+                        cbillno = remaining_characters+str(last_two_numbers) 
+
             else:
                 new_number = 1
+                cbillno = '01'
+                remaining_characters=''
+
 
             if DeletedChallan.objects.filter(cid = cmp1).exists():
                 deleted = DeletedChallan.objects.get(cid = cmp1)
@@ -40466,7 +40563,9 @@ def goadd_dl_challan(request):
                     while int(deleted.ref) >= new_number:
                         new_number+=1
         
-            customers = customer.objects.all()
+            customers = customer.objects.filter(cid = cmp1,status = 'Active')
+            pay_terms = PaymentTerms.objects.filter(cid=request.session["uid"])
+            price_list = Pricelist.objects.filter(cid=request.session["uid"])
             toda = date.today()
             tod = toda.strftime("%Y-%m-%d")
             inv = inventory.objects.filter(cid=cmp1)
@@ -40479,32 +40578,63 @@ def goadd_dl_challan(request):
             acc  = accounts1.objects.filter(acctype='Cost of Goods Sold',cid=cmp1)
             acc1  = accounts1.objects.filter(acctype='Sales',cid=cmp1)
 
-
-
             context = {
-                'cmp1': cmp1, 'customers': customers, 'inv': inv, 'bun': bun, 'noninv': noninv,'item' :item,'ser': ser,'tod': tod,'unit':unit,'acc':acc,'acc1':acc1,'referno':new_number,
+                'cmp1': cmp1, 'customers': customers, 'inv': inv, 'bun': bun, 'noninv': noninv,'item' :item,'ser': ser,'tod': tod,'unit':unit,'acc':acc,'acc1':acc1,'referno':new_number, 'pay_terms':pay_terms, 'price_list':price_list, 'cbillno':cbillno, 'remaining_characters':remaining_characters
             }
             return render(request, 'app1/add_deliver_challan.html', context)
         except:
             return redirect('delivery_challan') 
     
 @login_required(login_url='regcomp')
-
 def delivery_view(request,id):
     cmp1 = company.objects.get(id=request.session['uid'])
     upd = challan.objects.get(id=id, cid=cmp1)
-
     estitem = challanitem.objects.filter(dl_id=id)
 
     context ={
         'estimate':upd,
         'cmp1':cmp1,
         'estitem':estitem,
-
     }
     
     return render(request,'app1/delivery_challan_view.html', context)
 
+def shareDeliveryChallanToEmail(request,id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                cmp1 = company.objects.get(id=request.session['uid'])
+                upd = challan.objects.get(id=id, cid=cmp1)
+                estitem = challanitem.objects.filter(dl_id=id)
+                        
+                context = {'bill': upd, 'cmp': cmp1,'items':estitem}
+                template_path = 'app1/delivery_challan_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Delivery Challan - {upd.chal_no}.pdf'
+                subject = f"Delivery Challan - {upd.chal_no}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Delivery Challan - Bill-{upd.chal_no}. \n{email_message}\n\n--\nRegards,\n{cmp1.cname}\n{cmp1.caddress}\n{cmp1.city}\n{cmp1.state} - {cmp1.cemail}\n{cmp1.phone}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Bill has been shared via email successfully..!')
+                return redirect(delivery_view,id)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(delivery_view, id)
+            
 def challan_add_file(request,id):
     cmp1 = company.objects.get(id=request.session['uid'])
     est = challan.objects.get(id=id,cid=cmp1)
@@ -40556,9 +40686,8 @@ def challancreate(request):
     
         if request.method == 'POST':  
             cmp1 = company.objects.get(id=request.session["uid"])
-            cust=request.POST['email']
-            c=customer.objects.get(email=cust)
-            print(c)
+            cust=request.POST['customerid']
+            c=customer.objects.get(customerid=cust)
             
             if 'save_as_saved' in request.POST:
                 stat = 'Saved'
@@ -40567,10 +40696,8 @@ def challancreate(request):
             
             inv2 = challan(customer=c,
                             challan_date=request.POST['challandate'],
-
                             challan_type=request.POST['terms'],  billto=request.POST['bname'],
                              pl=request.POST['placosupply'],
-
                             cid=cmp1,
                             subtotal=float(request.POST['subtotal']),
                             note = request.POST['Note'],
@@ -40584,7 +40711,6 @@ def challancreate(request):
                             chal_no =request.POST['chal_no'],
                             adjustment =float(request.POST['Adjustment']),
                             status= stat
-
                         )
             inv2.save()
             
@@ -40593,6 +40719,14 @@ def challancreate(request):
             # chln.save()
 
             product=request.POST.getlist('item[]')
+            itemname = []
+            itemid = []
+            for i in product:
+                w = itemtable.objects.get(id = i)
+                x = w.name
+                y = w
+                itemname.append(x)
+                itemid.append(y)
             hsn=request.POST.getlist('hsn[]')
             quantity=request.POST.getlist('quantity[]')
             rate=request.POST.getlist('rate[]')
@@ -40601,13 +40735,13 @@ def challancreate(request):
             total=request.POST.getlist('amount[]')
             discount=request.POST.getlist('discount[]')
             cl_id=challan.objects.get(id=inv2.id)
-            if len(product)==len(hsn)==len(quantity)==len(desc)==len(tax)==len(total)==len(rate)==len(discount) and product and hsn  and quantity and rate and tax and desc and total:
+            if len(itemname)==len(itemid)==len(hsn)==len(quantity)==len(desc)==len(tax)==len(total)==len(rate)==len(discount) and product and hsn  and quantity and rate and tax and desc and total:
 
-                mapped = zip(product,hsn,quantity,desc,tax,total,rate,discount)
+                mapped = zip(itemname,hsn,quantity,desc,tax,total,rate,discount,itemid)
                 mapped = list(mapped)
                 for element in mapped:
                     created = challanitem.objects.create(dl=cl_id,product=element[0],hsn=element[1],
-                                            quantity=element[2],desc=element[3],tax=element[4],total=element[5],rate=element[6],cid=cmp1,discount=element[7])
+                                            quantity=element[2],desc=element[3],tax=element[4],total=element[5],rate=element[6],cid=cmp1,discount=element[7],item = element[8])
                     print('first')
             return redirect('delivery_challan')
         print('1')
@@ -40633,75 +40767,84 @@ def editchallan(request,id):
 
         upd = challan.objects.get(id=id, cid=cmp1)
         estitem = challanitem.objects.filter(dl_id=id)
+        estitem_count = challanitem.objects.filter(dl_id=id).count()
+
+        pay_terms = PaymentTerms.objects.filter(cid=request.session["uid"])
+        price_list = Pricelist.objects.filter(cid=request.session["uid"])
 
         context = {'cmp1': cmp1, 'customers': customers, 'inv': inv, 'bun': bun, 'noninv': noninv,'item' :item,
-                   'ser': ser,
-                   'tod': tod,
+                   'ser': ser, 'pay_terms':pay_terms, 'estitem_count':estitem_count,
+                   'tod': tod, 'price_list':price_list,
                    'unit':unit,'acc':acc,'acc1':acc1,'ch':upd,'chitem':estitem,
                    }
-    
-
     
         return render(request,'app1/editchallan.html',context)
 
 def edited_challan(request,id):
     if request.method == 'POST':
        
-            cmp1 = company.objects.get(id=request.session['uid'])
-            ch = challan.objects.get(id=id, cid=cmp1)
-            cust=request.POST['customername']
-            # customer.objects.get(email=cust)
-            customers = customer.objects.get(customerid=cust)
-            ch.customer = customers
-            # ch.cx_mail = request.POST['email']
-            ch.challan_date=request.POST['challandate']
-            ch.challan_type=request.POST['terms']
-            ch.billto=request.POST['bname']
-            ch.pl=request.POST['placosupply']
-            ch.subtotal=float(request.POST['subtotal'])
-            ch.note = request.POST['Note']
-            ch.igst = float(request.POST['igst'])
-            ch.cgst = float(request.POST['cgst'])
-            ch.sgst = float(request.POST['sgst'])
-            ch.taxamount = float(request.POST['totaltax'])
-            ch.ref=request.POST['ref']
-            ch.chal_no=request.POST['chal_no']
-            ch.shipping=float(request.POST['ship'])
-            ch.adjustment=float(request.POST['Adjustment'])
-            ch.grand=float(request.POST['t_total'])
-            if len(request.FILES) != 0:
-                if len(ch.file) != "default.jpg" :
-                    os.remove(ch.file.path)                    
-                    ch.file = request.FILES.get('file')
-
-            ch.save()
+        cmp1 = company.objects.get(id=request.session['uid'])
+        ch = challan.objects.get(id=id, cid=cmp1)
+        cust=request.POST['customerid']
             
-            product=request.POST.getlist('item[]')
-            hsn=request.POST.getlist('hsn[]')
-            quantity=request.POST.getlist('quantity[]')
-            rate=request.POST.getlist('rate[]')
-            desc=request.POST.getlist('desc[]')
-            tax=request.POST.getlist('tax[]')
-            total=request.POST.getlist('amount[]')
-            itemid = request.POST.getlist("id[]")
-            discount=request.POST.getlist('discount[]')
-            chid=challan.objects.get(id =ch.id)
-            count = challanitem.objects.filter(dl=chid).count()
-            obj_dele=challanitem.objects.filter(dl=ch.id)
-            obj_dele.delete()
-       
-            if len(product)==len(hsn)==len(quantity)==len(desc)==len(tax)==len(total)==len(rate)==len(discount):
-
-                mapped = zip(product,hsn,quantity,desc,tax,total,rate,discount)
-                mapped = list(mapped)
-                for element in mapped:
-                    created = challanitem.objects.get_or_create(dl=chid,cid=cmp1,product=element[0],hsn=element[1],
-                                    quantity=element[2],desc=element[3],tax=element[4],total=element[5],rate=element[6],discount=element[7])
-                
-                return redirect('delivery_view',id)
-
-
+        customers = customer.objects.get(customerid=cust)
+        ch.customer = customers
         
+        ch.challan_date=request.POST['challandate']
+        ch.challan_type=request.POST['terms']
+        ch.billto=request.POST['bname']
+        ch.pl=request.POST['placosupply']
+        ch.subtotal=float(request.POST['subtotal'])
+        ch.note = request.POST['Note']
+        ch.igst = float(request.POST['igst'])
+        ch.cgst = float(request.POST['cgst'])
+        ch.sgst = float(request.POST['sgst'])
+        ch.taxamount = float(request.POST['totaltax'])
+        ch.grand=float(request.POST['t_total'])
+        ch.shipping=float(request.POST['ship'])
+        ch.ref=request.POST['ref']
+        ch.chal_no=request.POST['chal_no']
+        ch.adjustment=float(request.POST['Adjustment'])
+        if len(request.FILES) != 0:
+            if len(ch.file) != "default.jpg" :
+                os.remove(ch.file.path)                    
+                ch.file = request.FILES.get('file')
+
+        ch.save()
+            
+        product=request.POST.getlist('item[]')
+        itemname = []
+        itemid = []
+        for i in product:
+            w = itemtable.objects.get(id = i)
+            x = w.name
+            y = w
+            itemname.append(x)
+            itemid.append(y)
+        hsn=request.POST.getlist('hsn[]')
+        quantity=request.POST.getlist('quantity[]')
+        rate=request.POST.getlist('rate[]')
+        desc=request.POST.getlist('desc[]')
+        tax=request.POST.getlist('tax[]')
+        total=request.POST.getlist('amount[]')
+        discount=request.POST.getlist('discount[]')
+
+        chid=challan.objects.get(id =ch.id)
+        obj_dele=challanitem.objects.filter(dl=ch.id)
+        obj_dele.delete()
+       
+        if len(itemname)==len(itemid)==len(hsn)==len(quantity)==len(desc)==len(tax)==len(total)==len(rate)==len(discount):
+
+            mapped = zip(itemname,hsn,quantity,desc,tax,total,rate,discount,itemid)
+            mapped = list(mapped)
+            for element in mapped:
+                created = challanitem(dl=chid,product=element[0],hsn=element[1],
+                                    quantity=element[2],desc=element[3],tax=element[4],total=element[5],rate=element[6],cid = cmp1, discount=element[7], item = element[8])
+                print(created)
+
+                created.save()
+        return redirect('delivery_view',id)
+
     else:
         return redirect('delivery_challan')
 
@@ -40772,27 +40915,248 @@ def render_pdfchallan_view(request,id):
 def challan_convert1(request,id):
     cmp1 = company.objects.get(id=request.session['uid'])
     upd = challan.objects.get(id=id, cid=cmp1)
-    upd.is_converted = True #changed - shemeem
-    upd.save()
+
+    inv = invoice.objects.filter(cid = cmp1).last()
+    if inv is None:
+        inv_no = '1001'
+    else:
+        last_invoiceno = inv.invoiceno
+        last_numbers = re.findall(r'\d+', last_invoiceno)
+        last_numbers_string = ''.join(last_numbers)
+
+        for number in last_numbers:
+            last_invoiceno = re.sub(number, '', last_invoiceno)
+        remaining_characters = last_invoiceno.strip()
+        if remaining_characters == "":
+            inv_no = str(int(last_numbers_string)+1)
+        else:
+            inv_no = remaining_characters + str(int(last_numbers_string)+1)
+        
     cst_name = str(upd.customer.customerid)+" "+upd.customer.firstname+" "+upd.customer.lastname
-    invo=invoice(invoiceno=upd.id,cid=cmp1,customername=cst_name,email=upd.customer.email,
-        invoicedate=upd.challan_date, duedate=upd.challan_date,bname=upd.billto,placosupply=upd.pl,grandtotal=upd.grand,paidoff = 0,balance = upd.grand,
-        subtotal=upd.subtotal,IGST=upd.igst,CGST=upd.cgst,SGST=upd.sgst,taxamount=upd.taxamount,shipping_charge=upd.shipping,status='Approved')
+    invo=invoice(customername=cst_name, email=upd.customer.email, invoiceno=inv_no, invoicedate=upd.challan_date, bname=upd.billto, duedate=upd.challan_date,
+        placosupply=upd.pl, baldue = upd.grand, subtotal=upd.subtotal, grandtotal=upd.grand, paidoff = 0, balance = upd.grand, status='Approved',note = upd.note ,file =upd.file,
+        IGST=upd.igst, CGST=upd.cgst, SGST=upd.sgst, taxamount=upd.taxamount, adjust = upd.adjustment, shipping_charge=upd.shipping, cid = cmp1)
 
     invo.save()
-    
-    # shemeem added - getting challan items and storing into invoice_items table
+    upd.is_converted = True #changed - shemeem
+    upd.converted_inv = invo.invoiceno
+    upd.save()
+            
+            # shemeem added - getting challan items and storing into invoice_items table
     ch_items = challanitem.objects.filter(dl_id = upd.id, cid_id = cmp1)
 
     for item in ch_items:
-        inv_items = invoice_item(invoice = invo, cid = cmp1, product = item.product,hsn = item.hsn,qty = item.quantity,price = item.rate,total = item.total,tax = item.tax,discount = item.discount)
+        inv_items = invoice_item(product = item.product, hsn = item.hsn, qty = item.quantity, price = item.rate, total = item.total, tax = item.tax, discount = item.discount,  cid = cmp1,invoice = invo)
         inv_items.save()
         stk = itemtable.objects.get(name = item.product, hsn = item.hsn, cid = cmp1)
         stk.stock -= item.quantity
         stk.save()
 
+    customers = customer.objects.filter(cid=cmp1).all()
+    my_string = invo.customername
+    first_letter = my_string[0]
+    cust = customer.objects.get(customerid = int(first_letter))
+    terms = PaymentTerms.objects.filter(cid = cmp1).all()
+    bank = bankings_G.objects.filter(cid=cmp1)
+    invitem = invoice_item.objects.filter(invoice = invo)
+    itemss = itemtable.objects.filter(cid = cmp1)
 
-    return redirect(delivery_challan)
+    context = {'invoice':invo, 'invitem':invitem, 'customers':customers, 'cust':cust, 'terms':terms ,'bank':bank ,'item':itemss}
+    return render(request,'app1/editinvoice.html',context)
+    
+def covert_challan_to_recinvoice(request,id):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    upd = challan.objects.get(id=id, cid=cmp1)
+
+    recinv = recinvoice.objects.filter(cid = cmp1).last()
+    if recinv is None:
+        recinv_no = '1001'
+    else:
+        last_recinvoiceno = recinv.recinvoiceno
+        last_numbers = re.findall(r'\d+', last_recinvoiceno)
+        last_numbers_string = ''.join(last_numbers)
+
+        for number in last_numbers:
+            last_recinvoiceno = re.sub(number, '', last_recinvoiceno)
+        remaining_characters = last_recinvoiceno.strip()
+        if remaining_characters == "":
+            recinv_no = str(int(last_numbers_string)+1)
+        else:
+            recinv_no = remaining_characters + str(int(last_numbers_string)+1)
+        
+    cst_name = str(upd.customer.customerid)+" "+upd.customer.firstname+" "+upd.customer.lastname
+    recinvo=recinvoice(customername=cst_name ,recinvoiceno = recinv_no, startdate=upd.challan_date, enddate=upd.challan_date, bname=upd.billto, placosupply=upd.pl,
+        taxamount = upd.taxamount, baldue = upd.grand, email=upd.customer.email, subtotal = upd.subtotal, grandtotal = upd.grand, status='Approved', note = upd.note, file = upd.file,
+        IGST=upd.igst, CGST=upd.cgst, SGST=upd.sgst, gsttype = upd.customer.gsttype, paidoff = 0, balance = upd.grand, shipping_charge=upd.shipping, adjust = upd.adjustment, cid = cmp1)
+
+    recinvo.save()
+    upd.is_converted = True #changed - shemeem
+    upd.converted_rec = recinvo.recinvoiceno
+    upd.save()
+            
+            # shemeem added - getting challan items and storing into invoice_items table
+    ch_items = challanitem.objects.filter(dl_id = upd.id, cid_id = cmp1)
+
+    for item in ch_items:
+        recinv_items = recinvoice_item(product = item.product, hsn = item.hsn, qty = item.quantity, price = item.rate, tax = item.tax, discount = item.discount, total = item.total, cid = cmp1, recinvoice = recinvo)
+        recinv_items.save()
+        #stk = itemtable.objects.get(name = item.product, hsn = item.hsn, cid = cmp1)
+        #stk.stock -= item.quantity
+        #stk.save()
+
+    customers = customer.objects.filter(cid=cmp1).all()
+    my_string = recinvo.customername
+    first_letter = my_string[0]
+    cust = customer.objects.get(customerid = int(first_letter))
+    terms = PaymentTerms.objects.filter(cid = cmp1).all()
+    bank = bankings_G.objects.filter(cid=cmp1)
+    recinvitem = recinvoice_item.objects.filter(recinvoice = recinvo)
+    itemss = itemtable.objects.filter(cid = cmp1)
+
+    context = {'recinvoice':recinvo,  'recinvitem':recinvitem, 'customers':customers, 'cust':cust, 'terms':terms ,'bank':bank ,'item':itemss}
+    return render(request,'app1/editrecinvoice.html',context)
+
+def shareTransactionStatementToEmail(request,id):
+    if request.user:
+      
+        if request.method == 'POST':
+            emails_string = request.POST['emails']
+            # Split the string by commas and remove any leading or trailing whitespace
+            emails_list = [email.strip() for email in emails_string.split(',')]
+            email_message = request.POST['messages']
+            # print(emails_list)
+
+            if request.POST['startdate'] != '' or request.POST['enddate'] != '':
+                startdate_string = request.POST['startdate']
+                startdate = datetime.strptime(startdate_string, '%Y-%m-%d').date()
+                enddate_string = request.POST['enddate']
+                enddate = datetime.strptime(enddate_string, '%Y-%m-%d').date()
+                
+                cmp1 = company.objects.get(id=request.session['uid'])
+                custo = customer.objects.get(customerid=id, cid=cmp1)
+                fn =custo.firstname
+                ln = custo.lastname
+                su = fn+ ' ' +ln
+                est1 = estimate.objects.filter(cid=cmp1,customer=str(id)+ " " +su,estimatedate__range=(startdate,enddate)).all()   
+                sel1 = salesorder.objects.filter(cid=cmp1,salename=str(id)+ " " +su,saledate__range=(startdate,enddate)).all() 
+
+                invs = invoice.objects.filter(cid=cmp1,customername=str(id)+ " " +su,invoicedate__range=(startdate,enddate)).all() 
+                invs_blances = []
+                for inv in invs:
+                    invs_blance = float(inv.balance) + float(custo.opening_balance)
+                    invs_blances.append(invs_blance)
+                zipped_data = zip_longest(invs, invs_blances)
+
+                crd_note = salescreditnote.objects.filter(cid=cmp1,customer=str(id)+ " " +su,creditdate__range=(startdate,enddate)).all()
+                crd_note_blances = []
+                for crd_notes in crd_note:
+                    crd_note_blance = float(crd_notes.balance) - float(custo.opening_balance)
+                    crd_note_blances.append(crd_note_blance)
+                zipped_data1 = zip_longest(crd_note, crd_note_blances)
+
+                payme = payment.objects.filter(cid=cmp1,customer=su,paymdate__range=(startdate,enddate)).all()  
+                payme_blances = []
+                for paymes in payme:
+                    payme_blance = float(paymes.balance) - float(custo.opening_balance)
+                    payme_blances.append(payme_blance)
+                zipped_data2 = zip_longest(payme, payme_blances)
+
+                ret_inv = RetainerInvoices.objects.filter(cid=cmp1,customer=su,invoice_date__range=(startdate,enddate)).all()
+                retinvs_blances = []
+                for ret_invs in ret_inv:
+                    retinvs_blance = float(ret_invs.balance) + float(custo.opening_balance)
+                    retinvs_blances.append(retinvs_blance)
+                zipped_data3 = zip_longest(ret_inv, retinvs_blances)
+
+                deli = challan.objects.filter(cid=cmp1,customer=id,challan_date__range=(startdate,enddate)).all()
+
+                recc_inv = recinvoice.objects.filter(cid=cmp1,customername=str(id)+ " " +su,startdate__range=(startdate,enddate)).all()
+                recinvs_blances = []
+                for rec_inv in recc_inv:
+                    recinvs_blance = float(rec_inv.balance) + float(custo.opening_balance)
+                    recinvs_blances.append(recinvs_blance)
+                zipped_data4 = zip_longest(recc_inv, recinvs_blances)
+
+                mjour = mjournal1.objects.filter(cid=cmp1,contact=su,mjrnl__date__range=(startdate,enddate)).all()
+
+            else:
+                cmp1 = company.objects.get(id=request.session['uid'])
+                custo = customer.objects.get(customerid=id, cid=cmp1)
+                fn =custo.firstname
+                ln = custo.lastname
+                su = fn+ ' ' +ln
+                est1 = estimate.objects.filter(cid=cmp1,customer=str(id)+ " " +su).all()   
+                sel1 = salesorder.objects.filter(cid=cmp1,salename=str(id)+ " " +su).all()
+
+                invs = invoice.objects.filter(cid=cmp1,customername=str(id)+ " " +su).all() 
+                invs_blances = []
+                for inv in invs:
+                    invs_blance = float(inv.balance) + float(custo.opening_balance)
+                    invs_blances.append(invs_blance)
+                zipped_data = zip_longest(invs, invs_blances)
+
+                crd_note = salescreditnote.objects.filter(cid=cmp1,customer=str(id)+ " " +su).all()
+                crd_note_blances = []
+                for crd_notes in crd_note:
+                    crd_note_blance = float(crd_notes.balance) - float(custo.opening_balance)
+                    crd_note_blances.append(crd_note_blance)
+                zipped_data1 = zip_longest(crd_note, crd_note_blances)
+
+
+                payme = payment.objects.filter(cid=cmp1,customer=su).all() 
+                payme_blances = []
+                for paymes in payme:
+                    payme_blance = float(paymes.balance) - float(custo.opening_balance)
+                    payme_blances.append(payme_blance) 
+                zipped_data2 = zip_longest(payme, payme_blances)
+
+                ret_inv = RetainerInvoices.objects.filter(cid=cmp1,customer=su).all()
+                retinvs_blances = []
+                for ret_invs in ret_inv:
+                    retinvs_blance = float(ret_invs.balance) + float(custo.opening_balance)
+                    retinvs_blances.append(retinvs_blance)
+                zipped_data3 = zip_longest(ret_inv, retinvs_blances)
+
+                deli = challan.objects.filter(cid=cmp1,customer=id).all()
+                recc_inv = recinvoice.objects.filter(cid=cmp1,customername=str(id)+ " " +su).all()
+                recinvs_blances = []
+                for rec_inv in recc_inv:
+                    recinvs_blance = float(rec_inv.balance) + float(custo.opening_balance)
+                    recinvs_blances.append(recinvs_blance)
+                zipped_data4 = zip_longest(recc_inv, recinvs_blances)
+
+                mjour = mjournal1.objects.filter(cid=cmp1,contact=su).all()
+                        
+            context = {'cmp1': cmp1,
+                        'customer':custo,
+                        'est1':est1,
+                        'sel1':sel1,
+                        'zipped_data':zipped_data,
+                        'zipped_data1':zipped_data1,
+                        'zipped_data2':zipped_data2,
+                        'zipped_data3':zipped_data3,
+                        'deli':deli,
+                        'zipped_data4':zipped_data4,
+                        'mjour':mjour
+                        }
+            template_path = 'app1/customer_transactions_pdf.html'
+            template = get_template(template_path)
+
+            html  = template.render(context)
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+            pdf = result.getvalue()
+            filename = f'{su} - customer_transction_statement.pdf'
+            subject = f"{su} - customer transction statement"
+            email = EmailMessage(subject, f"Hi,\nPlease find the attached Transaction statement of {su}. \n{email_message}\n\n--\nRegards,\n{cmp1.cname}\n{cmp1.caddress}\n{cmp1.city}\n{cmp1.state} - {cmp1.cemail}\n{cmp1.phone}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+            email.attach(filename, pdf, "application/pdf")
+            email.send(fail_silently=False)
+
+            msg = messages.success(request, 'Bill has been shared via email successfully..!')
+            return redirect(customer_profile,id)
+        return redirect(customer_profile,id)
+    return redirect(customer_profile,id)
+    
 #--------------------------------------------------------------------------------------------
 
 def removecl(request):
@@ -45999,7 +46363,7 @@ def item_dropdown_rbill(request):
     options = {}
     option_objects = itemtable.objects.filter(cid=company1)
     for option in option_objects:
-        options[option.id] = [option.name]
+        options[option.id] = option.name
 
     return JsonResponse(options)
 
@@ -46556,16 +46920,9 @@ from django.db.models import OuterRef, Subquery
 def sort_contactname(request):
     cmp1 = company.objects.get(id=request.session["uid"])
     
-    subquery = mjournal1.objects.filter(mjrnl=OuterRef('id')).order_by('id').values('contact')[:1]
-    
-    mj = mjournal.objects.filter(cid=cmp1).annotate(
-        first_contact=Subquery(subquery)
-    ).order_by('first_contact')
+    mj = mjournal.objects.filter(cid=cmp1).annotate(total_deb_int=Cast('total_deb', IntegerField())).order_by('total_deb_int')
     
     return render(request, 'app1/mjournal.html', {'mj': mj, 'cmp1': cmp1})
-
-
-
 
 def billconvert2(request, id):
     if 'uid' in request.session:
@@ -47650,69 +48007,21 @@ def deletedebitcomments(request,pdebitid, commentid):
         return redirect('viewpurchasedebit', pdebitid) 
         
         
-# def get_vendor_data_bill(request):
-#     company1 = company.objects.get(id=request.session["uid"])
-#     id = request.GET.get('id')
-#     options = {}
-#     vendor_object= vendor.objects.get(vendorid=id)
-#     print(vendor_object.email,'vendor_object')
-#     vendor_recurring = recurring_bill.objects.filter(vendor_mail=vendor_object.email)
-#     print(vendor_recurring)
-#     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
-   
-    
-#     print(option_objects,'option objects')
-#     if option_objects:
-#         for option in option_objects:
-            
-#             options[option.billid] = [option.bill_no]
-#     else:
-#         options={"null"}
-#     return JsonResponse(options, safe=False)
-    
-
-# def get_vendor_data_bill(request):
-#     company1 = company.objects.get(id=request.session["uid"])
-#     id = request.GET.get('id')
-#     options = {}
-#     vendor_object = vendor.objects.get(vendorid=id)
-#     print(vendor_object.email, 'vendor_object')
-#     email=vendor_object.email
-#     vendor_recurring = recurring_bill.objects.filter(vendor_mail=email)
-#     print(vendor_recurring)
-#     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
-    
-#     print(option_objects, 'option objects')
-#     if option_objects:
-#         for option in option_objects:
-#             options[option.billid] = [option.bill_no]
-#     else:
-#         options = {}  
-#     if vendor_recurring:
-#         for option in vendor_recurring:
-#             options[option.rbillid] = [option.billno]
-#     else:
-#         options = {}  
-
-#     print('options',options)
-
-#     return JsonResponse(options, safe=False)
-
-
 def get_vendor_data_bill(request):
     company1 = company.objects.get(id=request.session["uid"])
     id = request.GET.get('id')
+    print(id, 'id')
     options = {}
     vendor_object = vendor.objects.get(vendorid=id)
     
    
-    email = vendor_object.email.strip()
-    print(email, 'vendor_object email')
+    emails = str(' ') + str(vendor_object.email)
+    print(emails, 'vendor_object email')
 
-    vendor_recurring = recurring_bill.objects.filter(vendor_mail=email)
+    vendor_recurring = recurring_bill.objects.filter(vendor_mail=emails)
     print(vendor_recurring)
 
-    option_objects = purchasebill.objects.filter(vendor_mail=email)
+    option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
     print(option_objects, 'option objects')
 
     if option_objects:
@@ -47730,6 +48039,7 @@ def get_vendor_data_bill(request):
     print('options', options)
 
     return JsonResponse(options, safe=False)
+    
     
 ##reshna-holiday
 
@@ -47781,21 +48091,33 @@ def holidayss(request):
     
 def addholidays(request):
     if 'uid' in request.session:
-        if request.session.has_key('uid'):
-            uid = request.session['uid']
+        uid = request.session.get('uid')
+        if uid:
+            cmp1 = company.objects.get(id=uid)
+            if request.method == 'POST':
+                name = request.POST.get('name')
+                start_date = request.POST.get('start_date')
+                end_date = request.POST.get('end_date')
+                # Create a new Holiday instance
+                hdays = holidays(name=name, start_date=start_date, end_date=end_date, cid=cmp1)
+                
+                # Check if the date already exists in the Holiday model   ###### akshaya   ##########
+                if holidays.objects.filter(start_date=start_date).exists() or holidays.objects.filter(end_date=end_date).exists():
+                    messages.error(request, 'This date is already marked as a holiday....!')
+                    return redirect('addholidays')
+                try:
+                    hdays.save()  # Save the holiday
+                    messages.success(request, 'Holiday marked successfully...!')
+                    return redirect('holidayss')
+                except IntegrityError as e:
+                    return HttpResponse("An error occurred while adding the holiday.")  #endakshaya
+            else:
+                # Handle GET request for rendering form
+                return render(request, 'app1/holiday_add.html', {'cmp1': cmp1})
         else:
             return redirect('/')
-        cmp1 = company.objects.get(id=request.session['uid'])
-        if request.method == 'POST':
-            name = request.POST.get('name')
-            start_date=request.POST.get('start_date')
-            end_date=request.POST.get('end_date')
-          
-            hdays = holidays(name=name,start_date=start_date,end_date=end_date,cid=cmp1)
-            hdays.save()
-        return redirect('holidayss')
-        return render(request,'app1/holiday_add.html',{'cmp1': cmp1})
-    return redirect('/')
+    else:
+        return redirect('/')
     
 def generate_pdf(request,year, month):
     month_numeric = datetime.strptime(month, "%B").month
@@ -47885,7 +48207,7 @@ def attendancepagee(request):
                 }
 
            
-            if entry.status == 'Absent':
+            if entry.status == 'Leave': 
                 employee_attendance[key]['absent_days'] += 1
 
            
@@ -47901,10 +48223,12 @@ def attendancepagee(request):
             for holiday in holidays_data:
                 total_holidays += (holiday.end_date - holiday.start_date).days + 1
 
-            employee_attendance[key]['holidays'] = total_holidays
+                employee_attendance[key]['holidays'] = total_holidays
 
-           
-            employee_attendance[key]['working_days'] = last_day - employee_attendance[key]['holidays']
+            
+                working_days = last_day - total_holidays - employee_attendance[key]['absent_days'] #akshaya
+                employee_attendance[key]['working_days'] = working_days # akshaya
+
 
        
         context = {
@@ -47924,19 +48248,37 @@ def save_attendance(request):
             uid = request.session['uid']
         else:
             return redirect('/')
+        
         cmp1 = company.objects.get(id=request.session['uid'])
+        
         if request.method == 'POST':
             date = request.POST.get('date')
             status = request.POST.get('status')
-            # employeeid = request.POST.get('employeeid')
+            reason = request.POST.get('reason')
             employeeid = request.POST.get('employee_id').split(" ")[1:]
             employeeid = " ".join(employeeid)
-            new_attendance = attendance(cid=cmp1, date=date, employee=employeeid, status=status)
-            new_attendance.save()
+            
+            # Check if the selected date is a holiday  ############################ akshaya #############################
+            is_holiday = holidays.objects.filter(cid=cmp1, start_date=date).exists()
+            
+            if is_holiday:
+                messages.warning(request, f"{date} is a company holiday. Cannot add leave on a holiday.")
+            else:
+                # Check if attendance entry already exists for the same date and employee
+                existing_attendance = attendance.objects.filter(cid=cmp1, date=date, employee=employeeid)
+                
+                if existing_attendance.exists():
+                    messages.warning(request, f"Attendance for {employeeid} on {date} already exists.")
+                else:
+                    new_attendance = attendance(cid=cmp1, date=date, employee=employeeid, status=status, reason=reason)
+                    new_attendance.save()
+                    messages.success(request, f"Attendance for {employeeid} on {date} saved successfully.")
 
-            return redirect('attendancepagee')
-        return render(request,'app1/attendance_add.html',{'cmp1': cmp1})
-    return redirect('/') 
+            return redirect('attendancepagee')################# end akshaya  ###########################
+        
+        return render(request, 'app1/attendance_add.html', {'cmp1': cmp1})
+    
+    return redirect('/')
     
 def attendance_addpage(request):
     if 'uid' in request.session:
@@ -47975,7 +48317,7 @@ def attendance_view(request, year, month, employee):
     }
 
     for entry in attendance_data:
-        if entry.status == 'Absent':
+        if entry.status == 'Leave':
             employee_attendance['absent_days'] += 1
 
     # Calculate total holidays for the selected month and year using the holidays table
@@ -48032,7 +48374,7 @@ def pdf_attendance(request, year, month, employee):
     }
 
     for entry in attendance_data:
-        if entry.status == 'Absent':
+        if entry.status == 'Leave':
             employee_attendance['absent_days'] += 1
 
     # Calculate total holidays for the selected month and year using the holidays table
@@ -48065,8 +48407,6 @@ def pdf_attendance(request, year, month, employee):
         'month': month,
         'employee':employee
     }
-
-  
     
     fname='attendance'
    
@@ -48096,7 +48436,7 @@ def attendance_editpage(request):
                     'cmp1': cmp1,
                     'employees':employees}
         return render(request,'app1/attendance_edit.html',context)
-    return redirect('save_attendance')   
+    return redirect('save_attendance')    
     
     
 def delete_attendance(request, attendance_id):
@@ -48118,9 +48458,11 @@ def edit_attendance(request, attendance_id):
             if request.method == 'POST':
                 date = request.POST.get('date')
                 status = request.POST.get('status')
+                reason = request.POST.get('reason')
                 employee_id = request.POST.get('employee_id')
                 attendance_record.date = date
                 attendance_record.status = status
+                attendance_record.reason = reason
                 attendance_record.employee = employee_id
                 attendance_record.save()
 
@@ -49031,7 +49373,7 @@ def itemdatadebit(request):
             return redirect('/')
         else:
             
-            from django.core.exceptions import ObjectDoesNotExist
+            
 
             try:
                 # Try to get the purchasebill object with the specified bill_no
@@ -49091,7 +49433,61 @@ def itemdatadebit(request):
         })
 
     return redirect('/')
-    
+
+def create_item4(request,pdebit_id):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+            print(uid,'uid')
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        try:
+            pdebit = purchasedebit.objects.get(pdebitid=pdebit_id)
+            pd=pdebit.pdebitid
+        except purchasedebit.DoesNotExist:
+            return redirect('/') 
+        if request.method == 'POST':
+            cmp1 = company.objects.get(id=request.session['uid'])
+            iname = request.POST['name']
+            itype = request.POST['type']
+            iunit = request.POST.get('unit')
+            ihsn = request.POST['hsn']
+            itax = request.POST['taxref']
+            ipcost = request.POST['pcost']
+            iscost = request.POST['salesprice']
+            itmdate = request.POST['itmdate']
+            #itrate = request.POST['tax']
+            ipuracc = request.POST['pur_account']
+            isalacc = request.POST['sale_account']
+            ipurdesc = request.POST['pur_desc']
+            isaledesc = request.POST['sale_desc']
+            iintra = request.POST['intra_st']
+            iinter = request.POST['inter_st']
+            iinv = request.POST.get('invacc')
+            istock = request.POST.get('stock')
+            istatus = request.POST['status']
+            item = itemtable(name=iname,item_type=itype,unit=iunit,
+                                hsn=ihsn,tax_reference=itax,
+                                purchase_cost=ipcost,
+                                sales_cost=iscost,
+                                itmdate=itmdate,
+                                #tax_rate=itrate,
+                                acount_pur=ipuracc,
+                                account_sal=isalacc,
+                                pur_desc=ipurdesc,
+                                sale_desc=isaledesc,
+                                intra_st=iintra,
+                                inter_st=iinter,
+                                inventry=iinv,
+                                stockin=istock,
+                                stock=istock,
+                                status=istatus,
+                                cid=cmp1)
+            item.save()
+            return redirect('goeditpurchasedebit',pd)
+        return render(request,'app1/editpurchasedebit2.html')
+    return redirect('/')     
     
 def create_bank(request):
     if 'uid' in request.session:
@@ -52009,62 +52405,326 @@ def purchaseDebitToEmail(request,id):
             return JsonResponse({'message':''})
         else:        
             return JsonResponse({'message':''})
+            
+#Akshaya
 
+def shareholidaysToEmail(request,year,month):
+    if request.method == 'POST':
+        month_numeric = datetime.strptime(month, "%B").month
+        cmp1 = company.objects.get(id=request.session["uid"])
+        holiday_data = holidays.objects.filter(
+            start_date__year=year,
+            start_date__month=month_numeric,
+            cid=cmp1
+    )
 
+        total_holidays = 0
+        total_working_days = 0
 
+        for holiday in holiday_data:
+            start_date = holiday.start_date
+            end_date = holiday.end_date
 
-def create_item4(request,pdebit_id):
+            
+            date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+            total_holidays += len(date_range)
+
+        _, last_day = monthrange(int(year), month_numeric)
+        all_days = [date(int(year), month_numeric, day) for day in range(1, last_day + 1)]
+        total_working_days = len(all_days) - total_holidays
+        template_path = 'app1/pdf_holidays.html'
+
+        context = {
+            'year': year,
+            'month': month,
+            'holiday_data': holiday_data,
+            'cmp1': cmp1,
+            'total_holidays': total_holidays,
+            'total_working_days': total_working_days,
+        }
+        email_message = request.POST['email_message']
+        my_subject = "holidays "
+        emails_string = request.POST['email_ids']
+        emails_list = [email.strip() for email in emails_string.split(',')]
+        # recipient_email = request.POST.get('email_ids')
+        html_message = render_to_string('app1\pdf_holidays.html',context)#add ur html
+        # vyaparapp\templates\index.html
+        # vyaparapp\templates\company\gstr3B_pdf.html
+        plain_message = strip_tags(html_message)
+        pdf_content = BytesIO()
+        pisa_document = pisa.CreatePDF(html_message.encode("UTF-8"), pdf_content) 
+        pdf_content.seek(0)
+        # todo: need to update the from_email
+        filename = f'holiday for { month } { year }.pdf'
+        message = EmailMultiAlternatives(
+            subject=my_subject,
+            body= f"Hi,\nPlease find the attached Holiday Report -  \n{email_message}\n--\nRegards,\n{cmp1.cname}\n{cmp1.caddress}\n{cmp1.state} -\n{cmp1.phone}",
+            from_email='altostechnologies6@gmail.com',
+            to= emails_list ,  # Use the recipient_email variable here
+            )
+        message.attach(filename, pdf_content.read(), 'application/pdf')
+        
+        try:
+            message.send()
+            messages.success(request, 'Report has been shared via email successfully..!')
+            return redirect('holidayss')
+        except Exception as e:
+            # Handle the exception, log the error, or provide an error message
+            messages.error(request, f'Error while sending report: {e}')
+            return redirect('holidayss')
+    return HttpResponse('<script>alert("Invalid Request!");window.location="/"</script>') 
+   
+
+def sort_employeename_attendance(request):
     if 'uid' in request.session:
         if request.session.has_key('uid'):
             uid = request.session['uid']
-            print(uid,'uid')
         else:
             return redirect('/')
+        
         cmp1 = company.objects.get(id=request.session['uid'])
-        try:
-            pdebit = purchasedebit.objects.get(pdebitid=pdebit_id)
-            pd=pdebit.pdebitid
-        except purchasedebit.DoesNotExist:
-            return redirect('/') 
-        if request.method == 'POST':
-            cmp1 = company.objects.get(id=request.session['uid'])
-            iname = request.POST['name']
-            itype = request.POST['type']
-            iunit = request.POST.get('unit')
-            ihsn = request.POST['hsn']
-            itax = request.POST['taxref']
-            ipcost = request.POST['pcost']
-            iscost = request.POST['salesprice']
-            itmdate = request.POST['itmdate']
-            #itrate = request.POST['tax']
-            ipuracc = request.POST['pur_account']
-            isalacc = request.POST['sale_account']
-            ipurdesc = request.POST['pur_desc']
-            isaledesc = request.POST['sale_desc']
-            iintra = request.POST['intra_st']
-            iinter = request.POST['inter_st']
-            iinv = request.POST.get('invacc')
-            istock = request.POST.get('stock')
-            istatus = request.POST['status']
-            item = itemtable(name=iname,item_type=itype,unit=iunit,
-                                hsn=ihsn,tax_reference=itax,
-                                purchase_cost=ipcost,
-                                sales_cost=iscost,
-                                itmdate=itmdate,
-                                #tax_rate=itrate,
-                                acount_pur=ipuracc,
-                                account_sal=isalacc,
-                                pur_desc=ipurdesc,
-                                sale_desc=isaledesc,
-                                intra_st=iintra,
-                                inter_st=iinter,
-                                inventry=iinv,
-                                stockin=istock,
-                                stock=istock,
-                                status=istatus,
-                                cid=cmp1)
-            item.save()
-            return redirect('goeditpurchasedebit',pd)
-        return render(request,'app1/editpurchasedebit2.html')
-    return redirect('/') 
 
+        attendance_data = attendance.objects.filter(cid=cmp1).order_by('employee')
+
+        employee_attendance = {}
+
+        for entry in attendance_data:
+            year = entry.date.year
+            month = entry.date.month
+            key = (entry.employee, year, month)
+
+            if key not in employee_attendance:
+                employee_attendance[key] = {
+                    'employee': entry.employee,
+                    'year': year,
+                    'month': month_name[month],
+                    'working_days': 0,
+                    'holidays': 0,
+                    'absent_days': 0,
+                }
+
+            if entry.status == 'Leave':
+                employee_attendance[key]['absent_days'] += 1
+
+            _, last_day = monthrange(year, month)
+
+            holidays_data = holidays.objects.filter(
+                cid=cmp1,
+                start_date__year=year,
+                start_date__month=month
+            )
+            total_holidays = 0
+            for holiday in holidays_data:
+                total_holidays += (holiday.end_date - holiday.start_date).days + 1
+
+            employee_attendance[key]['holidays'] = total_holidays
+            working_days = last_day - total_holidays - employee_attendance[key]['absent_days']
+            employee_attendance[key]['working_days'] = working_days
+
+        context = {
+            'cmp1': cmp1,
+            'employee_attendance': list(employee_attendance.values()),
+        }
+
+        return render(request, 'app1/attendance.html', context)
+
+    return redirect('/')
+    
+
+def shareattendanceToEmail(request,year,month,employee):
+    if request.method == 'POST':
+        month_numeric = datetime.strptime(month, "%B").month
+        cmp1 = company.objects.get(id=request.session['uid'])
+
+        attendance_data = attendance.objects.filter(
+            cid=cmp1,
+            date__year=year,
+            date__month=month_numeric,
+            employee=employee.replace("_", " ")
+        )
+
+        employee_attendance = {
+            'employee_name': employee.replace("_", " "),
+            'year': year,
+            'month': month,
+            'working_days': 0,
+            'holidays': 0,
+            'absent_days': 0,
+        }
+
+        for entry in attendance_data:
+            if entry.status == 'Leave':
+                employee_attendance['absent_days'] += 1
+
+        # Calculate total holidays for the selected month and year using the holidays table
+        holidays_data = holidays.objects.filter(
+            cid=cmp1,
+            start_date__year=year,
+            start_date__month=month_numeric
+        )
+        total_holidays = 0
+        for holiday in holidays_data:
+            start_date = holiday.start_date
+            end_date = holiday.end_date
+            date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+            total_holidays += len(date_range)
+
+        # Calculate total working days for the selected month and year
+        _, last_day = monthrange(int(year), month_numeric)
+        all_days = [date(int(year), month_numeric, day) for day in range(1, last_day + 1)]
+        total_working_days = len(all_days) - total_holidays - employee_attendance['absent_days']
+
+        employee_attendance['holidays'] = total_holidays
+        employee_attendance['working_days'] = total_working_days
+        template_path = 'app1/pdf_attendance.html'
+        context = {
+            'cmp1': cmp1,
+            'employee_attendance': employee_attendance,
+            'attendance_data':attendance_data,
+            'holidays_data':holidays_data,
+            'year': year,
+            'month': month,
+            'employee':employee
+        }
+        email_message = request.POST['email_message']
+        my_subject = "attendance "
+        emails_string = request.POST['email_ids']
+        emails_list = [email.strip() for email in emails_string.split(',')]
+        # recipient_email = request.POST.get('email_ids')
+        html_message = render_to_string('app1\pdf_attendance.html',context)#add ur html
+        # vyaparapp\templates\index.html
+        # vyaparapp\templates\company\gstr3B_pdf.html
+        plain_message = strip_tags(html_message)
+        pdf_content = BytesIO()
+        pisa_document = pisa.CreatePDF(html_message.encode("UTF-8"), pdf_content) 
+        pdf_content.seek(0)
+        # todo: need to update the from_email
+        filename = f'Attendance for { year } { month }.pdf'
+        message = EmailMultiAlternatives(
+            subject=my_subject,
+            body= f"Hi,\nPlease find the attached attendance Report -  \n{email_message}\n--\nRegards,\n{cmp1.cname}\n{cmp1.caddress} -\n{cmp1.phone}",
+            from_email='altostechnologies6@gmail.com',
+            to= emails_list ,  # Use the recipient_email variable here
+            )
+        message.attach(filename, pdf_content.read(), 'application/pdf')
+        
+        try:
+            message.send()
+            messages.success(request, 'Report has been shared via email successfully..!')
+            return redirect('attendancepagee')
+        except Exception as e:
+            # Handle the exception, log the error, or provide an error message
+            messages.error(request, f'Error while sending report: {e}')
+            return redirect('attendancepagee')
+    return HttpResponse('<script>alert("Invalid Request!");window.location="/"</script>') 
+   
+
+
+def AddEmployeeInAttendance(request):
+    try: 
+        cmpId = company.objects.get(id=request.session["uid"]) 
+        if request.method == 'POST':
+            title = request.POST['title']
+            firstname = request.POST['firstname'].replace(' ','')
+            lastname = request.POST['lastname'].replace(' ','')
+            alias = request.POST['alias']
+            location = request.POST['location']
+            email = request.POST['email']
+           
+            mobile = request.POST['mobile']
+            employees = request.POST['employees']
+            joindate = request.POST['joindate']
+            try:
+                img1 = request.FILES['image']
+            except:
+                img1 = 'default' 
+            salarydetails = request.POST['salarydetails']
+            effectivefrom = request.POST['effectivefrom']
+            payhead = request.POST['payhead']
+            hours = request.POST['hours']
+            rate = request.POST['rate']
+            amount = request.POST['amount']
+            employeeno = request.POST['employeeno']
+            designation = request.POST['designation']
+            function = request.POST['function']
+            gender = request.POST['gender']
+            dateofbirth = request.POST['dateofbirth']
+            bloodgroup = request.POST['bloodgroup']
+            fathersmothersname = request.POST['fathersmothersname']
+            spousename = request.POST['spousename']
+            
+           
+            generalphone = request.POST['generalphone']
+            bankdetails = request.POST['bankdetails']
+            acno = request.POST['acno']
+            ifsccode = request.POST['ifsccode']
+            bankname = request.POST['bankname']
+            branchname = request.POST['branchname']
+            transactiontype = request.POST['transactiontype']
+            pannumber = request.POST['pannumber']
+            universalaccountnumber = request.POST['universalaccountnumber']
+            pfaccountnumber = request.POST['pfaccountnumber']
+            praccountnumber = request.POST['praccountnumber']
+            esinumber = request.POST['esinumber']
+            tdsapp = request.POST['tdsapp']
+            tdstype = request.POST['tdstype']
+            tds = request.POST['tds']
+            street = request.POST['street']
+            city = request.POST['city']
+            state = request.POST['state']
+            pincode = request.POST['pincode']
+            country = request.POST['country']
+            tempstreet = request.POST['tempstreet']
+            tempcity = request.POST['tempcity']
+            tempstate = request.POST['tempstate']
+            temppincode = request.POST['temppincode']
+            tempcountry = request.POST['tempcountry'] 
+            adharnumber = request.POST['adharnumber'] 
+            try:
+                file = request.FILES['file']
+            except:
+                file = '' 
+            
+            emppayroll = payrollemployee(title=title,firstname=firstname,
+                                         lastname=lastname,alias=alias,cid=cmpId,
+                                         location=location,
+                                         email=email,
+                                         mobile=mobile,employees=employees,
+                                         joindate=joindate,
+                                         salarydetails=salarydetails,effectivefrom=effectivefrom,
+                                         hours=hours,rate=rate,
+                                         amount=amount,employeeno=employeeno,
+                                         designation=designation,function=function,
+                                         gender=gender,dateofbirth=dateofbirth,
+                                         bloodgroup=bloodgroup,fathersmothersname=fathersmothersname,
+                                         spousename=spousename,
+                                         generalphone=generalphone,
+                                         bankdetails=bankdetails,acno=acno,ifsccode=ifsccode,
+                                         bankname=bankname,branchname=branchname,
+                                         transactiontype=transactiontype,pannumber=pannumber,
+                                         universalaccountnumber=universalaccountnumber,
+                                         pfaccountnumber=pfaccountnumber,praccountnumber=praccountnumber,
+                                         esinumber=esinumber,istds=tdsapp,
+                                         tdstype=tdstype,tds=tds,street=street,
+                                         city=city,state=state,
+                                         pincode=pincode,country=country,
+                                         tempstreet=tempstreet,tempcity=tempcity,
+                                         tempstate=tempstate,temppincode=temppincode,
+                                         tempcountry=tempcountry,payhead=payhead,
+                                         adharnumber=adharnumber
+                                        )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('attendance_addpage')
+    except:    
+        print('sorry')
+        return redirect('attendance_addpage')
+
+# end akshaya

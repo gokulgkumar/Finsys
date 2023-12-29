@@ -148,8 +148,8 @@
                                                 <td>{{ forloop.counter }}
                                                     <input type="text" name="id[]" value="{{p.id}}" hidden>
                                                 </td>
-                                                <td><input type="text" name="billdate[]" id="billdate{{forloop.counter}}" value="{{ p.billdate | date:'Y-m-d' }}" class="form-control"/></td>
-                                                <td><input type="text" name='billno[]' id="billno{{forloop.counter}}" value="{{ p.billno }}" class="form-control"/></td>
+                                                <td><input type="hidden" name='payment1[]' value="{{p.payment_type}}"/><input type="text" name="billdate[]" id="billdate{{forloop.counter}}" value="{{ p.billdate | date:'Y-m-d' }}" class="form-control"/></td>
+                                                <td><input type="hidden" name='payment2[]' value="{{p.payment_id}}"/><input type="text" name='billno[]' id="billno{{forloop.counter}}" value="{{ p.billno }}" class="form-control"/></td>
                                                 <td><input type="text" name='billamount[]' value="{{ p.billamount }}" id="billamount{{forloop.counter}}"
                                                     class="form-control qty" step="0" min="0"/>
                                                 </td>
