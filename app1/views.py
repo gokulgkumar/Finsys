@@ -52728,3 +52728,66 @@ def AddEmployeeInAttendance(request):
         return redirect('attendance_addpage')
 
 # end akshaya
+
+
+
+                                       )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('attendance_addpage')
+    except:    
+        print('sorry')
+        return redirect('attendance_addpage')
+
+# end akshaya
+                                       )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('attendance_addpage')
+    except:    
+        print('sorry')
+        return redirect('attendance_addpage')
+
+# end akshaya
+                                       )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('attendance_addpage')
+    except:    
+        print('sorry')
+        return redirect('attendance_addpage')
+
+# end akshaya
+                                       )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('attendance_addpage')
+    except:    
+        print('sorry')
+        return redirect('attendance_addpage')
+
+# end akshaya
