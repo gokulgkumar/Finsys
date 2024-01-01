@@ -48024,17 +48024,21 @@ def get_vendor_data_bill(request):
     option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
     print(option_objects, 'option objects')
 
-    if option_objects:
+    if option_objects or vendor_recurring:
         for option in option_objects:
             options[option.billid] = [option.bill_no]
-    else:
-        options = {}
-
-    if vendor_recurring:
+            print('yo')
+        
         for option in vendor_recurring:
             options[option.rbillid] = [option.billno]
     else:
         options = {}
+
+    # if vendor_recurring:
+    #     for option in vendor_recurring:
+    #         options[option.rbillid] = [option.billno]
+    # else:
+    #     options = {}
 
     print('options', options)
 
@@ -52714,69 +52718,6 @@ def AddEmployeeInAttendance(request):
                                          tempcountry=tempcountry,payhead=payhead,
                                          adharnumber=adharnumber
                                         )
-            if img1 != 'default':
-                emppayroll.image = img1
-
-            if file !="":
-                 emppayroll.file=file
-
-            emppayroll.save()
-            print('done')
-            return redirect('attendance_addpage')
-    except:    
-        print('sorry')
-        return redirect('attendance_addpage')
-
-# end akshaya
-
-
-
-                                       )
-            if img1 != 'default':
-                emppayroll.image = img1
-
-            if file !="":
-                 emppayroll.file=file
-
-            emppayroll.save()
-            print('done')
-            return redirect('attendance_addpage')
-    except:    
-        print('sorry')
-        return redirect('attendance_addpage')
-
-# end akshaya
-                                       )
-            if img1 != 'default':
-                emppayroll.image = img1
-
-            if file !="":
-                 emppayroll.file=file
-
-            emppayroll.save()
-            print('done')
-            return redirect('attendance_addpage')
-    except:    
-        print('sorry')
-        return redirect('attendance_addpage')
-
-# end akshaya
-                                       )
-            if img1 != 'default':
-                emppayroll.image = img1
-
-            if file !="":
-                 emppayroll.file=file
-
-            emppayroll.save()
-            print('done')
-            return redirect('attendance_addpage')
-    except:    
-        print('sorry')
-        return redirect('attendance_addpage')
-
-# end akshaya
-                                       )
             if img1 != 'default':
                 emppayroll.image = img1
 

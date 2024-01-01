@@ -57,7 +57,7 @@ input[name="service-city"] {
     <!--<h1>Taxes</h1>-->
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 
-    <form action="createpurchasedebit" method="post" class="needs-validation" novalidate>
+    <form action="{% url 'createpurchasedebit' %}" method="post"  novalidate>
         {% csrf_token %}
         <div class="page-content">
             <!--breadcrumb-->
@@ -182,7 +182,7 @@ input[name="service-city"] {
 </script>                               -->
 
                                                
-                                        <!-- <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newvendor" data-toggle="modal">+</a> -->
+                                        <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newvendor" data-toggle="modal">+</a>
                                     </div>
                                 </div>
                                 <div class="col-md-5 mt-3">
@@ -734,14 +734,14 @@ input[name="service-city"] {
                         <div class="col-md-6"></div>
                         <div class="col-md-3">
                             <button class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3"
-                                   name="save_as_draft" type="submit" onclick="saveAsDraftDialog()">
+                                   name="save_as_draft" type="submit" >
                                 Save as Draft
                             </button></div>
                             <div class="col-md-3">
-                            <button class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3" name="save_as_billed"
-                            type="submit" onclick="saveAndOpenDialog()">
+                            <input class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3" name="save_as_billed"
+                            type="submit" >
                              Save 
-                           </button>
+                           
                            </div>
                     </div>
                 </div>
@@ -750,6 +750,8 @@ input[name="service-city"] {
         </div>
    
     </form>
+
+    <p>hellp</p>
 
     <div class="modal fade" id="newvendor">
         <div class="modal-dialog modal-xl">
