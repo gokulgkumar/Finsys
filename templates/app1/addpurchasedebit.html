@@ -215,10 +215,11 @@ input[name="service-city"] {
                                     <input type="date" class="form-control" name="debitdate" id="date">
                                 </div>
                                 <div class="col-md-5 mt-3">
-                                    <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This number is not continous <span class="text-white">)</span></span>
-                                   
-                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
-                                    
+                                    <label for="validationCustom02">Debit Note Number</label>
+                                    <span class="text-danger" id="dangerdiv" style="display: none;">
+                                        <span class="text-white">(</span>This number is not continuous<span class="text-white">)</span>
+                                    </span>
+                                    <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
                                 </div>
 
 
@@ -276,7 +277,7 @@ input[name="service-city"] {
                                     <label for="validationCustom02">Bill Number</label>
                                     <select name="billno" id="billno" class="form-control">
                                         <option selected>No Bill</option>
-                                        <option ></option>
+                                        
                                         <!-- {% for r in rbill %}
                                         <option>{{ r.billno }}</option>
                                         {% endfor %}
@@ -738,10 +739,10 @@ input[name="service-city"] {
                                 Save as Draft
                             </button></div>
                             <div class="col-md-3">
-                            <input class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3" name="save_as_billed"
+                            <button class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3" name="save_as_billed"
                             type="submit" >
                              Save 
-                           
+                            </button>
                            </div>
                     </div>
                 </div>
@@ -751,7 +752,7 @@ input[name="service-city"] {
    
     </form>
 
-    <p>hellp</p>
+    
 
     <div class="modal fade" id="newvendor">
         <div class="modal-dialog modal-xl">
@@ -1538,7 +1539,7 @@ input[name="service-city"] {
 
 
 
-#payment method
+<!-- #payment method -->
 <script>
     $(document).ready(function() {
       $("#pay_method").change(function() {
@@ -3701,11 +3702,52 @@ document.getElementById('qty3').addEventListener('change', function(event) {
     });
 
 </script>
+<script type="text/javascript">
+    $(document).on('change', '#deb_no', function () {
+        deb_value = $('#deb_no').val();
 
+        if (deb_value == '') {
+            document.getElementById('dangerdiv').style.display = 'none';
+        } else {
+            document.getElementById('dangerdiv').style.display = 'block';
 
+            var deb_list = "{{ purdebit}}";
+            deblist = deb_list.split(",");
+            for (let i = 0; i < deblist.length; i++) {
+                if (deb_value === deblist[i]) {
+                    alert('Debit Number already in use.');
+                    document.getElementById('dangerdiv').style.display = 'none';
+                    document.getElementById('deb_no').value = '';
+                }
+            }
+        }
+    });
+</script>
 
+<script type="text/javascript">
+    $(document).on('change', '#deb_no', function () {
+        deb = '{{deb_no}}';
+        deb_value = $('#deb_no').val();
 
+        // if (deb !== null && deb_value !== deb) {
+        //     document.getElementById('dangerdiv').style.display = 'block';
+        // } else {
+        //     document.getElementById('dangerdiv').style.display = 'none';
+        // }
 
+        var deb_list = "{{ purdebit }}";
+        deblist = deb_list.split(",");
+        for (let i = 0; i < deblist.length; i++) {
+            if (deb_value !== '' && deb_value === deblist[i]) {
+                alert('Debit Number already in use.');
+                document.getElementById('dangerdiv').style.display = 'none';
+                document.getElementById('deb_no').value = '';
+            }
+        }
+    });
+</script>
+
+<!-- 
 <script type="text/javascript">
     $(document).on('change','#deb_no', function() {
         deb = '{{deb_no}}'
@@ -3725,7 +3767,7 @@ document.getElementById('qty3').addEventListener('change', function(event) {
             }
         }
     })
-</script>
+</script> -->
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
