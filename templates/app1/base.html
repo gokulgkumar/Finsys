@@ -45,7 +45,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
   <style>
     .a {
@@ -351,7 +352,7 @@
                 <li id="bankreconcilation"><a href="{% url 'gobankrecon' %}"><i class="bx bx-right-arrow-alt"></i>Bank
                     Reconcilation</a>
                 </li>
-                <li id="bankholders"><a href="{% url 'bank_account_holder_list' %}"><i class="bx bx-right-arrow-alt"></i>Bank
+                <li id="bankholders"><a href="{% url 'bank_load' %}"><i class="bx bx-right-arrow-alt"></i>Bank
                     Holders</a>
                 </li>
                 <li id="cashinhands"><a href="{% url 'cash_in_hand' %}"><i class="bx bx-right-arrow-alt"></i>Cash
@@ -585,6 +586,7 @@
               <li id="employeeloan"><a href="{% url 'employeeloanpage' %}"><i class="bx bx-right-arrow-alt"></i>Employee Loan</a> </li>
               <li><a href="{% url 'holidayss' %}"><i class="bx bx-right-arrow-alt"></i>Holidays</a> </li>
               <li><a href="{% url 'attendancepagee' %}"><i class="bx bx-right-arrow-alt"></i>Attendance</a> </li>
+              <li><a href="{% url 'salary_details' %}"><i class="bx bx-right-arrow-alt"></i>Salary Details</a> </li>
             </ul>
           </li>
           </ul>
@@ -740,6 +742,8 @@
   <script src="{% static 'assets/plugins/vectormap/jquery-jvectormap-au-mill.js' %}"></script>
   <script src="{% static 'assets/plugins/apexcharts-bundle/js/apexcharts.min.js' %}"></script>
   <script src="{% static 'assets/js/index.js' %}"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
   <!-- App JS -->
   <script src="{% static 'assets/js/app.js' %}"></script>
 

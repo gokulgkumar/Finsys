@@ -1,0 +1,306 @@
+{% extends 'app1/base.html' %}
+{% block body %}
+{% load static %}
+
+<style>
+    input {
+        background-color: #2f516f;
+        border: 0;
+        border-radius: 5px;
+        color: white;
+    }
+
+    @media screen and (max-width: 768px) {
+        #employeeid {
+            margin-left: 0px !important;
+        }
+    }
+</style>
+
+{{ employee.employeeid }}
+<form action="{% url 'salaryedit' employee_id=employee.employeeid salary_id=salary_detail.id %}" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+    <script>
+        function fetchEmployeeDetails() {
+            console.log("Fetching employee details...");
+            var selectedEmployeeId = $('#empl_id').val();
+            console.log("Selected Employee ID:", selectedEmployeeId);
+    
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'listemployee_salary' %}",
+                data: {
+                    id: selectedEmployeeId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log("Employee details received:", data);
+                    updateFormFields(data); 
+                },
+                error: function (error) {
+                    console.error("Error fetching employee details:", error);
+                }
+            });
+        }
+        function updateFormFields(data) {
+            console.log(data);
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('eid').value = data.employeeno || '';
+            document.getElementById('joindate').value = data.joindate || '';
+            document.getElementById('Salary').value = data.amount || '';
+            
+            {% comment %} if (data.holidays_data) {
+            var holidaysList = data.holidays_data.map(function (holiday) {
+                return holiday.start_date + ' to ' + holiday.end_date;
+            });
+            updateFieldValue('holidays', holidaysList.join(', '));
+        }
+        if (data.attendance_data) {
+            var attendanceList = data.attendance_data.map(function (attendance) {
+                return attendance.date + ' (' + attendance.status + ')';
+            });
+            updateFieldValue('attendance', attendanceList.join(', '));
+        }
+
+        if (data.working_days) {
+            updateFieldValue('working_days', data.working_days);
+        } {% endcomment %}
+    }
+    function updateFieldValue(elementId, value) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.value = value;
+        } else {
+            console.warn("Element with ID '" + elementId + "' not found in the DOM.");
+        }
+    }
+        function clearEmployeeDetails() {
+            updateFormFields({
+                email: '',
+                employeeno: '',
+                joindate: '',
+                amount: '',
+                holidays_data: [],
+                attendance_data: [],
+                working_days: '',
+               
+            });
+        }
+    </script>
+    <script>
+        function fetchDays() {
+            var selectedEmployeeId = $('#empl_id').val();
+            var sd = $('#salary_date').val();
+            var selectedMonth = $('#month').val();
+            var selectedYear = $('#year_').val();
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'getDays' %}",
+                data: {
+                    sd : sd,
+                    id: selectedEmployeeId,
+                    month: selectedMonth,
+                    year: selectedYear,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                dataType: 'json',
+                success: function (data) {
+                    document.getElementById('error_msg').innerHTML = ""
+                    console.log("Employee details received:", data);
+                    document.getElementById('holidays').value = data.holiday ;
+                    document.getElementById('attendance').value = data.leave ;
+                    document.getElementById('working_days').value = data.working_days ;
+                },
+                error: function (error) {
+                    console.error("Error fetching employee details:", error);
+                    document.getElementById('error_msg').innerHTML = error.responseJSON && error.responseJSON.error || 'Unknown error';
+                }
+            });
+        } 
+    </script>
+    <script>
+        function calculateSalary() {
+            var casualLeave = $('#casual_leave').val() || 0;
+            var otherCuttings = $('#other_cuttings').val() || 0;
+            var addBonus = $('#add_bonus').val() || 0;
+            var salary = $('#Salary').val() || 0;
+            var holiday = $('#holidays').val() || 0;
+            var leave = $('#attendance').val()|| 0;
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'calculate_salary' %}",
+                data: {
+                    leave : leave,
+                    holiday : holiday,
+                    attendance : leave,
+                    casual_leave: casualLeave,
+                    other_cuttings: otherCuttings,
+                    add_bonus: addBonus,
+                    salary:salary,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log("Monthly salary calculated:", data);
+                    document.getElementById('monthly_salary').value = data.monthly_salary;;
+                    {% comment %} updateMonthlySalary(data); {% endcomment %}
+                },
+                error: function (error) {
+                    console.error("Error calculating monthly salary:", error);
+                }
+            });
+        }
+        function updateMonthlySalary(data) {
+            var monthlySalaryElement = document.getElementById('monthly_salary');
+    
+            if (monthlySalaryElement) {
+                monthlySalaryElement.value = data.monthly_salary;
+            } else {
+                console.warn("Element with ID 'monthly_salary' not found in the DOM.");
+            }
+        }   
+    </script>
+    <div class="page-content">
+        <h2 id="hel"></h2>
+        <div class="card radius-15">
+            <div class="card-body">
+                <div class="card-title">
+                    <center>
+                        <h2 class="mb-0" id="estno">EDIT SALARY DETAILS</h2>
+                    </center>
+                </div>
+                <hr />
+            </div>
+        </div>
+        <div class="card radius-15">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col"> </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Employee</label>
+                        <input type="text" class="form-control" id="employee" name="employee"
+                            placeholder="Employee" value="{{employee.firstname}} {{employee.lastname}}" readonly>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Employee No</label>
+                        <input type="text" class="form-control" id="employeeid" name="employeeid"
+                            placeholder="Employee Id" value="{{employee.employeeno}}" readonly>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4 " style="width: 100%;">
+                        <label class="col-form-label">Email</label>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{employee.email}}" readonly>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Salary</label>
+                        <input type="text" class="form-control" id="Salary" name="Salary" placeholder="Salary" value="{{employee.amount}}" readonly>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Join Date</label>
+                        <input type="date" class="form-control"  id="joindate" name="joindate" value="{{employee.joindate}}" readonly><br>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Salary Date</label>
+                        <input type="date" class="form-control" name="salary_date" id="salary_date" value="{{salary_detail.salary_date|date:'Y-m-d'}}"required>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Month</label>
+                        <select name="month" id="month" class="form-control" required onchange="fetchDays()">
+                            {% for month_name in months %}
+                                <option value="{{ forloop.counter}}" {% if month == salary_detail.month %}selected{% endif %}>{{ month_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Year</label>
+                        <select name="year" id="year_" class="form-control" required onchange="fetchDays()">
+                            {% for year in years %}
+                                <option value="{{ year }}" {% if year == salary_detail.year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <p id="error_msg"></p>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Leave</label>
+                        <input type="text" class="form-control" id="attendance" name="attendance" value="{{ salary_detail.leave }}" readonly>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Casual Leave</label>
+                        <input type="number" class="form-control" id="casual_leave" name="casual_leave" value="{{ salary_detail.casual_leave }}" >
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Holiday</label>
+                        <input type="text" class="form-control" id="holidays" name="holidays" value="{{ salary_detail.holiday }}"readonly>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Working Day</label>
+                        <input type="text" class="form-control" id="working_days" name="working_days" value="{{ salary_detail.working_days }}" readonly>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Other Cuttings</label>
+                        <input type="number" class="form-control" name="other_cuttings" id="other_cuttings" value="{{ salary_detail.other_cuttings }}" placeholder="Other Cuttings">
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Add Bonus</label>
+                        <input type="number" class="form-control" name="add_bonus"  id="add_bonus" value="{{ salary_detail.add_bonus }}"  placeholder="Add Bonus">
+                    </div>
+                    
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Calculate Salary</label>
+                        <input type="text" class="form-control" id="monthly_salary" name="monthly_salary" value="{{ salary_detail.total_salary }}" readonly>
+                        <button type="button" class="btn btn-primary" onclick="calculateSalary();">Calculate Salary</button>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Optional">{{ salary_detail.description }}</textarea>
+                    </div>
+                </div>
+
+                <div class="row mt-3 text-center">
+                    <div class="col-md-5 mb-10">
+                        <button type="submit" name="submit" value="draft" class="btn btn-secondary">Draft</button>
+                    </div>
+                    <div class="col-md-5 mb-10">
+                        <button type="submit" name="submit" value="save" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function() {
+        console.log("Script is running");
+        var selectedDate = $('#salary_date').val();
+        console.log("Selected Date:", selectedDate);
+    });
+</script>
+
+{% endblock %}
+
+

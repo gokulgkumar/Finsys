@@ -30,7 +30,7 @@
     </div>
     
     <div class="row">
-        <div class="col-md-5 d-flex p-2"><select name="acc_name" id="acc_name" class="form-control text-white" >
+        <div class="col-md-5 d-flex p-2"><select name="acc_name" id="acc_name" class="form-control text-white" required>
           <option value="cash">Select Name</option>
           {% for i in accounts %}
             <option data-acc-number="{{ i.account_number }}" value="{{ i.holder.name }}">{{ i.holder.name }}</option>
@@ -43,7 +43,7 @@
          
         
         <div class="col-md-2"></div>
-        <div class="col-md-5 p-2"> <input class="form-control" type="text" name="lender" value=""> </div>
+        <div class="col-md-5 p-2"> <input class="form-control" type="text" name="lender" value="" required> </div>
     </div>
     
 
@@ -56,7 +56,7 @@
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2"><input class="form-control" type="text" name="acc_number" id="acc_number" value=""></div>
+        <div class="col-md-5 p-2"><input class="form-control" type="text" name="acc_number" id="acc_number" value="" required></div>
         <div class="col-md-2"></div>
         <div class="col-md-5 p-2"><input class="form-control" type="text" name="desc" value=""></div>
     </div>
@@ -76,31 +76,46 @@
   </script>
   
     <div class="row">
-        <div class="col-md-5 p-2">CURRENT BALANCE</div>
+        <div class="col-md-5 p-2"> LOAN AMOUNT</div>
         <div class="col-md-2"></div>
         <div class="col-md-5 p-2">LOAN DATE</div>
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2"><input class="form-control" type="text" name="balance" value=""></div>
+        <div class="col-md-5 p-2"><input class="form-control" type="text" name="balance" value="" required></div>
         <div class="col-md-2"></div>
-        <div class="col-md-5 p-2"><input class="form-control" type="date" name="date" value=""></div>
+        <div class="col-md-5 p-2"><input class="form-control" type="date" name="date" value="{{current_date}}"></div>
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2">LOAN RECIEVED in</div>
+        <div class="col-md-5 p-2 pt-3">LOAN RECIEVED in</div>
         <div class="col-md-2"></div>
-        <div class="col-md-5 p-2">INTREST RATE %</div>
+        <div class="col-md-5 p-2"></div>
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2"><select   name="recieved" class="form-control  text-white" id="">
+        <div class="col-md-5 p-2 pt-3"><select   name="recieved" class="form-control  text-white" id="pay" required>
             <option class="form-control bg-dark text-white" value="cash">CASH</option>
+            <option class="form-control bg-dark text-white" value="upi">UPI</option>
+            <option class="form-control bg-dark text-white" value="cheque">CHEQUE</option>
+
             {% for i in bank %}
             <option class="form-control bg-dark text-white" value="{{i.bankname}}">{{i.bankname}}</option>
             {% endfor %}
-        </select>  </div>  <div class="col-md-2"></div>
-        <div class="col-md-5 p-2"><input class="form-control" type="text" placeholder="%" name="intrest" value="%"></div>
+        </select>  </div> 
+        <div class="col-md-2"></div>
+        <div class="col-md-5" style="display:none;"  id="chequedi">
+          <label class="col-form-label" >Cheque No</label>
+          <input type="text" class="form-control" name="recieved_cheque_id" value="{{rbill.cheque_no}}" id="cheque_i" placeholder="Enter Cheque No">
+      </div>
+      <div class="col-md-5"  style="display:none;" id="upidi">
+          <label class="col-form-label" >UPI ID</label>
+          <input type="text" class="form-control" name="recieved_upi_id" value="{{rbill.upi_no}}" id="upi_i" placeholder="Enter UPI ID">
+      </div>
+      <div class="col-md-5"  style="display:none;" id="bnkdi">
+          <label class="col-form-label" >Bank Account</label>
+          <input type="text" class="form-control" name="recieved_bnk_id" id="bnk_i" style="background-color: #43596c;" readonly>
+      </div>
     </div>
     
     <div class="row">
@@ -110,7 +125,7 @@
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2"> <input type="text" name="term" class="form-control" ></div>
+        <div class="col-md-5 p-2"> <input type="text" name="term" class="form-control" required></div>
         <div class="col-md-2"></div>
         <div class="col-md-5 p-2"><input class="form-control" type="text" name="processing" value=""></div>
     </div>
@@ -118,20 +133,40 @@
     <div class="row">
         <div class="col-md-5 p-2">PROCESSING PAID FROM</div>
         <div class="col-md-2"></div>
-        <div class="col-md-5"></div>
+        <div class="col-md-5">INTREST AMOUNT</div>
     </div>
     
     <div class="row">
-        <div class="col-md-5 p-2"> <select    name="paid" class="form-control  text-white" id="">
+        <div class="col-md-5 p-2"> 
+          <select class="form-control my-select" id="pay_method" name="paid" style="background-color: #43596c;" required>
             <option class="form-control bg-dark text-white" value="cash">CASH</option>
-            {% for i in bank %}
-            <option class="form-control bg-dark text-white" value="{{i.bankname}}">{{i.bankname}}</option>
-            {% endfor %}
-        </select>      </div>
+            <option class="form-control bg-dark text-white" value="upi">UPI</option>
+            <option class="form-control bg-dark text-white" value="cheque">CHEQUE</option>            {% for i in bank %}
+              <option class="form-control bg-dark text-white" value="{{i.bankname}}">{{i.bankname}}</option>
+              {% endfor %}
+          </select>
+          
+            </div>
         <div class="col-md-2"></div>
-        <div class="col-md-5"></div>
-    </div>
+            <div class="col-md-5 p-2">
+              <input class="form-control" type="text" placeholder="0" name="intrest" value="0">
+            </div>
+      </div>
     
+   <div class="row">
+    <div class="col-md-5" style="display:none;"  id="chequediv">
+      <label class="col-form-label" >Cheque No</label>
+      <input type="text" class="form-control" name="paid_cheque_id" value="" id="cheque_id" placeholder="Enter Cheque No">
+  </div>
+  <div class="col-md-5"  style="display:none;" id="upidiv">
+      <label class="col-form-label" >UPI ID</label>
+      <input type="text" class="form-control" name="paid_upi_id" value="" id="upi_id" placeholder="Enter UPI ID">
+  </div>
+  <div class="col-md-5"  style="display:none;" id="bnkdiv">
+      <label class="col-form-label" >Bank Account</label>
+      <input type="text" class="form-control" name="paid_bnk_id" id="bnk_id" style="background-color: #43596c;" readonly>
+  </div>
+   </div>
 
     
     <div class="row mb-5">
@@ -270,8 +305,8 @@ value="No">No</option>
         <div style="width: 45%;float: right;" class="ml-5">
           <h3>Bank Account Form</h3>
           <div class="form-group">
-            <label for="accountName">Account Name</label>
-            <input type="text" class="form-control" id="account_name" placeholder="Account Name" name="account_name">
+            <label for="accountName">Holder Name</label>
+            <input type="text" class="form-control" id="account_name" placeholder="Holder Name" name="account_name">
           </div>
 
           <div class="form-group">
@@ -328,12 +363,12 @@ value="No">No</option>
             </div>
             
             <div class="form-group">
-              <label for="address">Mailing Address</label>
+              <label for="address"> Address</label>
               <textarea class="form-control" id="address" rows="3" name="address"></textarea>
             </div>
             
             <div class="form-group">
-              <label for="mailingCountry">Mailing Country</label>
+              <label for="mailingCountry"> Country</label>
               <select class="form-control" id="country" name="country">
                 <option>Select Country</option>
   <option value="AF">Afghanistan</option>
@@ -601,7 +636,7 @@ value="No">No</option>
               
             <label
              
-            for="mailingState">Mailing State</label>
+            for="mailingState"> State</label>
             
               
             <select
@@ -656,7 +691,7 @@ value="No">No</option>
               
             <label
              
-            for="mailingPin">Mailing Pin</label>
+            for="mailingPin"> Pin</label>
             
               
             <input
@@ -670,7 +705,7 @@ value="No">No</option>
             <h3>Opening Balance Form</h3>
             <div class="form-group">
               <label for="date">Date</label>
-              <input type="date" class="form-control" id="date" placeholder="Opening Balance Date" name="date">
+              <input type="date" class="form-control" id="date" value="{{current_date}}" placeholder="Opening Balance Date" name="date">
             </div>
             
             <div class="form-group">
@@ -688,6 +723,102 @@ value="No">No</option>
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+<script>
+  $(document).ready(function() {
+    $("#pay_method").change(function() {
+      var x=$('#pay_method').val();
+      if(x==='cash'){
+        $('#chequediv').hide()
+        $('#bnkdiv').hide()
+        $('#upidiv').hide()
+        document.getElementById('cheque_id').value=null
+        document.getElementById('upi_id').value=null
+      }else if(x==='cheque'){
+        $('#chequediv').show()
+        $('#bnkdiv').hide()
+        $('#upidiv').hide()
+        document.getElementById('upi_id').value=null
+      }else if(x==='upi'){
+        $('#upidiv').show()
+        $('#bnkdiv').hide()
+        $('#chequediv').hide()
+        document.getElementById('cheque_id').value=null
+      }else{
+        $('#bnkdiv').show()
+        $('#chequediv').hide()
+        $('#upidiv').hide()
+        document.getElementById('cheque_id').value=null
+        document.getElementById('upi_id').value=null
+
+        $.ajax({
+            type: "GET",
+            url: "{% url 'bankdata' %}",
+            data: {
+                id: x,
+            },
+            success: function (response) {
+                data = response.bank
+                document.getElementById('cheque_id').value=null
+                document.getElementById('upi_id').value=null
+                document.getElementById("bnk_id").value = data
+            }
+        });
+      }
+    });
+  });
+</script>
+
+
+
+
+<script>
+  $(document).ready(function() {
+    $("#pay").change(function() {
+      var x=$('#pay').val();
+      if(x==='cash'){
+        $('#chequedi').hide()
+        $('#bnkdi').hide()
+        $('#upidi').hide()
+        document.getElementById('cheque_i').value=null
+        document.getElementById('upi_i').value=null
+      }else if(x==='cheque'){
+        $('#chequedi').show()
+        $('#bnkdi').hide()
+        $('#upidi').hide()
+        document.getElementById('upi_i').value=null
+      }else if(x==='upi'){
+        $('#upidi').show()
+        $('#bnkdi').hide()
+        $('#chequedi').hide()
+        document.getElementById('cheque_i').value=null
+      }else{
+        $('#bnkdi').show()
+        $('#chequedi').hide()
+        $('#upidi').hide()
+        document.getElementById('cheque_i').value=null
+        document.getElementById('upi_i').value=null
+
+        $.ajax({
+            type: "GET",
+            url: "{% url 'bankdat' %}",
+            data: {
+                id: x,
+            },
+            success: function (response) {
+                data = response.bank
+                document.getElementById('cheque_i').value=null
+                document.getElementById('upi_i').value=null
+                document.getElementById("bnk_i").value = data
+            }
+        });
+      }
+    });
+  });
+</script>
+
 <script>
 $(document).ready(function() {
   $('#open-modal').click(function() {
@@ -786,4 +917,5 @@ function reloadAccountDropdown() {
 
 
 </script>
+
 {% endblock %}

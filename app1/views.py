@@ -26972,12 +26972,16 @@ def search_resept(request,id):
 def goestimate(request):
     cmp1 = company.objects.get(id=request.session["uid"])
     est1 = estimate.objects.filter(cid=cmp1).values()
+    customers = customer.objects.filter(cid=cmp1).all()
+    
     for e in est1:
-        cust = " " . join(e['customer'].split(" ")[1:])
+        cust = " ".join(e['customer_name'].split(" ")[1:])
         e['cust'] = cust
+    
     context = {
         'est1' :est1,
-        'cmp1': cmp1
+        'cmp1': cmp1,
+        'customers':customers
 
     }
     return render(request,'app1/goestimate.html',context)
@@ -26995,16 +26999,61 @@ def estindex2(request):
         noninv = noninventory.objects.filter(cid=cmp1).all()
         ser = service.objects.filter(cid=cmp1).all()
         item = itemtable.objects.filter(cid=cmp1).all()
-
+        
         unit = unittable.objects.filter(cid=cmp1)
         acc  = accounts1.objects.filter(acctype='Cost of Goods Sold',cid=cmp1)
         acc1  = accounts1.objects.filter(acctype='Sales',cid=cmp1)
+        ref = estimate.objects.filter(cid=cmp1).last()
+        if ref:
+            ref_no = int(ref.reference_number) + 1
+            ord_no = 1000+ref_no
+
+        else:
+            ref_no = 1
+            ord_no = 1001
+
+        sel = estimate.objects.filter(cid=cmp1).last()
+        if sel:
+            ord_no = str(sel.estimateno)
+            numbers = []
+            stri = []
+            for word in ord_no:
+                if word.isdigit():
+                    numbers.append(word)
+                else:
+                    stri.append(word)
+            
+            num=''
+            for i in numbers:
+                num +=i
+            
+            st = ''
+            for j in stri:
+                st = st+j
+
+            ord_no = int(num)+1
+
+            if num[0] == '0':
+                if ord_no <10:
+                    ord_no = st+'0'+ str(ord_no)
+                else:
+                    ord_no = st+ str(ord_no)
+            else:
+                ord_no = st+ str(ord_no)
+
+        sale_list = ''
+        sale_ord = estimate.objects.all()
+        for s in sale_ord:
+            sale_list = s.estimateno+ ',' + sale_list
+
+        terms  = PaymentTerms.objects.filter(cid=cmp1)
+
 
 
 
         context = {'est': est1, 'customers': customers, 'cmp1': cmp1, 'inv': inv, 'bun': bun, 'noninv': noninv,'item':item,
                    'ser': ser, 'tod': tod,
-                   'unit':unit,'acc':acc,'acc1':acc1,
+                   'unit':unit,'acc':acc,'acc1':acc1,'ref_no':ref_no,'ord_no':ord_no,'terms':terms,'sale_list':sale_list
                    }
         return render(request, 'app1/estimate2.html', context)
     except:
@@ -27012,17 +27061,16 @@ def estindex2(request):
 
 
 @login_required(login_url='regcomp')
-@login_required(login_url='regcomp')
 def estcreate2(request):
     if request.method == 'POST':
         cmp1 = company.objects.get(id=request.session["uid"])
-        est2 = estimate(customer=request.POST.get('customer'), 
+        est2 = estimate(customer_name=request.POST.get('customer_name'), 
                         email=request.POST.get('email'), 
                         billingaddress=request.POST.get('billingaddress'), 
                         estimatedate=request.POST.get('estimatedate'), 
                         expirationdate=request.POST.get('expirationdate'),
                         placeofsupply=request.POST.get('placosupply'),
-                        estimateno='1000',
+                        estimateno=request.POST.get('ord_no'),
                         cid=cmp1,
                         reference_number = request.POST.get('Ref_No'),
                         note = request.POST.get('Note'),
@@ -27031,16 +27079,22 @@ def estcreate2(request):
                         CGST  = request.POST.get('cgst'),
                         SGST = request.POST.get('sgst'),
                         taxamount = request.POST.get('taxamount'),
+                        adjust = request.POST.get("adj"),
                         shipping_charge = request.POST.get('ship'),
                         estimatetotal=request.POST.get('grandtotal'),
+                        term_days = request.POST.get("pay_term"),
+                        
                     )
                         
-                            
+        if 'Draft' in request.POST:
+            est2.status = "Draft"
+        if "Sent" in request.POST:
+            est2.status = "Sent" 
+
         if len(request.FILES) != 0:
             est2.file=request.FILES.get('file')
         est2.save()
-        est2.estimateno = int(est2.estimateno) + est2.estimateid
-        est2.save()
+        
 
         items = request.POST.getlist("product[]")
         hsn = request.POST.getlist("hsn[]")
@@ -27203,42 +27257,41 @@ def estimate_create_item2(request,id):
 
 @login_required(login_url='regcomp')
 def editestimate(request, id):
-    try:
+   
         cmp1 = company.objects.get(id=request.session['uid'])
        
         inv = inventory.objects.filter(cid=cmp1).all()
         bun = bundle.objects.filter(cid=cmp1).all()
         noninv = noninventory.objects.filter(cid=cmp1).all()
         ser = service.objects.filter(cid=cmp1).all()
-        customers = customer.objects.filter(cid=cmp1).all()
         edt = estimate.objects.get(estimateid=id, cid=cmp1)
+        customers = customer.objects.filter(cid=cmp1).all()
+        cust = customer.objects.get(customerid = edt.customer_name.split(" ")[0])
         item = itemtable.objects.filter(cid=cmp1).all()
         estimateitem = estimate_item.objects.filter(estimate=id).all()
+        terms = PaymentTerms.objects.filter(cid = cmp1)
+        # cust1 = customer.objects.get(customerid = edt.customer_id)
         
-        cust1 = customer.objects.get(customerid = edt.customer.split(" ")[0])
-        # print(cust1)
-        # print(edt.customer.split(" ")[0])
         context = {'estimate': edt, 'cmp1': cmp1, 'inv': inv,
                    'noninv': noninv, 'bun': bun, 'ser': ser,'item':item,
-                   'estimateitem':estimateitem ,'customers':customers,'cust1' : cust1}
+                   'estimateitem':estimateitem ,'customers':customers,'terms':terms,'cust':cust}
         
         return render(request, 'app1/edit_estimate.html', context)
-    except:
-        return redirect('goestimate')
 
 @login_required(login_url='regcomp')
 def updateestimate2(request, id):
     if request.method =="POST":
         cmp1 = company.objects.get(id=request.session['uid'])
         upd = estimate.objects.get(estimateid=id, cid=cmp1)
-        upd.customer = request.POST.get('customer')
+        upd.customer_name = request.POST.get('customer_name')
         upd.email = request.POST.get('email')
         upd.billingaddress = request.POST.get('billingaddress')
         upd.estimatedate = request.POST.get('estimatedate')
         upd.expirationdate = request.POST.get('expirationdate')
         upd.placeofsupply = request.POST.get('placosupply')
-        
+        upd.term_days= request.POST.get('pay_term')
         upd.reference_number = request.POST.get('Ref_No')
+        upd.estimateno  = request.POST.get('ord_no')
         upd.note = request.POST.get('Note')
         upd.subtotal=request.POST.get('subtotal')
                        
@@ -27247,6 +27300,7 @@ def updateestimate2(request, id):
         upd.SGST = request.POST.get('sgst')
         upd.taxamount = request.POST.get('taxamount')
         upd.shipping_charge = request.POST.get('ship')
+        upd.adjust = request.POST.get('adj')
         upd.estimatetotal = request.POST.get('grandtotal')
         if len(request.FILES) != 0:
             if len(upd.file) > 0  :
@@ -27359,15 +27413,14 @@ def new_customers4(request,id):
 
 @login_required(login_url='regcomp')
 def deleteestimate(request, id):
-    try:
-        cmp1 = company.objects.get(id=request.session['uid'])
-        upd = estimate.objects.get(estimateid=id, cid=cmp1)
+    cmp =request.session.get('uid')
+    cmp1=company.objects.get(id=cmp)
+
+    upd = estimate.objects.get(estimateid=id, cid=cmp1)
+    upd1=estimate_item.objects.filter(estimate=upd,cid=cmp1).delete()
+    upd.delete()
         
-        upd.delete()
-        os.remove(upd.estimate.path)
-        return redirect('goestimate')
-    except:
-        return redirect('goestimate')
+    return redirect('goestimate')
 
 
 def search_estimate(request):
@@ -27408,14 +27461,18 @@ def estimate_view(request,id):
     
     cmp1 = company.objects.get(id=request.session['uid'])
     upd = estimate.objects.get(estimateid=id, cid=cmp1)
-    cust = customer.objects.get(customerid = upd.customer.split(" ")[0])
-    estitem = estimate_item.objects.filter(estimate=id)
+    cust = customer.objects.get(customerid =upd.customer_name.split(" ")[0])
+    estitem = estimate_item.objects.filter(estimate=id, cid=cmp1)
+    tot_dis = 0
+    for s in estitem:
+        tot_dis += int( s.discount)
 
     context ={
         'estimate':upd,
         'cmp1':cmp1,
         'estitem':estitem,
         'cust' : cust,
+        'tot_dis':tot_dis,
 
     }
 
@@ -27473,12 +27530,11 @@ def render_pdfestimate_view(request,id):
 
 
 
-
 def convert1(request,id):
     cmp1 = company.objects.get(id=request.session['uid'])
     upd = estimate.objects.get(estimateid=id, cid=cmp1)
 
-    upd.status = 'Approved'
+    upd.status = 'Sent'
     upd.save()
 
 
@@ -27689,6 +27745,7 @@ def convert2(request,id):
 def estmate_filter1(request):
     cmp1 = company.objects.get(id=request.session["uid"])
     est1 = estimate.objects.filter(cid=cmp1,status='Draft').all()
+    
 
     context = {
             'est1' :est1,
@@ -27698,7 +27755,7 @@ def estmate_filter1(request):
 
 def estmate_filter2(request):
     cmp1 = company.objects.get(id=request.session["uid"])
-    est1 = estimate.objects.filter(cid=cmp1,status='Approved').all()
+    est1 = estimate.objects.filter(cid=cmp1,status='Sent').all()
 
     context = {
             'est1' :est1,
@@ -27715,6 +27772,250 @@ def estmate_filter3(request):
             'cmp1': cmp1
             }
     return render(request,'app1/goestimate.html',context)
+
+def itemdata3(request):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        print(cmp1.state)
+        id = request.GET.get('id')
+        print("asdsadas")
+        print(id)
+        toda = date.today()
+        tod = toda.strftime("%Y-%m-%d")
+        # to = toda.strftime("%d-%m-%Y")
+        item = itemtable.objects.get(name=id,cid=cmp1)
+        print(item)
+        hsn = item.hsn
+        qty = item.stock
+        price = item.sales_cost
+        gst = item.intra_st
+        sgst = item.inter_st
+        places=cmp1.state
+        return JsonResponse({"status":" not",'hsn':hsn,'qty':qty,'places':places,'price':price,'gst':gst,'sgst':sgst})
+    return redirect('/')
+
+
+
+
+def shareEstimateToEmail(request,id):
+  if request.user:
+       
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                print(emails_list)
+
+                cmp1 = company.objects.get(id_id=request.user.id)
+                upd = estimate.objects.get(estimateid=id, cid=cmp1)
+                cust = customer.objects.get(customerid =upd.customer_name.split(" ")[0])
+                estitem = estimate_item.objects.filter(estimate=id)
+                        
+                context = {'estimate':upd,
+                'cmp1':cmp1,
+                'estitem':estitem,
+                'cust':cust,
+                }
+                template_path = 'app1/estimate_file_mail.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                pdf = result.getvalue()
+                filename = f'ESTIMATE .pdf'
+                subject = f"ESTIMATE bill"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached ESTIMATE  \nRegards,\n{cmp1.cname}\n{cmp1.caddress}\n{cmp1.city} - {cmp1.state}\n{cmp1.phone}", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                # messages.success(request, 'Estimate file has been shared via email successfully..!')
+                return redirect(estimate_view,id)
+        
+
+def estimate_convert1(request,id, conversion_type):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    upd = estimate.objects.get(estimateid=id, cid=cmp1)
+
+    inv = invoice.objects.filter(cid = cmp1).last()
+    if inv is None:
+        inv_no = 'IN-01'
+    else:
+        last_invoiceno = inv.invoiceno
+        last_numbers = re.findall(r'\d+', last_invoiceno)
+        last_numbers_string = ''.join(last_numbers)
+
+        for number in last_numbers:
+            last_invoiceno = re.sub(number, '', last_invoiceno)
+        remaining_characters = last_invoiceno.strip()
+        if remaining_characters == "":
+            inv_no = str(int(last_numbers_string)+1)
+        else:
+            inv_no = remaining_characters + str(int(last_numbers_string)+1)
+    
+    if conversion_type == 'invoice':
+        
+       
+        invoice_balance = inv.balance
+        
+       
+    
+    invo=invoice(customername=upd.customer_name, email=upd.email, invoiceno=inv_no, invoicedate=upd.estimatedate, bname=upd.billingaddress, duedate=upd.expirationdate,
+        placosupply=upd.placeofsupply, baldue = upd.estimatetotal, subtotal=upd.subtotal, grandtotal=upd.estimatetotal, paidoff = 0, balance =invoice_balance, status='Approved',note = upd.note ,file =upd.file,
+        IGST=upd.IGST, CGST=upd.CGST, SGST=upd.SGST, taxamount=upd.taxamount, adjust = upd.adjust, shipping_charge=upd.shipping_charge, cid = cmp1)
+
+   
+    upd.is_converted = True #changed - shemeem
+    upd.converted_inv = invo.invoiceno
+    upd.converted_invoice_balance = invo.balance
+    invo.save()
+    upd.save()
+            
+            # shemeem added - getting challan items and storing into invoice_items table
+    ch_items = estimate_item.objects.filter(estimate = upd.estimateid, cid_id = cmp1)
+
+    for item in ch_items:
+        inv_items = invoice_item(product = item.item, hsn = item.hsn, qty = item.quantity, price = item.rate, total = item.total, tax = item.tax, discount = item.discount,  cid = cmp1,invoice = invo)
+        inv_items.save()
+        stk = itemtable.objects.get(name = item.item, hsn = item.hsn, cid = cmp1)
+        quantity_as_int = int(item.quantity)
+        stk.stock -= quantity_as_int
+        stk.save()
+
+    customers = customer.objects.filter(cid=cmp1).all()
+    my_string = invo.customername
+    first_letter = my_string[0]
+    cust = customer.objects.get(customerid = int(first_letter))
+    terms = PaymentTerms.objects.filter(cid = cmp1).all()
+    bank = bankings_G.objects.filter(cid=cmp1)
+    invitem = invoice_item.objects.filter(invoice = invo)
+    itemss = itemtable.objects.filter(cid = cmp1)
+
+    context = {'invoice':invo, 'invitem':invitem, 'customers':customers, 'cust':cust, 'terms':terms ,'bank':bank ,'item':itemss}
+    return render(request,'app1/editinvoice.html',context)
+
+def covert_estimate_to_recinvoice(request,id,conversion_type):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    upd = estimate.objects.get(estimateid=id, cid=cmp1)
+
+    recinv = recinvoice.objects.filter(cid = cmp1).last()
+    if recinv is None:
+        recinv_no = 'RI-01'
+    else:
+        last_recinvoiceno = recinv.recinvoiceno
+        last_numbers = re.findall(r'\d+', last_recinvoiceno)
+        last_numbers_string = ''.join(last_numbers)
+
+        for number in last_numbers:
+            last_recinvoiceno = re.sub(number, '', last_recinvoiceno)
+        remaining_characters = last_recinvoiceno.strip()
+        if remaining_characters == "":
+            recinv_no = str(int(last_numbers_string)+1)
+        else:
+            recinv_no = remaining_characters + str(int(last_numbers_string)+1)
+        
+    
+    if conversion_type == 'recurring_invoice':
+        recurring_invoice_balance = recinv.balance
+        upd.converted_recurring_invoice_balance = recurring_invoice_balance
+     
+    
+    recinvo=recinvoice(customername=upd.customer_name ,recinvoiceno = recinv_no, startdate=upd.estimatedate, enddate=upd.expirationdate, bname=upd.billingaddress, placosupply=upd.placeofsupply,
+        taxamount = upd.taxamount, baldue = upd.estimatetotal, email=upd.email, subtotal = upd.subtotal, grandtotal = upd.estimatetotal, status='Approved', note = upd.note, file = upd.file,
+        IGST=upd.IGST, CGST=upd.CGST, SGST=upd.SGST,  paidoff = 0, balance = upd.converted_recurring_invoice_balance, shipping_charge=upd.shipping_charge, adjust = upd.adjust, cid = cmp1)
+
+    recinvo.save()
+    upd.is_converted = True #changed - shemeem
+    upd.converted_rec = recinvo.recinvoiceno
+    upd.converted_recurring_invoice_balance = recurring_invoice_balance
+    upd.save()
+            
+            # shemeem added - getting challan items and storing into invoice_items table
+    ch_items = estimate_item.objects.filter(estimate = upd.estimateid, cid_id = cmp1)
+
+    for item in ch_items:
+        recinv_items = recinvoice_item(product = item.item, hsn = item.hsn, qty = item.quantity, price = item.rate, tax = item.tax, discount = item.discount, total = item.total, cid = cmp1, recinvoice = recinvo)
+        recinv_items.save()
+        #stk = itemtable.objects.get(name = item.product, hsn = item.hsn, cid = cmp1)
+        #stk.stock -= item.quantity
+        #stk.save()
+
+    customers = customer.objects.filter(cid=cmp1).all()
+    my_string = recinvo.customername
+    first_letter = my_string[0]
+    cust = customer.objects.get(customerid = int(first_letter))
+    terms = PaymentTerms.objects.filter(cid = cmp1).all()
+    bank = bankings_G.objects.filter(cid=cmp1)
+    recinvitem = recinvoice_item.objects.filter(recinvoice = recinvo)
+    itemss = itemtable.objects.filter(cid = cmp1)
+
+    context = {'recinvoice':recinvo,  'recinvitem':recinvitem, 'customers':customers, 'cust':cust, 'terms':terms ,'bank':bank ,'item':itemss}
+    return render(request,'app1/editrecinvoice.html',context)
+
+
+def covert_estimate_to_salesorder(request,id,conversion_type):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    upd = estimate.objects.get(estimateid=id, cid=cmp1)
+
+    recinv = salesorder.objects.filter(cid = cmp1).last()
+    
+    if recinv is None:
+        sale_no = 'SO-01'
+    else:
+        last_recinvoiceno = recinv.saleno
+        last_numbers = re.findall(r'\d+', last_recinvoiceno)
+        last_numbers_string = ''.join(last_numbers)
+
+        for number in last_numbers:
+            last_recinvoiceno = re.sub(number, '', last_recinvoiceno)
+        remaining_characters = last_recinvoiceno.strip()
+        if remaining_characters == "":
+            sale_no = str(int(last_numbers_string)+1)
+        else:
+            sale_no = remaining_characters + str(int(last_numbers_string)+1)
+
+    if conversion_type == 'sales_order':
+        sales_order_balance = recinv.balance
+        upd.converted_sales_order_balance = sales_order_balance  
+
+
+    recinvo=salesorder(salename=upd.customer_name ,saleno = sale_no, saledate=upd.estimatedate, shipmentdate=upd.expirationdate, saleaddress=upd.billingaddress, placeofsupply=upd.placeofsupply,
+        taxamount = upd.taxamount,  saleemail=upd.email, subtotal = upd.subtotal, salestotal = upd.estimatetotal, status='Approved', note = upd.note, file = upd.file,
+        IGST=upd.IGST, CGST=upd.CGST, SGST=upd.SGST,  paidoff = 0, balance = upd.converted_sales_order_balance, shipping_charge=upd.shipping_charge, adjust = upd.adjust, cid = cmp1,term_days=upd.term_days)
+
+    recinvo.save()
+    upd.is_converted = True #changed - shemeem
+    upd.converted_sales = recinvo.saleno
+    upd.converted_sales_order_balance = sales_order_balance  
+    upd.save()
+            
+            # shemeem added - getting challan items and storing into invoice_items table
+    ch_items = estimate_item.objects.filter(estimate = upd.estimateid, cid_id = cmp1)
+
+    for item in ch_items:
+        recinv_items = sales_item(product = item.item, hsn = item.hsn, qty = item.quantity, price = item.rate, tax = item.tax, discount = item.discount, total = item.total, cid = cmp1, salesorder = recinvo)
+        recinv_items.save()
+        #stk = itemtable.objects.get(name = item.product, hsn = item.hsn, cid = cmp1)
+        #stk.stock -= item.quantity
+        #stk.save()
+
+    customers = customer.objects.filter(cid=cmp1).all()
+    my_string = recinvo.salename
+    first_letter = my_string[0]
+    cust = customer.objects.get(customerid = int(first_letter))
+    terms = PaymentTerms.objects.filter(cid = cmp1).all()
+    bank = bankings_G.objects.filter(cid=cmp1)
+    recinvitem = sales_item.objects.filter(salesorder = recinvo)
+    itemss = itemtable.objects.filter(cid = cmp1)
+
+    context = {'recinvoice':recinvo,  'recinvitem':recinvitem, 'customers':customers, 'cust':cust, 'terms':terms ,'bank':bank ,'item':itemss}
+    return render(request,'app1/edit_sales_order.html',context)
 
 
 
@@ -30112,7 +30413,7 @@ def search_payment_received(request):
             refno__istartswith=search_str,cid=cmp1)
            
         data =expenses .values()  
-        return JsonResponse(list(data),safe=False) 
+        return JsonResponse(list(data),safe=False)
 
         
 def payment_view(request,id):
@@ -33559,38 +33860,26 @@ def viewvendor(request, id):
 
         statment, frd1, tod1 = get_vendor_statement(request, su, cmp1)   
         
+        tot6 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance_amount'))
+        tot3 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+        tot1 = purchasepayment.objects.filter(vendor=su).all().aggregate(t2=Sum('amtcredit'))
+        tot7 = purchasepayment.objects.filter(vendor=su).all().aggregate(t3=Sum('paymentamount')) 
+        tot2 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+        tot4 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance'))
+        tot5 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('paid_amount'))
+        tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('balance_amount'))
 
-        tot6 = purchasebill.objects.filter(cid=cmp1,vendor_name=su).all().aggregate(t2=Sum('balance_amount'))
-        tot2 = purchasebill.objects.filter(cid=cmp1,vendor_name=su).all().aggregate(t2=Sum('grand_total'))
-        tot3 = purchasebill.objects.filter(cid=cmp1,vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
-        tot1 = purchasepayment.objects.filter(vendor=su).all().aggregate(t2=Sum('paymentamount'))
-        tot7 = purchasepayment.objects.filter(vendor=su).all().aggregate(t3=Sum('amtcredit')) 
+        # Corrected total balance calculation
+        total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
 
-       
-        value1 = tot3.get('t2', 0)
-        value2 = tot1.get('t2', 0) 
-        if value1 is None:
-            value1 = 0
-        if value2 is None:
-            value2 = 0 
-        received=value1+value2
-        
-        billed=0
-        sum=0
-        summ=0
-        re=0
 
-        for i in pbill:
-            if i.balance_amount:
-                sum+=i.balance_amount
-            if i.grand_total:
-                billed += i.grand_total  
 
         pbl = purchasebill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
         paymnt = purchasepayment.objects.filter(vendor=su,cid_id=cmp1).all()  
         pdeb = purchasedebit.objects.filter(vendor=su,cid_id=cmp1).all()  
         expnc = purchase_expense.objects.filter(vendor=su,cid_id=cmp1).all()   
-        pordr =purchaseorder.objects.filter(vendor_name=su,status='Draft',cid_id=cmp1).all() 
+        pordr =purchaseorder.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+        rec =recurring_bill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
 
         combined_data=[]
 
@@ -33600,15 +33889,38 @@ def viewvendor(request, id):
             Date=item.date
             Total=int(item.grand_total)
             Balance=int(item.balance_amount) if item.balance_amount is not None else 0
+            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
 
             combined_data.append({
                 'Type':Type,
                 'Number':Number,
                 'Date':Date,
                 'Total':Total,
-                'Balance':Balance
+                'Balance':Balance,
+                'paid':paid_amount,
+
 
             })
+
+        for item in rec:
+            Type='Recurring Bill'
+            Number=item.billno
+            Date=item.start_date
+            Total=int(item.grand_total)
+            Balance=int(item.balance)
+            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+            combined_data.append({
+                'Type':Type,
+                'Number':Number,
+                'Date':Date,
+                'Total':Total,
+                'Balance':Balance,
+                'paid':paid_amount,
+
+            })    
+
+
 
         for item in pordr:
             Type='Purchase Order'
@@ -33616,13 +33928,15 @@ def viewvendor(request, id):
             Date=item.date
             Total=int(item.grand_total)
             Balance=int(item.balance_amount)
+            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
 
             combined_data.append({
                 'Type':Type,
                 'Number':Number,
                 'Date':Date,
                 'Total':Total,
-                'Balance':Balance
+                'Balance':Balance,
+                'paid':paid_amount,
 
             })    
 
@@ -33632,7 +33946,7 @@ def viewvendor(request, id):
             Date=item.paymentdate
             Total = int(item.paymentamount) if item.paymentamount else 0
             paid = int(item.amtreceived) if item.amtreceived else 0
-
+            bal = int(item.paymentamount) - int(item.amtreceived) if item.amtreceived else 0
             
 
             combined_data.append({
@@ -33640,7 +33954,8 @@ def viewvendor(request, id):
                 'Number':Number,
                 'Date':Date,
                 'Total':Total,
-                'Balance':'None'
+                'Balance':bal,
+                'paid':paid,
 
             }) 
 
@@ -33649,14 +33964,15 @@ def viewvendor(request, id):
             Number=int(item.debit_no)
             Date=item.debitdate
             Total=int(item.grandtotal)
-            Balance='None'
+            Balance=float(item.balance_amount)
 
             combined_data.append({
                 'Type':Type,
                 'Number':Number,
                 'Date':Date,
                 'Total':Total,
-                'Balance':Balance
+                'Balance':Balance,
+                'paid':0
 
             })    
 
@@ -33666,28 +33982,29 @@ def viewvendor(request, id):
             Number=int(item.expense_no)
             Date=item.date 
             Total=int(item.amount)
-            Balance='None'
+            Balance=Total
 
             combined_data.append({
                 'Type':Type,
                 'Number':Number,
                 'Date':Date,
                 'Total':Total,
-                'Balance':Balance
+                'paid':0,
+                'Balance':0
 
             })                 
 
         comments = VendorComment.objects.filter(vendor=vndr)
         print(comments)
 
-        context = {'vndr': vndr,'cmp1': cmp1,'pbill':pbill,'sum':sum,'sum2':summ,'billed':billed,'tod':tod,'re':re,
+        context = {'vndr': vndr,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,
                     'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,
-                    'statment':statment,'tot6':tot6,'tot7':tot7,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'received':received,'comments': comments
+                    'statment':statment,'tot6':total_balance,'tot7':tot7,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'comments': comments,
 
                 }
         return render(request,'app1/viewvendor.html',context)
-    return redirect('viewvendor') 
+    return redirect('viewvendor')
 
 # @login_required(login_url='regcomp')
 # def viewvendor1(request,id):
@@ -36003,7 +36320,7 @@ def createexpense(request):
         if request.method == 'POST':
             expense_no= '1000'
             date = request.POST['date']
-            expenseaccount = request.POST['expenseaccount']
+            expenseaccount = request.POST.get('expenseaccount')
             etyp = request.POST['expensetype']
             hsnsac = request.POST['hsn_sac']
             amount = request.POST['amount']
@@ -36078,7 +36395,7 @@ def createexpense(request):
 
             return redirect('goexpenses')
         return render(request,'app1/goexpenses.html',{'cmp1': cmp1})
-    return redirect('/') 
+    return redirect('/')  
 
 @login_required(login_url='regcomp')
 def viewexpense(request,id):
@@ -38829,7 +39146,7 @@ def addpurchasecredit(request):
         except Exception as e:
             print(e)
             return redirect(credit_note)
-    return redirect('/') 
+    return redirect('/')
     
 def getcustdata(request):
     if 'uid' in request.session:
@@ -48632,16 +48949,22 @@ def inactiveloan(request):
     
 def create_loan(request):
     cmp1 = company.objects.get(id=request.session["uid"])
-    loan=loan_account.objects.filter(cid=cmp1)
-    bank=bankings_G.objects.filter(cid=cmp1)
-    accounts = BankAccount.objects.all()
-    context={
-        'cmp1':cmp1,
-        'loan':loan,
-        'bank':bank,
-        'accounts':accounts,
+    loan = loan_account.objects.filter(cid=cmp1)
+    bank = bankings_G.objects.filter(cid=cmp1)
+    accounts = BankAccount.objects.filter(cid=cmp1)
+
+    # Get the current date
+    current_date = date.today().strftime('%Y-%m-%d')
+
+    context = {
+        'cmp1': cmp1,
+        'loan': loan,
+        'bank': bank,
+        'accounts': accounts,
+        'current_date': current_date,
     }
-    return render(request,'app1/loan_creat.html',context)
+
+    return render(request, 'app1/loan_creat.html', context)
     
     
 def create_loan_account(request):
@@ -48658,10 +48981,19 @@ def create_loan_account(request):
         processing_value = request.POST.get('processing', '0')
         processing = int(processing_value) if processing_value.isdigit() else 0
         paid = request.POST.get('paid')
+
+        recieved_cheque_id = request.POST.get('recieved_cheque_id')
+        recieved_upi_id = request.POST.get('recieved_upi_id')
+        recieved_bnk_id = request.POST.get('recieved_bnk_id')
+        paid_cheque_id = request.POST.get('paid_cheque_id')
+        paid_bnk_id = request.POST.get('paid_bnk_id')
+        paid_upi_id = request.POST.get('paid_upi_id')
+
+
         status = "Active"
         desc = request.POST.get('desc','')
         date = request.POST.get('date')
-        balance = loan_amount + processing
+        balance = loan_amount 
         recieved_amount = loan_amount -processing
         # Handle lender, received bank, and processing bank options
         # if lenderbank == 'cash':
@@ -48678,6 +49010,10 @@ def create_loan_account(request):
             received_bankname = 'cash'
             cid.cash += balance
             cid.save()
+        elif received_bank == 'upi':
+            received_bankname = 'upi'
+        elif received_bank == 'cheque':
+            received_bankname = 'cheque'
         else:
             received = bankings_G.objects.get(bankname=received_bank)
             received_bankname = received.bankname
@@ -48688,6 +49024,10 @@ def create_loan_account(request):
             processing_bankname = 'cash'
             # cid.cash -= processing
             cid.save()
+        elif paid == 'upi':
+            processing_bankname = 'upi'
+        elif paid == 'cheque':
+            processing_bankname = 'cheque'
         else:
             processing_bank = bankings_G.objects.get(bankname=paid)
             processing_bankname = processing_bank.bankname
@@ -48712,7 +49052,13 @@ def create_loan_account(request):
                 balance=balance,
                 date=date,
                 recieved_amount=recieved_amount,
+                paid_cheque =  paid_cheque_id,
+                paid_upi = paid_upi_id,
+                paid_bank_acc_number = paid_bnk_id,
 
+                recieved_cheque = recieved_cheque_id,
+                recieved_upi = recieved_upi_id,
+                bank_acc_number = paid_bnk_id,
             )
         loan.save()
 
@@ -48794,6 +49140,8 @@ def edit_loan(request,id):
     loan=loan_account.objects.get(id=id)
     bank=bankings_G.objects.filter(cid=cid)
     accounts=BankAccount.objects.all()
+    print('loannnnn')
+    print(loan.recieced_bank)
     return render(request,'app1/loan_edit.html',{'loan':loan,'cmp1':cid,'bank':bank,'accounts':accounts})
     
     
@@ -48829,8 +49177,19 @@ def edit_loan_account(request, id):
         loan.account_name = request.POST.get('acc_name')
         loan.account_number = request.POST.get('acc_number')
         loan.lenderbank = request.POST.get('lender')
-        loan.recieced_bank = request.POST.get('received')
+        loan.recieced_bank = request.POST.get('recieved')
+        i=request.POST.get('recieved')
+        print(i)
         loan.paid = request.POST.get('paid')
+        print(loan.paid)
+        loan.paid_cheque = request.POST.get('recieved_cheque_id')
+        loan.paid_upi = request.POST.get('recieved_upi_id')
+        loan.paid_bank_acc_number = request.POST.get('recieved_bnk_id')
+
+        loan.recieved_cheque = request.POST.get('paid_cheque_id')
+        loan.recieved_upi = request.POST.get('paid_upi_id')
+        loan.bank_acc_number = request.POST.get('paid_bnk_id')
+
         loan.intrest = request.POST.get('intrest')
         loan.term = request.POST.get('term')
         loan.loan_amount = int(request.POST.get('balance'))
@@ -48840,9 +49199,10 @@ def edit_loan_account(request, id):
         loan.status = "Active"
         loan.desc = request.POST.get('desc')
         loan.date = request.POST.get('date')
-        loan.balance = loan.loan_amount + loan.processing
-        loan.received_amount = loan.loan_amount - loan.processing
-
+        loan.balance = loan.loan_amount
+        loan.recieved_amount = loan.loan_amount - loan.processing
+        print('doneee')
+        print(loan.recieved_amount)
         # Save the updated loan account
         
         
@@ -48863,15 +49223,33 @@ def edit_loan_account(request, id):
         # Check if received bank is cash
         if loan.recieced_bank == 'cash':
               # Add the new value
-            cid.cash = loan.received_amount
+            cid.cash = loan.recieved_amount
             print('reciec')
             print(cid.cash)
             cid.save()
+        elif loan.recieced_bank == 'upi':
+            loan.recieced_bank = 'cheque'
+        elif loan.recieced_bank == 'cheque':
+            loan.recieced_bank = 'upi'
         else:
             received = bankings_G.objects.get(bankname=loan.recieced_bank)
-            received.balance += loan.received_amount
+            received.balance += loan.recieved_amount
             received.save()
 
+        if loan.paid == 'cash':
+              # Add the new value
+            cid.cash = loan.recieved_amount
+            print('reciec')
+            print(cid.cash)
+            cid.save()
+        elif loan.paid == 'upi':
+            loan.paid = 'upi'
+        elif loan.paid == 'cheque':
+            loan.paid = 'cheque'
+        else:
+            received = bankings_G.objects.get(bankname=loan.paid)
+            received.balance += loan.recieved_amount
+            received.save()
         # Check if paid bank is cash
        
         # Update the loan account fields
@@ -48891,7 +49269,7 @@ def edit_loan_account(request, id):
                     transaction.save()
                 elif transaction.bank_type == 'PROCESSING FEE':
                     transaction.loan_amount = loan.processing
-                    transaction.balance = loan.received_amount
+                    transaction.balance = loan.loan_amount
                     transaction.loan_date = loan.date
                     transaction.loan_desc = loan.desc
                     transaction.from_trans = loan.lenderbank
@@ -48910,7 +49288,7 @@ def edit_loan_account(request, id):
                     transaction.save()
                 if transaction.bank_type == 'PROCESSING FEE':
                     transaction.loan_amount = loan.processing
-                    transaction.balance = loan.received_amount
+                    transaction.balance = loan.loan_amount
                     transaction.loan_date = loan.date
                     transaction.loan_desc = loan.desc
                     transaction.from_trans = loan.lenderbank
@@ -48922,13 +49300,31 @@ def edit_loan_account(request, id):
                 # Redirect to the loan list page or show a success message
         print(loan.id)
         loan_id=loan.id
-        loans_sum=loan_transaction.objects.filter(loan=loan_id)
-        print(loans_sum)
-        total_sum=loans_sum.filter(bank_type__in=["OPENING BAL","PROCESSING FEE"]).aggregate(Sum("loan_amount"))["loan_amount__sum"]
-        emi_sum=loans_sum.filter(bank_type="EMI PAID").aggregate(Sum("loan_amount"))["loan_amount__sum"]
-        print(total_sum)
-        print(emi_sum)
-        loan.balance = total_sum - emi_sum
+ 
+        loan_trans = loan_transaction.objects.filter(cid=cid,loan=loan_id)
+        print(loan_trans)
+        
+
+
+        for i in loan_trans:
+                total_balance =loan.balance
+                print('balance '+ str(total_balance) )
+                if i.bank_type=='OPENING BAL':
+                    res = loan.balance = i.loan_amount
+                elif i.bank_type == 'EMI PAID':
+                    res = loan.balance - i.loan_amount
+                    print('true')
+                elif i.bank_type == 'ADDITIONAL LOAN ISSUED':
+                    print('false')
+                    res = loan.balance + i.loan_amount
+                i.balance  = res
+                i.save()
+                loan.balance = res
+                loan.save()
+
+                print('done')
+
+
         loan.save()
         return redirect('loan')
 
@@ -48939,21 +49335,22 @@ def delet_loan(request, id):
     cid = company.objects.get(id=request.session["uid"])
     loan = loan_account.objects.get(id=id)
     print(loan.lenderbank)
+    
     # Check if the lender bank is 'cash'
-    if loan.lenderbank == 'cash':
-        cid.cash += loan.balance
-        cid.save()
-        # Add the loan amount to the lender bank's balance
-        received_bank = bankings_G.objects.get(bankname=loan.recieced_bank)
-        received_bank.balance -= loan.balance
-        received_bank.save()
-    else:
-        cid.cash -= loan.balance
-        cid.save()
-        # Subtract the loan amount from the received bank's balance
-        received_bank = bankings_G.objects.get(bankname=loan.lenderbank)
-        received_bank.balance += loan.balance
-        received_bank.save()
+    # if loan.lenderbank == 'cash':
+    #     cid.cash += loan.balance
+    #     cid.save()
+    #     # Add the loan amount to the lender bank's balance
+    #     received_bank = bankings_G.objects.get(bankname=loan.recieced_bank)
+    #     received_bank.balance -= loan.balance
+    #     received_bank.save()
+    # else:
+    #     cid.cash -= loan.balance
+    #     cid.save()
+    #     # Subtract the loan amount from the received bank's balance
+    #     received_bank = bankings_G.objects.get(bankname=loan.lenderbank)
+    #     received_bank.balance += loan.balance
+    #     received_bank.save()
 
     # Delete the loan
     loan.delete()
@@ -48965,10 +49362,14 @@ def loan_list(request,id):
     global loan_id_global
     loan_id_global = id
     cid = company.objects.get(id=request.session["uid"])
-    
+    print('sdgx  '+' '+ str(loan_id_global))
     cmp1 = company.objects.get(id=request.session["uid"])
     loan=loan_account.objects.get(id=id)
     loan_tr=loan_transaction.objects.filter(loan_id=id)
+    bnk_name = loan.account_name
+    bnk_acc = BankAccountHolder.objects.get(name=bnk_name,cid=cid)
+    bnk_det = BankAccount.objects.get(holder=bnk_acc,cid=cid)
+    print(bnk_name)
     print(loan)
     context={
         'cmp1':cmp1,
@@ -48977,6 +49378,8 @@ def loan_list(request,id):
         'cid':cid,
         'loan_tr':loan_tr,
         'loan_id_global':loan_id_global,
+        'bnk_acc':bnk_acc,
+        'bnk_det':bnk_det,
 
         
         }
@@ -48987,10 +49390,13 @@ def loan_trans(request,id):
     loan_id_global = id
     cid = company.objects.get(id=request.session["uid"])
     bank=bankings_G.objects.filter(cid=cid)
+    current_date = date.today().strftime('%Y-%m-%d')
+
     context={
         'cid':cid,
         'bank':bank, 
         'loan_id_global':loan_id_global, 
+        'current_date':current_date,
     }
     return render(request,'app1/loan_payment.html',context)
     
@@ -49004,12 +49410,24 @@ def crt_loan_trans(request, id):
         intrest = request.POST.get('interest',0)
         total = int(request.POST.get('total'))
         received_from = request.POST.get('recieved')
+        received_from_upi = request.POST.get('paid_upi_id')
+        received_from_cheque = request.POST.get('paid_cheque_id')
+        received_from_bank_acc = request.POST.get('paid_bnk_id')
+
         print(id)
         # Fetch the loan account
         loan = loan_account.objects.get(id=id)
         print(loan.lenderbank)
         # Deduct payment based on source (cash or bank)
         if received_from == 'cash':
+            # Deduct from company's cash balance
+            cid.cash -= principal
+            cid.save()
+        elif received_from == 'upi':
+            # Deduct from company's cash balance
+            cid.cash -= principal
+            cid.save()
+        elif received_from == 'cheque':
             # Deduct from company's cash balance
             cid.cash -= principal
             cid.save()
@@ -49038,7 +49456,7 @@ def crt_loan_trans(request, id):
         # Create a transaction record
         transaction = loan_transaction(
             bank_type='EMI PAID',
-            from_trans=received_from if received_from != 'cash' else 'CASH',
+            from_trans=received_from if received_from != 'CASH' else 'cash',
             to_trans=loan.lenderbank,
             cid=cid,
             loan_desc=received_from if received_from != 'cash' else loan.lenderbank,
@@ -49048,36 +49466,15 @@ def crt_loan_trans(request, id):
             loan_date=date,
             loan_id=loan.id,
             balance=loan.balance,
-            total = total
+            total = total,
+            recieved_cheque=received_from_cheque,
+            recieved_upi=received_from_upi,
+            bank_acc_number=received_from_bank_acc
         )
         transaction.save()
 
     return redirect('loan_list',id)
 
-def delet_loan(request, id):
-    cid = company.objects.get(id=request.session["uid"])
-    loan = loan_account.objects.get(id=id)
-    print(loan.lenderbank)
-    # Check if the lender bank is 'cash'
-    # if loan.lenderbank == 'cash':
-    #     cid.cash += loan.balance
-    #     cid.save()
-    #     # Add the loan amount to the lender bank's balance
-    #     received_bank = bankings_G.objects.get(bankname=loan.recieced_bank)
-    #     received_bank.balance -= loan.balance
-    #     received_bank.save()
-    # else:
-    #     cid.cash -= loan.balance
-    #     cid.save()
-    #     # Subtract the loan amount from the received bank's balance
-    #     received_bank = bankings_G.objects.get(bankname=loan.lenderbank)
-    #     received_bank.balance += loan.balance
-    #     received_bank.save()
-
-    # Delete the loan
-    loan.delete()
-    
-    return redirect('loan')
     
     
 def edit_loan_payment(request, id):
@@ -49087,6 +49484,7 @@ def edit_loan_payment(request, id):
     l=loan.loan_id
     ac=loan_account.objects.get(id=l)
     loan_id=loan.loan
+    print('ffff'+' '+str(ac.id))
     print(ac.balance)
     if request.method == 'POST':
         principal = int(request.POST.get('principal'))
@@ -49095,6 +49493,11 @@ def edit_loan_payment(request, id):
         total = int(request.POST.get('total'))
         received_from = request.POST.get('recieved')
         principal = request.POST.get('principal')
+
+        paid_cheque_id = request.POST.get('paid_cheque_id')
+        paid_upi_id = request.POST.get('paid_upi_id')
+        paid_bnk_id = request.POST.get('paid_bnk_id')
+
         bank = bankings_G.objects.filter(cid=cid)
 
         # Calculate the difference in principal amount for balance adjustments
@@ -49105,6 +49508,9 @@ def edit_loan_payment(request, id):
         loan.loan_intrest = intrest
         loan.recieved_bank = received_from
         loan.total = total
+        loan.recieved_cheque=paid_cheque_id
+        loan.recieved_upi=paid_upi_id
+        loan.bank_acc_number=paid_bnk_id
         # if loan.total >= total:
         #    # Handle balance adjustments based on the difference in principal
         #     ac.balance -= principal_difference
@@ -49113,34 +49519,31 @@ def edit_loan_payment(request, id):
              # Handle balance adjustments based on the difference in principal
         # 
         loan.save()
-        loans_sum=loan_transaction.objects.filter(loan_id=loan_id)
-        total_sum=loans_sum.filter(bank_type__in=["OPENING BAL","PROCESSING FEE"]).aggregate(Sum("loan_amount"))["loan_amount__sum"]
-        emi_sum=loans_sum.filter(bank_type="EMI PAID").aggregate(Sum("loan_amount"))["loan_amount__sum"]
-        print(total_sum)
-        print(emi_sum)
-        ac.balance = total_sum - emi_sum
-        ac.save()
-        # Handle balance adjustments based on received_from
-        if received_from == 'cash':
-            cid.cash -= loan.total
-            cid.save()
-        # else:
-        #     received_from_bank = bankings_G.objects.get(bankname=received_from)
-        #     received_from_bank.balance -= principal_difference
-        #     received_from_bank.save()
-        
-        # Handle balance adjustments for lender bank (if not cash)
-        # if loan.to_trans != 'cash':
-        #     lender_bank = bankings_G.objects.get(bankname=loan.to_trans)
-        #     lender_bank.balance += principal_difference
-        #     lender_bank.save()
-        # else:
-        #     cid.cash += principal_difference
-        #     cid.save()
-        # Create a transaction record
+        loan_trans = loan_transaction.objects.filter(cid=cid,loan=ac.id)
+        print(loan_trans)
         
 
-        return redirect('loan_list',l)  # Redirect to the appropriate URL after editing
+
+        for i in loan_trans:
+                total_balance =ac.balance
+                print('balance '+ str(total_balance) )
+                if i.bank_type=='OPENING BAL':
+                    res = ac.balance = i.loan_amount
+                elif i.bank_type == 'EMI PAID':
+                    res = ac.balance - i.loan_amount
+                    print('true')
+                elif i.bank_type == 'ADDITIONAL LOAN ISSUED':
+                    print('false')
+                    res = ac.balance + i.loan_amount
+                i.balance  = res
+                i.save()
+                ac.balance = res
+                ac.save()
+
+                print('done+edited')
+        
+
+        return redirect('loan_list',ac.id)  # Redirect to the appropriate URL after editing
 
     return render(request, 'edit_loan_transaction.html', {'loan': loan})
     
@@ -49149,16 +49552,25 @@ def edit_loan_payment(request, id):
 def loan_statement(request,id):
     loan=loan_account.objects.get(id=id)
     cmp1 = company.objects.get(id=request.session["uid"])
+    current_date = date.today().strftime('%Y-%m-%d')
+
     if request.method == 'POST':
         sdate=request.POST.get('sdate')
         edate=request.POST.get('edate')
-        
-        searchrslt=loan_transaction.objects.raw('select * from app1_loan_transaction where loan_date between "'+sdate+'" and "'+edate+'" ')
+        print
+        searchrslt = loan_transaction.objects.filter(
+            loan_id=loan,
+            loan_date__range=(sdate, edate)
+        )
+        print(searchrslt)
         context={
         'cmp1':cmp1,
         'bnk':searchrslt,
+        'sdate':sdate,
+        'edate':edate,
         'ids':id,
         'loan':loan,
+        'current_date':current_date,
 
         }
         return render(request,'app1/loan_statement.html',context)
@@ -49167,6 +49579,7 @@ def loan_statement(request,id):
         bnk=loan_transaction.objects.filter(loan_id=id)
         loan=loan_account.objects.get(id=id)
         cmp1 = company.objects.get(id=request.session["uid"])
+        current_date = date.today().strftime('%Y-%m-%d')
 
         
 
@@ -49175,6 +49588,8 @@ def loan_statement(request,id):
             'bnk':bnk,
             'ids':id,
             'loan':loan,
+            'current_date':current_date,
+
 
             }
         return render(request,'app1/loan_statement.html',context)
@@ -49188,10 +49603,10 @@ def loan_pdf(request,id):
 
     loan=loan_account.objects.get(id=id)
     
-    template_path = 'app1/loan_pdf.html'
+    template_path = 'app1/loan_account_statement_pdf.html'
     context={
         'cmp1':cmp1,
-        'bnk':bnk,
+        'data':bnk,
         'ids':id,
         'loan':loan,
 
@@ -49222,14 +49637,14 @@ def active_status(request,id):
     loan=loan_account.objects.get(id=id)
     loan.status = 'Active'
     loan.save()
-    return redirect('loan_statement',id)
+    return redirect('loan_list',id)
     
     
 def inactive_status(request,id):
     loan=loan_account.objects.get(id=id)
     loan.status = 'In-Active'
     loan.save()
-    return redirect('loan_statement',id)
+    return redirect('loan_list',id)
     
     
 def sales_report(request):
@@ -49295,31 +49710,39 @@ def delete_loan_payment(request, id):
     total_amount = dl_loan.total
     print(dl_loan.from_trans)
     dl_acc = loan_account.objects.get(id=dl_loan.loan_id)
-    dl_acc.balance += amount
-    dl_acc.save()
-    # Update company cash and bank balances
-    if dl_loan.from_trans == 'CASH':
-        # Increase company's cash balance
-        cid.cash += amount
-        cid.save()
-        # to_trans_bank = bankings_G.objects.get(bankname=to_trans)
-        # to_trans_bank.balance -= amount
-        # print('doncash')
-        # to_trans_bank.save()
-    else:
-        cid.cash -= amount
-        cid.save()
-        # Decrease the 'to_trans' bank's balance
-        to_trans_bank = bankings_G.objects.get(bankname=to_trans)
-        to_trans_bank.balance += amount
-        print('set')
-        to_trans_bank.save()
-
-    # If 'to_trans' is cash, increase company's cash balance
-    dl_loan.balance += amount
     dl_loan.save()
-    # Delete the loan transaction
+    # Update company cash and bank balances
+    loan_trans = loan_transaction.objects.filter(cid=cid,loan=dl_acc)
+    print(loan_trans)
+        
     dl_loan.delete()
+
+
+    for i in loan_trans:
+                total_balance =dl_acc.balance
+                print('balance '+ str(total_balance) )
+                if i.bank_type=='OPENING BAL':
+                    res = dl_acc.balance = i.loan_amount
+                    print('open')
+                    print(res)
+                elif i.bank_type == 'EMI PAID':
+                    res = dl_acc.balance - i.loan_amount
+                    print('true')
+                    print(res)
+
+                elif i.bank_type == 'ADDITIONAL LOAN ISSUED':
+                    print('false')
+                    
+
+                    res = dl_acc.balance + i.loan_amount
+                    print(res)
+                i.balance  = res
+                i.save()
+                dl_acc.balance = res
+                dl_acc.save()
+                print('deleeted')
+                print('done')
+    # Delete the loan transaction
 
     return redirect('loan_list',loan_id_global)
     
@@ -52001,8 +52424,10 @@ def itemdata_qty_edit(request):
             
 
 def save_account(request):
-    account_holder = BankAccountHolder.objects.get(id=request.session['uid'])
+    cmp = company.objects.get(id = request.user.id)
+
     if request.method == "POST":
+
         account_name = request.POST.get("account_name")
         account_number = request.POST.get("account_number")
         ifsc_code = request.POST.get("ifsc_code")
@@ -52028,7 +52453,7 @@ def save_account(request):
         set_cheque_book_range = request.POST.get('set_cheque_book_range')
         enable_cheque_printing = request.POST.get('enable_cheque_printing')
         set_cheque_printing_configuration = request.POST.get('set_cheque_printing_configuration')
-    
+        cid = cmp
         print(
         account_name,
         account_number,
@@ -52062,6 +52487,7 @@ def save_account(request):
             phone_number=phone_number,
             email=email,
             account_type=account_type,
+            cid = cmp
         )
         account_holder.save()
 
@@ -52074,6 +52500,7 @@ def save_account(request):
             swift_code=swift_code,
             bank_name=bank_name,
             branch_name=branch_name,
+            cid = cmp
         )
         account.save()
         # Create MailingAddress instance with the related BankAccountHolder
@@ -52120,6 +52547,7 @@ def save_account(request):
         return JsonResponse({"status": "success"})
     else:
         return JsonResponse({"status": "error"})
+        
 def account_dropdown(request):
     # Fetch the account data from the database
     accounts = BankAccount.objects.all()
@@ -52732,3 +53160,1849 @@ def AddEmployeeInAttendance(request):
         return redirect('attendance_addpage')
 
 # end akshaya
+
+
+def bank_load(request):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        account_holder=BankAccountHolder.objects.filter(cid=cmp1)
+        account=BankAccount.objects.filter(cid=cmp1)
+        account_configuration=BankConfiguration.objects.filter(cid=cmp1)
+        mailing_address = MailingAddress.objects.filter(cid=cmp1)
+        bank_details = BankingDetails.objects.filter(cid=cmp1)
+        opening_balance = OpeningBalance.objects.filter(cid=cmp1)
+        bank =bankings_G.objects.filter(cid=cmp1)
+        sort_by = request.GET.get('sort_by', None)
+
+        if sort_by == 'bname':
+            account = account.order_by('bank_name')
+        elif sort_by == 'name':
+            account = account.order_by('holder_name')
+
+        
+
+        context={'cmp1':cmp1,'account_holder':account_holder,'account':account,'account_configuration':account_configuration,'mailing_address':mailing_address,'bank_details':bank_details,'opening_balance':opening_balance,'bank':bank,'sort_by':sort_by}
+
+        
+
+        return render(request,'app1/bank_account_holder_list.html',context)
+    return redirect('bank_load') 
+
+
+
+def addbank(request):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        account_holder=BankAccountHolder.objects.filter(cid=cmp1)
+        account=BankAccount.objects.filter(cid=cmp1)
+        account_configuration=BankConfiguration.objects.filter(cid=cmp1)
+        mailing_address = MailingAddress.objects.filter(cid=cmp1)
+        bank_details = BankingDetails.objects.filter(cid=cmp1)
+        opening_balance = OpeningBalance.objects.filter(cid=cmp1)
+        bank =bankings_G.objects.filter(cid=cmp1)
+
+        context={'cmp1':cmp1,'account_holder':account_holder,'account':account,'account_configuration':account_configuration,'mailing_address':mailing_address,'bank_details':bank_details,'opening_balance':opening_balance,'bank':bank}
+
+        
+
+        return render(request,'app1/bank_account_holder_create.html',context)
+    return redirect('bank_load') 
+
+
+
+
+
+
+def bank_account_holder(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+
+    
+    if request.method == "POST":
+        account_name = request.POST['name']
+        account_number = request.POST['accountNumber']
+        ifsc_code = request.POST['ifscCode']
+        swift_code = request.POST['swiftCode']
+        bank_name = request.POST['bank_name']
+        branch_name = request.POST['branch_name']
+        name = request.POST['name']
+        alias = request.POST['alias']
+        phone_number = request.POST['phone_number']
+        email = request.POST['email']
+        account_type = request.POST['account_type']
+        mailing_name = request.POST['mailingName']
+        address = request.POST['address']
+        country = request.POST['country']
+        state = request.POST['state']
+        pin = request.POST['pin']
+        date = request.POST['date']
+        amount = request.POST['Opening']
+        pan_it_number = request.POST['pan_it_number']
+        registration_type = request.POST['registration_type']
+        gstin_un = request.POST['gstin_un']
+        types = request.POST['termof']
+        set_cheque_book_range = request.POST['set_cheque_book_range']
+        enable_cheque_printing = request.POST['enable_cheque_printing']
+        set_cheque_printing_configuration = request.POST['set_cheque_printing_configuration']
+    
+        print(
+        account_name,
+        account_number,
+        ifsc_code,
+        swift_code,
+        bank_name,
+        branch_name,
+        name,
+        alias,
+        phone_number,
+        email,
+        account_type,
+        set_cheque_book_range,
+        enable_cheque_printing,
+        set_cheque_printing_configuration,
+        pan_it_number,
+        registration_type,
+        gstin_un,
+        
+        mailing_name,
+        address,
+        country,
+        state,
+        pin,
+        date,
+        amount,)
+        # Create BankAccountHolder instance
+        account_holder = BankAccountHolder(
+            name=name,
+            alias=alias,
+            phone_number=phone_number,
+            email=email,
+            account_type=account_type,
+            cid=cmp1,
+        )
+        account_holder.save()
+
+        # Create BankAccount instance with the related BankAccountHolder
+        account = BankAccount(
+            holder=account_holder,
+            holder_name=account_name,
+            account_number=account_number,
+            ifsc_code=ifsc_code,
+            swift_code=swift_code,
+            bank_name=bank_name,
+            branch_name=branch_name,
+            cid=cmp1,
+        )
+        account.save()
+        # Create MailingAddress instance with the related BankAccountHolder
+        mailing_address = MailingAddress(
+            holder=account_holder,
+            mailing_name=mailing_name,
+            address=address,
+            country=country,
+            state=state,
+            pin=pin,
+            cid=cmp1,
+        )
+        mailing_address.save()
+
+        # Create OpeningBalance instance with the related BankAccountHolder
+        opening_balance = OpeningBalance(
+            holder=account_holder,
+            date=date,
+            amount=amount,
+            Open_type=types,
+            cid=cmp1,
+        )
+        opening_balance.save()
+        
+
+        # Create BankingDetails instance with the related BankAccountHolder
+        bank_details = BankingDetails(
+            holder=account_holder,
+            pan_it_number=pan_it_number,
+            registration_type=registration_type,
+            gstin_un=gstin_un,
+            cid=cmp1,
+           
+        )
+        bank_details.save()
+        
+        # Create BankConfiguration instance with the related BankAccountHolder
+        account_configuration = BankConfiguration(
+            holder=account_holder,
+            set_cheque_book_range = True if set_cheque_book_range == "Yes" else False,
+            enable_cheque_printing = True if enable_cheque_printing == "Yes" else False,
+            set_cheque_printing_configuration = True if set_cheque_printing_configuration == "Yes" else False,
+            cid=cmp1,
+
+        )
+        account_configuration.save()
+        
+        
+
+        return redirect('bank_load')
+    else:
+        return redirect(bank_load)
+
+
+def bank_holder_view(request, id):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        
+        account = BankAccount.objects.get(id=id) 
+
+        holder = account.holder
+
+        try:
+            mailing_address = MailingAddress.objects.get(holder=holder)
+        except MailingAddress.DoesNotExist:
+            mailing_address = None
+       
+        try:
+            banking_details = BankingDetails.objects.get(holder=holder)
+        except BankingDetails.DoesNotExist:
+            banking_details = None
+
+        try:
+            opening_balance = OpeningBalance.objects.get(holder=holder)
+        except OpeningBalance.DoesNotExist:
+            opening_balance = None
+
+        try:
+            bank_configuration = BankConfiguration.objects.get(holder=holder)
+        except BankConfiguration.DoesNotExist:
+            bank_configuration = None
+
+        
+        cmp1 = company.objects.get(id=request.session["uid"])
+        context = {
+            'account': account,
+            'holder': holder,
+            'mailing_address':mailing_address,
+            'banking_details': banking_details,
+            'opening_balance': opening_balance,
+            'bank_configuration': bank_configuration,
+            
+            'cmp1': cmp1,
+        }
+    return render(request, 'app1/bank_account_holder_detail.html', context)
+
+      
+def active_bank_account(request, id):
+   
+    bank_account = BankAccount.objects.get(id=id)
+
+    bank_account.is_active = True
+    bank_account.save()
+
+    
+    return redirect('bank_holder_view', id=id)
+
+
+def inactivate_bank_account(request, id):
+   
+    bank_account = BankAccount.objects.get(id=id)
+
+   
+    bank_account.is_active = False
+    bank_account.save()
+
+   
+    return redirect('bank_holder_view', id=id)
+
+
+def edit_bank_account(request, id):
+    if 'uid' in request.session:
+        uid = request.session.get('uid', None)
+        if not uid:
+            return redirect('/')
+
+        cmp1 = company.objects.get(id=uid)
+        account = BankAccount.objects.get(id=id,cid=cmp1)
+        holder = account.holder
+
+        
+        account_configuration = BankConfiguration.objects.get(holder=holder,cid=cmp1)
+        mailing_address = MailingAddress.objects.get(holder=holder,cid=cmp1)
+        bank_details = BankingDetails.objects.get(holder=holder,cid=cmp1)
+        opening_balance = OpeningBalance.objects.get(holder=holder,cid=cmp1)
+        bank = bankings_G.objects.filter(cid=cmp1)
+
+        context = {'cmp1': cmp1,  'account': account,
+                   'account_configuration': account_configuration, 'mailing_address': mailing_address,
+                   'bank_details': bank_details, 'opening_balance': opening_balance, 'bank': bank}
+
+        return render(request, 'app1/bank_account_holder_edit.html', context)
+
+    return redirect('bank_load')
+
+def edit_bank_account_holder(request, id):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    account_holder = BankAccountHolder.objects.get(id=id)
+
+    if request.method == "POST":
+        # Retrieve data from POST request
+        account_name = request.POST.get('name')
+        alias = request.POST.get('alias')
+        phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
+        account_type = request.POST.get('account_type')
+        mailing_name = request.POST.get('mailingName')
+        address = request.POST.get('address')
+        country = request.POST.get('country')
+        state = request.POST.get('state')
+        pin = request.POST.get('pin')
+        date = request.POST.get('date')
+        amount = request.POST.get('Opening')
+        types = request.POST.get('termof')
+        pan_it_number = request.POST.get('pan_it_number')
+        registration_type = request.POST.get('registration_type')
+        gstin_un = request.POST.get('gstin_un')
+
+        name = request.POST.get('name')
+        account_number = request.POST.get('accountNumber')
+        ifsc_code = request.POST.get('ifscCode')
+        swift_code = request.POST.get('swiftCode')
+        bank_name = request.POST.get('bank_name')
+        branch_name = request.POST.get('branch_name')
+
+        set_cheque_book_range = request.POST.get('set_cheque_book_range')
+        enable_cheque_printing = request.POST.get('enable_cheque_printing')
+        set_cheque_printing_configuration = request.POST.get('set_cheque_printing_configuration')
+
+        print(
+        account_name,
+        account_number,
+        ifsc_code,
+        swift_code,
+        bank_name,
+        branch_name,
+        name,
+        alias,
+        phone_number,
+        email,
+        account_type,
+        set_cheque_book_range,
+        enable_cheque_printing,
+        set_cheque_printing_configuration,
+        pan_it_number,
+        registration_type,
+        gstin_un,
+        
+        mailing_name,
+        address,
+        country,
+        state,
+        pin,
+        date,
+        amount,)
+
+        # Update BankAccountHolder instance
+        account_holder.name = account_name
+        account_holder.alias = alias
+        account_holder.phone_number = phone_number
+        account_holder.email = email
+        account_holder.account_type = account_type
+        account_holder.save()
+
+        # Update BankAccount instances
+        bank_accounts = BankAccount.objects.filter(holder=account_holder,cid=cmp1)
+        for bank_account in bank_accounts:
+            bank_account.holder_name = name
+            bank_account.account_number = account_number
+            bank_account.ifsc_code = ifsc_code
+            bank_account.swift_code = swift_code
+            bank_account.bank_name = bank_name
+            bank_account.branch_name = branch_name
+            bank_account.save()
+
+        # Update MailingAddress instances
+        mailing_addresses = MailingAddress.objects.filter(holder=account_holder,cid=cmp1)
+        for mailing_address in mailing_addresses:
+            mailing_address.mailing_name = mailing_name
+            mailing_address.address = address
+            mailing_address.country = country
+            mailing_address.state = state
+            mailing_address.pin = pin
+            mailing_address.save()
+
+        # Update OpeningBalance instances
+        opening_balances = OpeningBalance.objects.filter(holder=account_holder,cid=cmp1)
+        for opening_balance in opening_balances:
+            opening_balance.date = date
+            opening_balance.amount = amount
+            opening_balance.Open_type = types
+            opening_balance.save()
+
+        # Update BankingDetails instances
+        bank_details_list = BankingDetails.objects.filter(holder=account_holder,cid=cmp1)
+        for bank_details in bank_details_list:
+            bank_details.pan_it_number = pan_it_number
+            bank_details.registration_type = registration_type
+            bank_details.gstin_un = gstin_un
+            bank_details.save()
+
+        # Update BankConfiguration instances
+        account_configurations = BankConfiguration.objects.filter(holder=account_holder,cid=cmp1)
+        for account_configuration in account_configurations:
+            account_configuration.set_cheque_book_range = True if set_cheque_book_range == "Yes" else False
+            account_configuration.enable_cheque_printing = True if enable_cheque_printing == "Yes" else False
+            account_configuration.set_cheque_printing_configuration = True if set_cheque_printing_configuration == "Yes" else False
+            account_configuration.save()
+
+        return redirect('bank_load')
+    else:
+        return redirect('bank_load')
+
+
+@login_required(login_url='regcomp')
+def deletebank_holder(request, id):
+    cmp1=company.objects.get(id=request.session.get('uid'))
+    upd = BankAccount.objects.get(id=id,cid=cmp1) 
+
+    holder = upd.holder
+
+    upd1=BankAccount.objects.filter(holder=holder,cid=cmp1).delete()
+    upd2=BankingDetails.objects.filter(holder=holder,cid=cmp1).delete()
+    upd3=BankConfiguration.objects.filter(holder=holder,cid=cmp1).delete()
+    upd4=MailingAddress.objects.filter(holder=holder,cid=cmp1).delete()
+    upd5=OpeningBalance.objects.filter(holder=holder,cid=cmp1).delete()
+    holder.delete()
+    upd.delete()
+        
+    return redirect('bank_load')
+    
+    
+def salary_details(request):
+    cmp1 = company.objects.get(id=request.session["uid"]) 
+    salary_details = SalaryDetails1.objects.filter(employee__cid=cmp1)
+    context = {
+        'salary_details': salary_details,
+    }
+    return render(request, 'app1/salarydetails.html', context)
+
+def sort_employee_name_salary(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    salary_details = SalaryDetails1.objects.filter(cid=cmp1).order_by('employee__firstname', 'employee__lastname')
+    return render(request, 'app1/salarydetails.html', {'salary_details': salary_details, 'cmp1': cmp1})
+
+def payroll_sort_employeesalary_by_month(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    salary_details = SalaryDetails1.objects.filter(cid=cmp1).order_by('month', 'year')
+    return render(request, 'app1/salarydetails.html', {'salary_details': salary_details, 'cmp1': cmp1})
+
+def filter_by_status_save(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    salary_details = SalaryDetails1.objects.filter(cid=cmp1, status='save').order_by('employee__firstname', 'employee__lastname')
+    return render(request, 'app1/salarydetails.html', {'salary_details': salary_details, 'cmp1': cmp1})
+
+def filter_by_status_draft(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    salary_details = SalaryDetails1.objects.filter(cid=cmp1, status='draft').order_by('employee__firstname', 'employee__lastname')
+    return render(request, 'app1/salarydetails.html', {'salary_details': salary_details, 'cmp1': cmp1})
+
+@login_required(login_url='regcomp')
+def listemployee_salary(request):
+    print(request.POST)
+    if request.method == 'POST':
+        if 'uid' in request.session:
+            uid = request.session.get('uid')
+        else:
+            return JsonResponse({'error': 'Session UID not found'}, status=401)
+        try:
+            comp = company.objects.get(id=uid)
+        except company.DoesNotExist:
+            return JsonResponse({'error': 'Company not found'}, status=404)
+        employee_id = request.POST.get('id').split(" ")[0]
+        try:
+            cust = payrollemployee.objects.get(employeeid=employee_id, cid=comp)
+            email = cust.email
+            employeeno = cust.employeeno
+            joindate = cust.joindate
+            amount = cust.amount
+            return JsonResponse({
+                'email': email,
+                'employeeno': employeeno,
+                'joindate': joindate,
+                'amount': amount,                
+            }, safe=False)
+        except payrollemployee.DoesNotExist:
+            return JsonResponse({'error': 'Selected employee not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+import calendar
+@login_required(login_url='regcomp')
+def get_days(request):
+    if request.method == 'POST':
+        if 'uid' in request.session:
+            uid = request.session.get('uid')
+        else:
+            return JsonResponse({'error': 'Session UID not found'}, status=401)
+
+        try:
+            comp = company.objects.get(id=uid)
+        except company.DoesNotExist:
+            return JsonResponse({'error': 'Company not found'}, status=404)
+
+        employee_id = request.POST.get('id')
+        empid = payrollemployee.objects.get(employeeid=employee_id)
+        month = request.POST.get('month')
+        year = request.POST.get('year')
+        month = int(month)
+        year = int(year)
+        try:
+            result = SalaryDetails1.objects.get(employee=empid, month=month, year=year)
+            if result:
+                return JsonResponse({'error': 'Salary Already Executed.'}, status=404)
+        except SalaryDetails1.DoesNotExist:
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
+            else:
+                end_date = datetime(year, month % 12 + 1, 1) - timedelta(days=1)
+            start_date = start_date.strftime("%Y-%m-%d")
+            end_date = end_date.strftime("%Y-%m-%d")
+            leave_count = attendance.objects.filter(
+                employeeid=empid,
+                cid=comp,
+                date__range=(start_date, end_date),
+                status='absent'
+            ).count()
+            holidays_count = holidays.objects.filter(start_date__range=(start_date, end_date)).count()
+            print(holidays_count,leave_count)
+            _, num_days = calendar.monthrange(year, month)
+            working_days = num_days - holidays_count
+            try:
+                return JsonResponse({
+                    'holiday': holidays_count,
+                    'leave': leave_count,   
+                    'working_days' : working_days,         
+                }, safe=False)
+
+            except payrollemployee.DoesNotExist:
+                return JsonResponse({'error': 'Selected employee not found.'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@login_required(login_url='regcomp')
+def calculate_salary(request):
+    if request.method == 'POST':
+        try:
+            comp = company.objects.get(id=request.session["uid"])
+        except company.DoesNotExist:
+            return JsonResponse({'error': 'Company not found'}, status=404)
+        casual_leave = int(request.POST.get('casual_leave', 0))
+        other_cuttings = Decimal(request.POST.get('other_cuttings', 0))
+        add_bonus = Decimal(request.POST.get('add_bonus', 0))
+        salary = Decimal(request.POST.get('salary', 0))
+        leaves = int(request.POST.get('attendance', 0))
+        holiday = int(request.POST.get('holiday', 0))
+        wg = salary / 30  
+        s1 = wg * leaves
+        monthly_salary = (salary - s1 - other_cuttings) + add_bonus
+        monthly_salary = int(monthly_salary)
+        if leaves==0:
+            pass
+        else:
+            monthly_salary += (casual_leave*wg)
+        return JsonResponse({'monthly_salary': monthly_salary})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def newemployeesalary(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employee = payrollemployee.objects.filter(cid=cmp1).all()
+    salary_details = SalaryDetails1.objects.filter(employee__cid=cmp1)
+    holiday = holidays.objects.filter(employee__cid=cmp1)
+    leave = attendance.objects.filter(employee__cid=cmp1)
+    return render(request, 'app1/payroll_addsalarydetails.html', {'employee': employee, 'cmp1': cmp1, 'salary_details': salary_details, 'holiday': holiday, 'attendance': leave})
+
+
+from django.contrib.auth.models import User
+
+@login_required(login_url='regcomp')
+def payroll_addsalarydetails(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('regcomp') 
+        employee_id = request.POST.get('employee')
+        selected_employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)        
+        casual_leave = request.POST.get('casual_leave')
+        other_cuttings = request.POST.get('other_cuttings')
+        add_bonus = request.POST.get('add_bonus')
+        salary_str = request.POST.get('salary')
+        salary = Decimal(salary_str) if salary_str is not None else Decimal(0)
+        leaves_str = request.POST.get('attendance')
+        leaves = Decimal(leaves_str) if leaves_str is not None else Decimal(0)
+        holiday = request.POST.get('holidays')
+        working_days = request.POST.get('working_days')
+        monthly_salary_str = request.POST.get('monthly_salary')
+        monthly_salary = Decimal(monthly_salary_str) if monthly_salary_str is not None else Decimal(0)
+        
+
+        submit = request.POST.get('submit')
+        if submit == "save":
+            status = "save"
+        else:
+            status = "draft"
+
+        salary_detail = SalaryDetails1(
+            employee=selected_employee,
+            cid=cmp1,
+            salary_date=request.POST.get('salary_date'),
+            month=request.POST.get('month'),
+            year=request.POST.get('year'),
+            casual_leave=casual_leave,
+            leave = leaves,
+            holiday=holiday,
+            other_cuttings=other_cuttings,
+            add_bonus=add_bonus,
+            description=request.POST.get('description'),
+            total_salary=monthly_salary,
+            working_days=working_days,
+            status=status,
+        )
+        salary_detail.save()
+        
+        return redirect('salary_details')
+
+    employees = payrollemployee.objects.all()
+    months = list(calendar.month_name)[1:]
+    years = range(2000, 2030)
+    employee = payrollemployee.objects.filter(cid=cmp1)
+    holiday = holidays.objects.filter(cid=cmp1)
+
+    context = {
+        'employees': employees,
+        'months': months,
+        'years': years,
+        'employee': employee,
+        'cmp1': cmp1,
+        'leave': 0,
+        'holiday': 0,
+        'working_days': 0,
+        
+        
+    }
+
+    return render(request, 'app1/payroll_addsalarydetails.html', context)
+
+
+def AddEmployeeInSalaryPage(request):
+    try: 
+        cmpId = company.objects.get(id=request.session["uid"]) 
+        if request.method == 'POST':
+            title = request.POST['title']
+            firstname = request.POST['firstname'].replace(' ','')
+            lastname = request.POST['lastname'].replace(' ','')
+            alias = request.POST['alias']
+            location = request.POST['location']
+            email = request.POST['email']
+           
+            mobile = request.POST['mobile']
+            employees = request.POST['employees']
+            joindate = request.POST['joindate']
+            try:
+                img1 = request.FILES['image']
+            except:
+                img1 = 'default' 
+            salarydetails = request.POST['salarydetails']
+            effectivefrom = request.POST['effectivefrom']
+            payhead = request.POST['payhead']
+            hours = request.POST['hours']
+            rate = request.POST['rate']
+            amount = request.POST['amount']
+            employeeno = request.POST['employeeno']
+            designation = request.POST['designation']
+            function = request.POST['function']
+            gender = request.POST['gender']
+            dateofbirth = request.POST['dateofbirth']
+            bloodgroup = request.POST['bloodgroup']
+            fathersmothersname = request.POST['fathersmothersname']
+            spousename = request.POST['spousename']
+            
+           
+            generalphone = request.POST['generalphone']
+            bankdetails = request.POST['bankdetails']
+            acno = request.POST['acno']
+            ifsccode = request.POST['ifsccode']
+            bankname = request.POST['bankname']
+            branchname = request.POST['branchname']
+            transactiontype = request.POST['transactiontype']
+            pannumber = request.POST['pannumber']
+            universalaccountnumber = request.POST['universalaccountnumber']
+            pfaccountnumber = request.POST['pfaccountnumber']
+            praccountnumber = request.POST['praccountnumber']
+            esinumber = request.POST['esinumber']
+            tdsapp = request.POST['tdsapp']
+            tdstype = request.POST['tdstype']
+            tds = request.POST['tds']
+            street = request.POST['street']
+            city = request.POST['city']
+            state = request.POST['state']
+            pincode = request.POST['pincode']
+            country = request.POST['country']
+            tempstreet = request.POST['tempstreet']
+            tempcity = request.POST['tempcity']
+            tempstate = request.POST['tempstate']
+            temppincode = request.POST['temppincode']
+            tempcountry = request.POST['tempcountry'] 
+            adharnumber = request.POST['adharnumber'] 
+            try:
+                file = request.FILES['file']
+            except:
+                file = '' 
+            
+            emppayroll = payrollemployee(title=title,firstname=firstname,
+                                         lastname=lastname,alias=alias,cid=cmpId,
+                                         location=location,
+                                         email=email,
+                                         mobile=mobile,employees=employees,
+                                         joindate=joindate,
+                                         salarydetails=salarydetails,effectivefrom=effectivefrom,
+                                         hours=hours,rate=rate,
+                                         amount=amount,employeeno=employeeno,
+                                         designation=designation,function=function,
+                                         gender=gender,dateofbirth=dateofbirth,
+                                         bloodgroup=bloodgroup,fathersmothersname=fathersmothersname,
+                                         spousename=spousename,
+                                         generalphone=generalphone,
+                                         bankdetails=bankdetails,acno=acno,ifsccode=ifsccode,
+                                         bankname=bankname,branchname=branchname,
+                                         transactiontype=transactiontype,pannumber=pannumber,
+                                         universalaccountnumber=universalaccountnumber,
+                                         pfaccountnumber=pfaccountnumber,praccountnumber=praccountnumber,
+                                         esinumber=esinumber,istds=tdsapp,
+                                         tdstype=tdstype,tds=tds,street=street,
+                                         city=city,state=state,
+                                         pincode=pincode,country=country,
+                                         tempstreet=tempstreet,tempcity=tempcity,
+                                         tempstate=tempstate,temppincode=temppincode,
+                                         tempcountry=tempcountry,payhead=payhead,
+                                         adharnumber=adharnumber
+                                        )
+            if img1 != 'default':
+                emppayroll.image = img1
+
+            if file !="":
+                 emppayroll.file=file
+
+            emppayroll.save()
+            print('done')
+            return redirect('payroll_addsalarydetails')
+    except:    
+        print('sorry')
+        return redirect('payroll_addsalarydetails')
+
+
+
+
+# @login_required(login_url='regcomp')
+# def salary_overview(request, employee_id):
+#     try:
+#         cmp1 = company.objects.get(id=request.session["uid"])
+#         employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+#         salary_details = SalaryDetails.objects.filter(employee=employee)
+#     except company.DoesNotExist:
+#         return JsonResponse({'error': 'Company not found'}, status=404)
+#     except payrollemployee.DoesNotExist:
+#         return JsonResponse({'error': 'Employee not found'}, status=404)
+
+#     context = {
+#         'employee': employee,
+#         'salary_details': salary_details,
+#         'cmp1': cmp1,
+#     }
+
+#     return render(request, 'app1/salary_overview.html', context)
+
+
+@login_required(login_url='regcomp')
+def salary_overview(request, employee_id, salary_id=None):
+    try:
+        cmp1 = company.objects.get(id=request.session["uid"])
+        employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+        
+        # If salary_id is provided, filter by it; otherwise, get all salary details for the employee
+        if salary_id:
+            salary_details = SalaryDetails1.objects.filter(employee=employee, id=salary_id)
+        else:
+            salary_details = SalaryDetails1.objects.filter(employee=employee)
+    except company.DoesNotExist:
+        return JsonResponse({'error': 'Company not found'}, status=404)
+    except payrollemployee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+
+    context = {
+        'employee': employee,
+        'salary_details': salary_details,
+        'cmp1': cmp1,
+    }
+
+    return render(request, 'app1/salary_overview.html', context)
+
+
+
+@login_required(login_url='regcomp')
+def salary_payslip(request):
+    try:
+        cmp1 = company.objects.get(id=request.session['uid'])
+        employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+        salary_details = SalaryDetails1.objects.filter(employee=employee)
+        context = {'salary_details': salary_details, 'cmp1': cmp1,'employee':employee}
+        return render(request, 'app1/salary_payslip.html', context)
+    except:
+        return redirect('salary_details')
+
+def salarypdf(request, employee_id):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+    salary_details = SalaryDetails1.objects.filter(employee=employee)
+    template_path = 'app1/salarypdf.html'
+    context ={
+        'employee':employee,
+        'cmp1':cmp1,
+        'salary_details': salary_details,
+    }
+    fname = employee.employeeno
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename={fname}.pdf'
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def deletesalary(request,employee_id,salary_id=None):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+    if salary_id:
+        salary_detail = get_object_or_404(SalaryDetails1, id=salary_id, employee=employee)
+        salary_detail.delete()
+    else:
+        salary_details = SalaryDetails1.objects.filter(employee=employee)
+        salary_details.delete()
+    return redirect('salary_details')  
+
+
+from django.http import Http404
+@login_required(login_url='regcomp')
+def salaryedit(request, employee_id,salary_id=None):
+    try:
+        cmp1 = company.objects.get(id=request.session["uid"])
+        employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+        if salary_id:
+            salary_detail = SalaryDetails1.objects.get(employee=employee, id=salary_id)
+        else:
+            salary_detail, created = SalaryDetails1.objects.get_or_create(employee=employee)
+    
+    except payrollemployee.DoesNotExist:
+        raise Http404("Employee not found")
+    except SalaryDetails1.DoesNotExist:
+        raise Http404("Salary details not found")
+
+
+    print("Employee ID:", employee.employeeid)
+    print("Salary ID:", salary_id) 
+
+    if request.method == 'POST':
+        salary_detail.salary_date = request.POST.get('salary_date')
+        salary_detail.month = request.POST.get('month')
+        salary_detail.year = request.POST.get('year')
+        salary_detail.casual_leave = request.POST.get('casual_leave')
+        salary_detail.leave = request.POST.get('attendance')
+        salary_detail.holiday = request.POST.get('holidays')
+        salary_detail.other_cuttings = request.POST.get('other_cuttings')
+        salary_detail.add_bonus = request.POST.get('add_bonus')
+        salary_detail.working_days = request.POST.get('working_days')
+        salary_detail.description = request.POST.get('description')
+        salary_detail.total_salary = request.POST.get('monthly_salary')
+        salary_detail.status = 'save' if request.POST.get('submit') == 'save' else 'draft'
+
+        salary_detail.save()
+        return redirect('salary_details')
+    
+    employees = payrollemployee.objects.filter(cid=cmp1)
+    months = list(calendar.month_name)[1:]
+    years = range(2000, 2030)
+    holiday = holidays.objects.filter(cid=cmp1)
+    leave = attendance.objects.filter(cid=cmp1)
+
+    context = {
+        'salary_detail': salary_detail,
+        'employee': employee,
+        'employees': employees,
+        'months': months,
+        'years': years,
+        'cmp1': cmp1,
+        'leave': 0,
+        'holiday': 0,
+        'working_days': 0,
+    }
+
+    return render(request, 'app1/salaryedit.html', context)
+    
+
+def bankdat(request):
+    cmp1 = company.objects.get(id=request.session['uid'])
+    bank_name = request.GET.get('id')
+    print(str(bank_name)+ "hdhd")
+    bank = bankings_G.objects.get(bankname=bank_name,cid=cmp1)
+    data = {'bank': bank.account_number}
+    return JsonResponse(data)
+
+
+def additional_loan_approve(request,id):
+    cid = company.objects.get(id=request.session["uid"])
+
+    loan=loan_account.objects.get(id=id)
+    current_date = date.today().strftime('%Y-%m-%d')
+    bank=bankings_G.objects.filter(cid=cid)
+
+    context={
+        'loan':loan,
+        'current_date':current_date,
+        'bank':bank,
+        'cmp1':cid,
+    }
+    return render(request,'app1/additional_loan.html',context)
+
+
+def additional_loan_transaction(request , id):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employ = loan_account.objects.get(id=id)
+    print(employ)
+ 
+    print(employee)
+    if request.method == 'POST':
+        principal = int(request.POST.get('remain_loan'))
+        date = request.POST.get('adjdate')
+        new_loan = int(request.POST.get('new'))
+        total = request.POST.get('amount')
+        
+        cheque_id = request.POST['cheque_id'] 
+        upi_id = request.POST['upi_id'] 
+        bnk_id = request.POST['bnk_id'] 
+        payment_method = request.POST['payment_method']
+        lt=loan_transaction(from_trans=employ.lenderbank,to_trans=employ.recieced_bank,cid=cmp1,bank_type='ADDITIONAL LOAN ISSUED',loan_amount=new_loan,total=new_loan,
+        balance = total,loan_date=date,loan_intrest=0,recieved_upi=upi_id,recieved_cheque=cheque_id,type=payment_method,bank_acc_number= bnk_id,loan=employ)
+        lt.save()
+        employ.balance = total
+        res = int(employ.loan_amount) + new_loan
+        employ.loan_amount = res
+        print(total)
+        print(principal)
+        print(res)
+        employ.save()
+        if lt.type == 'cash':
+            cmp1.cash -= int(new_loan)
+            cmp1.save()
+        elif lt.type == 'upi':
+             cheque_no = cheque_id
+        elif lt.type == 'cheque':
+            cheque_no = cheque_id
+    
+        else:
+            received_bank = bankings_G.objects.get(bankname=payment_method)
+            received_bank.balance -= int(new_loan)
+            received_bank.save()
+    return redirect('loan_list',id)
+
+
+def edit_additional_LOan(request,id):
+    cid = company.objects.get(id=request.session["uid"])
+
+    bank=bankings_G.objects.filter(cid=cid)
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employ = loan_transaction.objects.get(id=id)
+    employ_ln = employ.loan.id
+    print(employ_ln)
+    employ_ln= loan_account.objects.get(id=employ_ln)
+    remain = employ.balance - employ.loan_amount
+    print('remAian')
+    print(remain)
+    reset_amount = int(employ_ln.loan_amount) - employ.loan_amount
+    print(reset_amount)
+    la = int(employ_ln.loan_amount) - employ.loan_amount
+    employ_ln.loan_amount=la
+    employ_ln.balance = reset_amount
+    employ_ln.save()
+    print('done')
+
+    employ.save()
+    context={
+        'bank':bank,
+        'cmp1':cid,
+        'employ':employ,
+        'remain':remain,
+    }
+    return render(request,'app1/edit_additional_LOan_transaction.html',context)
+
+
+def edit_additional_LOan_transaction(request,id):
+    cid = company.objects.get(id=request.session["uid"])
+
+    bank=bankings_G.objects.filter(cid=cid)
+    cmp1 = company.objects.get(id=request.session["uid"])
+    employ = loan_transaction.objects.get(id=id)
+    employ_ln = employ.loan.id
+    print(employ_ln)
+    employ_ln= loan_account.objects.get(id=employ_ln)
+    remain = employ.balance - employ.loan_amount
+    print('remAian')
+    print(remain)
+    reset_amount = int(employ_ln.loan_amount) - employ.loan_amount
+    print(reset_amount)
+    la = int(employ_ln.loan_amount) - employ.loan_amount
+    employ_ln.loan_amount=la
+    employ_ln.balance = reset_amount
+    employ_ln.save()
+    print('done')
+
+    employ.save()
+
+    if employ.type == 'cash':
+        cmp1.cash += int(employ.loan_amount)
+        cmp1.save()
+    elif employ.type == 'upi':
+        employ.recieved_upi = employ.recieved_upi
+    elif employ.type == 'cheque':
+        employ.recieved_cheque = employ.recieved_cheque
+    
+    else:
+        received_bank = bankings_G.objects.get(bankname=employ.payment_method)
+        received_bank.balance += int(employ.loan_amount)
+        received_bank.save()
+    if request.method == 'POST':
+        principal = request.POST.get('new')
+        date = request.POST.get('adjdate')
+        total = request.POST.get('amount')
+        cheque_id = request.POST['cheque_id'] 
+        upi_id = request.POST['upi_id'] 
+        bnk_id = request.POST['bnk_id'] 
+        payment_method = request.POST['payment_method']
+        employ.loan_amount = principal
+        employ.loan_intrest = 0
+        employ.loan_date = date
+        employ.total = principal
+        employ.balance = total
+        employ.recieved_cheque = cheque_id
+        employ.recieved_upi = upi_id
+        employ.type = payment_method
+        print(total)
+        print('goback')
+        employ.save()
+        employ_ln.balance += int(total)
+        employ_ln.loan_amount += int(principal)
+        employ_ln.save()
+        if employ.type == 'cash':
+            cmp1.cash -= int(employ.loan_amount)
+            cmp1.save()
+        elif employ.type == 'upi':
+            employ.recieved_upi = employ.recieved_cheque
+        elif employ.type == 'cheque':
+            employ.recieved_upi = employ.recieved_cheque
+        
+        else:
+            received_bank = bankings_G.objects.get(bankname=employ.type)
+            received_bank.balance -= int(employ.loan_amount)
+            received_bank.save()
+        print(employ_ln)
+        print('hdhdh')
+        loan_id = employ_ln.id
+        loan_trans = loan_transaction.objects.filter(cid=cid,loan=loan_id)
+        print(loan_trans)
+        
+
+
+        for i in loan_trans:
+                total_balance =employ_ln.balance
+                print('balance '+ str(total_balance) )
+                if i.bank_type=='OPENING BAL':
+                    res = employ_ln.balance = i.loan_amount
+                elif i.bank_type == 'EMI PAID':
+                    res = employ_ln.balance - i.loan_amount
+                    print('true')
+                elif i.bank_type == 'ADDITIONAL LOAN ISSUED':
+                    print('false')
+                    res = employ_ln.balance + i.loan_amount
+                i.balance  = res
+                i.save()
+                employ_ln.balance = res
+                employ_ln.save()
+
+                print('done1')
+    return redirect('loan_list',employ_ln.id)
+
+
+def LoanStatement_mail(request,id):
+    if request.user:
+            try:
+                if request.method == 'POST':
+                    fromdate = request.POST['FromD']
+                    todate = request.POST['ToD']
+                    print(fromdate)
+                    print('super')
+                    emails_string = request.POST['email_ids']
+                    cid = company.objects.get(id=request.session["uid"])
+                    cmp1 = company.objects.get(id=request.session["uid"])
+                    loan=loan_account.objects.get(id=id)
+                    loan_tr=loan_transaction.objects.filter(loan_id=id)
+                    bnk_name = loan.account_name
+                    bnk_acc = BankAccountHolder.objects.get(name=bnk_name)
+                    bnk_det = BankAccount.objects.get(holder=bnk_acc)
+
+                    if fromdate == '' and todate == '' :
+                        data = loan_transaction.objects.filter(loan_id=id)
+                        for i in data:
+                            print(i)
+                            print('ddddd')
+                    else:
+                        data = loan_transaction.objects.filter(loan_date__gte=fromdate, loan_date__lte=todate,loan_id=id)
+                    print(data)
+            
+                    # Split the string by commas and remove any leading or trailing whitespace
+                    emails_list = [email.strip() for email in emails_string.split(',')]
+                    email_message = request.POST['email_message']
+                    
+                    cmp = company.objects.get(id_id=request.user.id)
+                    
+
+                    context = {'cmp': cmp, 'data': data, 'email_message': email_message, 'cmp1':cmp1,
+                    'loan':loan,
+                    
+                    'cid':cid,
+                    'loan_tr':loan_tr,
+                    'bnk_acc':bnk_acc,
+                    'bnk_det':bnk_det,
+}
+                    print('context working')
+                    template_path = 'app1/loan_account_statement_pdf.html'
+                    print('tpath working')
+                    template = get_template(template_path)
+                    print('template working')
+                    html = template.render(context)
+                    print('html working')
+                    result = BytesIO()
+                    print('bytes working')
+                    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                    print('pisa working')
+
+                    if pdf.err:
+                        raise Exception(f"PDF generation error: {pdf.err}")
+
+                    pdf = result.getvalue()
+                    print('')
+                    filename = f'Loan_statement-{cmp.cname}.pdf'
+                    subject = f"Loan_statement - {cmp.cname}"
+                    email = EmailMessage(subject, f"Hi, \n{email_message} -of -{cmp.cname}. ", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                    email.attach(filename, pdf, "application/pdf")
+                    email.send(fail_silently=False)
+
+                    messages.success(request, 'Loan statement has been shared via email successfully..!')
+                    return redirect('loan_statement',id)
+            except Exception as e:
+                messages.error(request, f'Error while sending report: {e}')
+                return redirect('loan_statement',id)
+
+
+def vendor_check(request):
+    pan_number = request.GET.get('panno', None)
+    cmp1 = company.objects.get(id=request.session['uid'])
+    print(pan_number)
+    data = {
+        'is_taken': vendor.objects.filter(cid=cmp1, panno=pan_number).exists()
+    }
+
+    if data['is_taken']:
+        data['error_message'] = 'Vendor with this PAN number already exists.'
+
+    return JsonResponse(data)
+
+
+def vendor_check_name(request):
+    fn = request.GET.get('fn', None)
+    ln = request.GET.get('ln', None)
+
+    cmp1 = company.objects.get(id=request.session['uid'])
+    print(fn)
+    data = {
+        'is_taken': vendor.objects.filter(cid=cmp1, firstname=fn,lastname=ln).exists()
+    }
+
+    if data['is_taken']:
+        data['error_message'] = 'Vendor with this name already exists.'
+
+    return JsonResponse(data)
+
+
+def VendorStatement_mail(request,id):
+    if request.user:
+            try:
+                if request.method == 'POST':
+                    fromdate = request.POST['FromD']
+                    todate = request.POST['ToD']
+                    print(fromdate)
+                    print('super')
+                    emails_string = request.POST['email_ids']
+                    cid = company.objects.get(id=request.session["uid"])
+                    cmp1 = company.objects.get(id=request.session['uid'])
+                    vndr=vendor.objects.get(vendorid=id) 
+                    fn =vndr.firstname
+                    ln = vndr.lastname
+                    su = fn+ ' ' +ln
+                    toda = date.today()
+                    tod = toda.strftime("%Y-%m-%d")
+
+
+                    pbill = purchasebill.objects.filter(vendor_name=su,status='Approved',date=tod)
+                    pymnt = purchasepayment.objects.filter(vendor=su, paymentdate=tod)
+
+
+                    statment, frd1, tod1 = get_vendor_statement(request, su, cmp1)   
+                    
+
+
+                    pbl = purchasebill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+                    paymnt = purchasepayment.objects.filter(vendor=su,cid_id=cmp1).all()  
+                    pdeb = purchasedebit.objects.filter(vendor=su,cid_id=cmp1).all()  
+                    expnc = purchase_expense.objects.filter(vendor=su,cid_id=cmp1).all()   
+                    pordr =purchaseorder.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+                    rec =recurring_bill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+                    if fromdate == '' and todate == '' :
+                        tot6 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance_amount'))
+                        tot3 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+                        tot1 = purchasepayment.objects.filter(vendor=su).all().aggregate(t2=Sum('amtcredit'))
+                        tot7 = purchasepayment.objects.filter(vendor=su).all().aggregate(t3=Sum('paymentamount')) 
+                        tot2 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+                        tot4 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance'))
+                        tot5 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('paid_amount'))
+                        tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('balance_amount'))
+
+                    # Corrected total balance calculation
+                        total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
+
+
+                        combined_data=[]
+
+                        for item in pbl:
+                            Type='Bill'
+                            Number=int(item.bill_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount) if item.balance_amount is not None else 0
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+
+                            })
+
+                        for item in rec:
+                            Type='Recurring Bill'
+                            Number=item.billno
+                            Date=item.start_date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+
+
+                        for item in pordr:
+                            Type='Purchase Order'
+                            Number=int(item.puchaseorder_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+                        for item in paymnt:
+                            Type='Payment'
+                            Number=int(item.pymntid)
+                            Date=item.paymentdate
+                            Total = int(item.paymentamount) if item.paymentamount else 0
+                            paid = int(item.amtreceived) if item.amtreceived else 0
+                            bal = int(item.paymentamount) - int(item.amtreceived) if item.amtreceived else 0
+                            
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':bal,
+                                'paid':paid,
+
+                            }) 
+
+                        for item in pdeb:
+                            Type='Debit Note'
+                            Number=int(item.debit_no)
+                            Date=item.debitdate
+                            Total=int(item.grandtotal)
+                            Balance=float(item.balance_amount)
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':0
+
+                            })    
+
+                        
+                        for item in expnc:
+                            Type='Expense'
+                            Number=int(item.expense_no)
+                            Date=item.date 
+                            Total=int(item.amount)
+                            Balance=Total
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'paid':0,
+                                'Balance':0
+
+                            })                 
+
+              
+                    else:
+                        print('deo')
+                        pbill = purchasebill.objects.filter(cid_id=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate)
+                        paymnt = purchasepayment.objects.filter(vendor=su, paymentdate__gte=fromdate, paymentdate__lte=todate)
+                        pdeb = purchasedebit.objects.filter(cid=cmp1, vendor=su, debitdate__gte=fromdate, debitdate__lte=todate)
+                        rec = recurring_bill.objects.filter(cid=cmp1, vendor_name=su, start_date__gte=fromdate, start_date__lte=todate)
+                        pordr = purchaseorder.objects.filter(vendor_name=su, cid_id=cmp1,date__gte=fromdate, date__lte=todate).all()
+                        expnc = purchase_expense.objects.filter(vendor=su,cid_id=cmp1,date__gte=fromdate, date__lte=todate).all()   
+                        tot6 = purchasebill.objects.filter(cid=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate).all().aggregate(t2=Sum('balance_amount'))
+                        tot3 = purchasebill.objects.filter(cid=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+                        tot1 = purchasepayment.objects.filter(vendor=su,cid=cmp1, paymentdate__gte=fromdate, paymentdate__lte=todate).all().aggregate(t2=Sum('amtcredit'))
+                        tot7 = purchasepayment.objects.filter(cid=cmp1,vendor=su,paymentdate__gte=fromdate, paymentdate__lte=todate).all().aggregate(t3=Sum('paymentamount')) 
+                        tot2 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su,start_date__gte=fromdate, start_date__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+                        tot4 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su,start_date__gte=fromdate, start_date__lte=todate).all().aggregate(t2=Sum('balance'))
+                        tot5 = purchasedebit.objects.filter(cid=cmp1, vendor=su,debitdate__gte=fromdate, debitdate__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+                        tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su,debitdate__gte=fromdate, debitdate__lte=todate).all().aggregate(t2=Sum('balance_amount'))
+
+                        # Corrected total balance calculation
+                        total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
+
+
+
+                        # Add more data sources as needed
+                        combined_data=[]
+
+                        for item in pbill:
+                            print(item.bill_no)
+                            Type='Bill'
+                            Number=int(item.bill_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount) if item.balance_amount is not None else 0
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+
+                                })
+
+                        for item in rec:
+                            Type='Recurring Bill'
+                            Number=item.billno
+                            Date=item.start_date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+
+
+                        for item in pordr:
+                            Type='Purchase Order'
+                            Number=int(item.puchaseorder_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+                        for item in paymnt:
+                            Type='Payment'
+                            Number=int(item.pymntid)
+                            Date=item.paymentdate
+                            Total = int(item.paymentamount) if item.paymentamount else 0
+                            paid = int(item.amtreceived) if item.amtreceived else 0
+                            bal = int(item.paymentamount) - int(item.amtreceived) if item.amtreceived else 0
+                            
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':bal,
+                                'paid':paid,
+
+                            }) 
+
+                        for item in pdeb:
+                            Type='Debit Note'
+                            Number=int(item.debit_no)
+                            Date=item.debitdate
+                            Total=int(item.grandtotal)
+                            Balance=float(item.balance_amount)
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':0
+
+                            })    
+
+                        
+                        for item in expnc:
+                            Type='Expense'
+                            Number=int(item.expense_no)
+                            Date=item.date 
+                            Total=int(item.amount)
+                            Balance=Total
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'paid':0,
+                                'Balance':0
+
+                            })                 
+           
+            
+                    # Split the string by commas and remove any leading or trailing whitespace
+                    emails_list = [email.strip() for email in emails_string.split(',')]
+                    email_message = request.POST['email_message']
+                    
+                    cmp = company.objects.get(id_id=request.user.id)
+                    
+
+                    context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,
+
+                }
+                    print('context working')
+                    template_path = 'app1/vendor_pdf.html'
+                    print('tpath working')
+                    template = get_template(template_path)
+                    print('template working')
+                    html = template.render(context)
+                    print('html working')
+                    result = BytesIO()
+                    print('bytes working')
+                    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                    print('pisa working')
+
+                    if pdf.err:
+                        raise Exception(f"PDF generation error: {pdf.err}")
+
+                    pdf = result.getvalue()
+                    print('')
+                    filename = f'vendor_mail-{cmp.cname}.pdf'
+                    subject = f"vendor_mail - {cmp.cname}"
+                    email = EmailMessage(subject, f"Hi, \n{email_message} -of -{cmp.cname}. ", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                    email.attach(filename, pdf, "application/pdf")
+                    email.send(fail_silently=False)
+
+                    messages.success(request, 'Vendor statement has been shared via email successfully..!')
+                    return redirect('viewvendor',id)
+            except Exception as e:
+                messages.error(request, f'Error while sending report: {e}')
+                return redirect('viewvendor',id)
+
+
+def vendor_statement(request,id):
+    cid = company.objects.get(id=request.session["uid"])
+    cmp1 = company.objects.get(id=request.session['uid'])
+    vndr=vendor.objects.get(vendorid=id) 
+    fn =vndr.firstname
+    ln = vndr.lastname
+    su = fn+ ' ' +ln
+    toda = date.today()
+    tod = toda.strftime("%Y-%m-%d")
+    if request.method == 'POST':
+        fromdate = request.POST['sdate']
+        todate = request.POST['edate']
+        print(fromdate)
+        print('super')
+
+
+
+        pbill = purchasebill.objects.filter(vendor_name=su,status='Approved',date=tod)
+        pymnt = purchasepayment.objects.filter(vendor=su, paymentdate=tod)
+
+
+        statment, frd1, tod1 = get_vendor_statement(request, su, cmp1)   
+                    
+
+
+        pbl = purchasebill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+        paymnt = purchasepayment.objects.filter(vendor=su,cid_id=cmp1).all()  
+        pdeb = purchasedebit.objects.filter(vendor=su,cid_id=cmp1).all()  
+        expnc = purchase_expense.objects.filter(vendor=su,cid_id=cmp1).all()   
+        pordr =purchaseorder.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+        rec =recurring_bill.objects.filter(vendor_name=su,cid_id=cmp1).all() 
+        if fromdate == '' and todate == '' :
+            tot6 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance_amount'))
+            tot3 = purchasebill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+            tot1 = purchasepayment.objects.filter(vendor=su).all().aggregate(t2=Sum('amtcredit'))
+            tot7 = purchasepayment.objects.filter(vendor=su).all().aggregate(t3=Sum('paymentamount')) 
+            tot2 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('paid_amount'))
+            tot4 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su).all().aggregate(t2=Sum('balance'))
+            tot5 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('paid_amount'))
+            tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('balance_amount'))
+
+                    # Corrected total balance calculation
+            total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
+
+
+            combined_data=[]
+
+            for item in pbl:
+                            Type='Bill'
+                            Number=int(item.bill_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount) if item.balance_amount is not None else 0
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+
+                            })
+
+            for item in rec:
+                            Type='Recurring Bill'
+                            Number=item.billno
+                            Date=item.start_date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+
+
+            for item in pordr:
+                            Type='Purchase Order'
+                            Number=int(item.puchaseorder_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+            for item in paymnt:
+                            Type='Payment'
+                            Number=int(item.pymntid)
+                            Date=item.paymentdate
+                            Total = int(item.paymentamount) if item.paymentamount else 0
+                            paid = int(item.amtreceived) if item.amtreceived else 0
+                            bal = int(item.paymentamount) - int(item.amtreceived) if item.amtreceived else 0
+                            
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':bal,
+                                'paid':paid,
+
+                            }) 
+
+            for item in pdeb:
+                            Type='Debit Note'
+                            Number=int(item.debit_no)
+                            Date=item.debitdate
+                            Total=int(item.grandtotal)
+                            Balance=float(item.balance_amount)
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':0
+
+                            })    
+
+                        
+            for item in expnc:
+                            Type='Expense'
+                            Number=int(item.expense_no)
+                            Date=item.date 
+                            Total=int(item.amount)
+                            Balance=Total
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'paid':0,
+                                'Balance':0
+
+                            })                 
+
+              
+        else:
+            print('deo')
+            pbill = purchasebill.objects.filter(cid_id=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate)
+            paymnt = purchasepayment.objects.filter(vendor=su, paymentdate__gte=fromdate, paymentdate__lte=todate)
+            pdeb = purchasedebit.objects.filter(cid=cmp1, vendor=su, debitdate__gte=fromdate, debitdate__lte=todate)
+            rec = recurring_bill.objects.filter(cid=cmp1, vendor_name=su, start_date__gte=fromdate, start_date__lte=todate)
+            pordr = purchaseorder.objects.filter(vendor_name=su, cid_id=cmp1,date__gte=fromdate, date__lte=todate).all()
+            expnc = purchase_expense.objects.filter(vendor=su,cid_id=cmp1,date__gte=fromdate, date__lte=todate).all()   
+            tot6 = purchasebill.objects.filter(cid=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate).all().aggregate(t2=Sum('balance_amount'))
+            tot3 = purchasebill.objects.filter(cid=cmp1, vendor_name=su, date__gte=fromdate, date__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+            tot1 = purchasepayment.objects.filter(vendor=su,cid=cmp1, paymentdate__gte=fromdate, paymentdate__lte=todate).all().aggregate(t2=Sum('amtcredit'))
+            tot7 = purchasepayment.objects.filter(cid=cmp1,vendor=su,paymentdate__gte=fromdate, paymentdate__lte=todate).all().aggregate(t3=Sum('paymentamount')) 
+            tot2 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su,start_date__gte=fromdate, start_date__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+            tot4 = recurring_bill.objects.filter(cid=cmp1, vendor_name=su,start_date__gte=fromdate, start_date__lte=todate).all().aggregate(t2=Sum('balance'))
+            tot5 = purchasedebit.objects.filter(cid=cmp1, vendor=su,debitdate__gte=fromdate, debitdate__lte=todate).all().aggregate(t2=Sum('paid_amount'))
+            tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su,debitdate__gte=fromdate, debitdate__lte=todate).all().aggregate(t2=Sum('balance_amount'))
+
+                        # Corrected total balance calculation
+            total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
+
+
+
+                        # Add more data sources as needed
+            combined_data=[]
+
+            for item in pbill:
+                            print(item.bill_no)
+                            Type='Bill'
+                            Number=int(item.bill_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount) if item.balance_amount is not None else 0
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+
+                                })
+
+            for item in rec:
+                            Type='Recurring Bill'
+                            Number=item.billno
+                            Date=item.start_date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+
+
+            for item in pordr:
+                            Type='Purchase Order'
+                            Number=int(item.puchaseorder_no)
+                            Date=item.date
+                            Total=int(item.grand_total)
+                            Balance=int(item.balance_amount)
+                            paid_amount=int(item.paid_amount) if item.paid_amount is not None else 0
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':paid_amount,
+
+                            })    
+
+            for item in paymnt:
+                            Type='Payment'
+                            Number=int(item.pymntid)
+                            Date=item.paymentdate
+                            Total = int(item.paymentamount) if item.paymentamount else 0
+                            paid = int(item.amtreceived) if item.amtreceived else 0
+                            bal = int(item.paymentamount) - int(item.amtreceived) if item.amtreceived else 0
+                            
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':bal,
+                                'paid':paid,
+
+                            }) 
+
+            for item in pdeb:
+                            Type='Debit Note'
+                            Number=int(item.debit_no)
+                            Date=item.debitdate
+                            Total=int(item.grandtotal)
+                            Balance=float(item.balance_amount)
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'Balance':Balance,
+                                'paid':0
+
+                            })    
+
+                        
+            for item in expnc:
+                            Type='Expense'
+                            Number=int(item.expense_no)
+                            Date=item.date 
+                            Total=int(item.amount)
+                            Balance=Total
+
+                            combined_data.append({
+                                'Type':Type,
+                                'Number':Number,
+                                'Date':Date,
+                                'Total':Total,
+                                'paid':0,
+                                'Balance':0
+
+                            })                 
+           
+            
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+    
+
+
+
+
+

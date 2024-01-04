@@ -161,23 +161,39 @@
                 
                     <center><h2 class="text-center my-4">Bank Account Details</h2></center>
                     <hr>
-                   
+                    <div class="btn-group" style="float: left; ">
+                       
+                            
+                        
+                        <div>
+                            <center>
+                              
+                                  
+                                <p href="" class="btn btn-primary  text-grey mt-3 " style="font-size: larger;background-color:rgba(0,0,0,.01);">
+                                   Overview
+                                </p>
+                                    </center>
+                                    </div>
+                                    </div>
                     <div class="btn-group" style="float: right; ">
                        
                             
-                            
+                        
                             <div>
                                 <center>
-                                    <a href="{% url 'bank_account_holder_edit' pk=account.holder.pk %}" class=" fa fa-pencil btn btn-outline-info rounded-pill text-grey mt-3 mb-3" role="button">
+                                  
+                                      
+                                    <a href="{% url 'edit_bank_account' account.id %}" class="btn btn-outline-info  text-grey mt-3 "    style="border: 1px solid rgb(1, 100, 139);padding: 10px;">
                                         Edit
                                     </a>&nbsp;&nbsp;&nbsp;
                                     {% if account.is_active %}
-                                    <a href="{% url 'deactivate_bank_account' pk=account.pk  %}" class=" btn btn-outline-info rounded-pill text-grey mt-3 mb-3" role="button">Activate</a> &nbsp;&nbsp;&nbsp;
+                                    <a href="{% url 'inactivate_bank_account' account.id%}" class="btn btn-outline-info dropdown-toggle   text-grey mt-3 " style="border: 1px solid rgb(1, 100, 139);padding: 10px;">Activate</a> &nbsp;&nbsp;&nbsp;
                                     {% else %}
-                                    <a href="{% url 'activate_bank_account' pk=account.pk %}" class=" btn btn-outline-info rounded-pill text-grey mt-3 mb-3" role="button">Inactivate</a> &nbsp;&nbsp;&nbsp;
+                                    <a href="{% url 'active_bank_account' account.id%}" class="btn btn-outline-info dropdown-toggle   text-grey mt-3 " style="border: 1px solid rgb(1, 100, 139);padding: 10px;">Inactivate</a> &nbsp;&nbsp;&nbsp;
                                     {% endif %}
                                    
-                            
+                                    <a href="{% url 'deletebank_holder' account.id%}" class="btn btn-outline-info  text-grey mt-3 " style="border: 1px solid rgb(1, 100, 139);padding: 10px;">
+                                        Delete</a>
                                 </center>
                             </div>
                             
@@ -202,45 +218,45 @@
                             <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Account Information</h5>
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-2 mt-3">
-                                    <h7 class="mb-0">Holder Name</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">Holder Name :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{ account.holder_name }}</p>
+                                    <p class="mb-0">&nbsp; &nbsp;{{ account.holder_name }}</p>
                                 </div>
                                 <div class="col-md-2 mt-3 vl">
-                                    <h7 class="mb-0">Account<br> No.</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">Account No :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{ account.account_number }}</p>
+                                    <p class="mb-0">&nbsp; &nbsp;{{ account.account_number }}</p>
                                 </div>
                             </div>
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-2 mt-3">
-                                    <h7 class="mb-0">IFSC Code</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">IFSC Code :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{ account.ifsc_code  }}</p>
+                                    <p class="mb-0">&nbsp; &nbsp;{{ account.ifsc_code  }}</p>
                                 </div>
                                 <div class="col-md-2 mt-3 vl">
-                                    <h7 class="mb-0">SWIFT Code</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">SWIFT Code :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{  account.swift_code  }}</p>
+                                    <p class="mb-0"> &nbsp; &nbsp;{{  account.swift_code  }}</p>
                                 </div>
                             </div>
 
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-2 mt-3">
-                                    <h7 class="mb-0">Bank Name</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">Bank Name :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{ account.get_bank_name_display}}</p>
+                                    <p class="mb-0">&nbsp; &nbsp;{{ account.bank_name}}</p>
                                 </div>
                                 <div class="col-md-2 mt-3 vl">
-                                    <h7 class="mb-0">Branch Name</h7>
+                                    <h7 class="mb-0" style="white-space: nowrap;">Branch Name :</h7>
                                 </div>
                                 <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{  account.branch_name  }}</p>
+                                    <p class="mb-0"> &nbsp; &nbsp;{{  account.branch_name  }}</p>
                                 </div>
                             </div>
 
@@ -267,25 +283,24 @@
                         <h6 class="">PAN/IT Number:</h6>
                         <h6>{{ banking_details.pan_it_number }}</h6>
                     </div>
-                    {% if banking_details.registration_type not in hide_gstin_un_for %}
+                    {% if banking_details.gstin_un %}
                     <div class="d-flex justify-content-between mb-4">
                     <h6 class="">GSTIN/UN:</h6>
                     
                     <h6>  {{banking_details.gstin_un  }}</h6>
                     </div>
+                    {%else%}
+                    <div class=" justify-content-between mb-4" style="display: none;">
+                        <h6 class="">GSTIN/UN:</h6>
+                        
+                        <h6>  </h6>
+                        </div>
                     {% endif %}
                     <div class="d-flex justify-content-between mb-4">
                         <h6 class="">GST Type:</h6>
                         <h6>{{ banking_details.registration_type }}</h6>
                     </div>
-                    <div class="d-flex justify-content-between mb-4">
-                        <h6 class="">Set alter gst details:</h6>
-                        {% if banking_details.set_alter_gst_details == 1 %}
-                        <h6>Yes</h6>
-                        {% else%}
-                        <h6>No</h6>
-                        {%endif%}
-                    </div>
+                    
                 </div>
 
 
@@ -338,7 +353,7 @@
                         </div>
                         <div class="row mb-4 d-flex justify-content-between align-items-center">
                             <div class="col-md-2 mt-3">
-                                <h7 class="mb-0">Phone Number</h7>
+                                <h7 class="mb-0">Phone No</h7>
                             </div>
                             <div class="col-md-4 mt-3">
                                 <p class="mb-0">{{ holder.phone_number  }}</p>
@@ -353,10 +368,10 @@
 
                         <div class="row mb-4 d-flex justify-content-between align-items-center">
                             <div class="col-md-2 mt-3">
-                                <h7 class="mb-0">Account Type</h7>
+                                <h7 class="mb-0" style="white-space: nowrap;">Account Type</h7>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <p class="mb-0">{{ holder.get_account_type_display}}</p>
+                                <p class="mb-0">{{ holder.account_type}}</p>
                             </div>
                             <div class="col-md-2 mt-3 vl">
                                 <h7 class="mb-0">Status</h7>
@@ -372,29 +387,30 @@
                                
                             </div>
                         </div>
-                            {% if address %}
+                        
                             <hr class="my-4">
+                            {% if mailing_address and mailing_address.mailing_name and mailing_address.address and mailing_address.country and mailing_address.state and mailing_address.pin %}
                             <h5 class="fw-bold mb-5 mt-2 pt-1" style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Mailing Address</h5>
                             
                             <div class="d-flex justify-content-between mb-4">
                                 <h6 class="">Name</h6>
-                                <h6>{{ address.mailing_name }}</h6>
+                                <h6>{{ mailing_address.mailing_name }}</h6>
                             </div>
                             <div class="d-flex justify-content-between mb-4">
                             <h6 class="">Address</h6>
                             
-                            <h6>  {{ address.address }}</h6>
+                            <h6>  {{ mailing_address.address }}</h6>
                             </div>
                             <div class="d-flex justify-content-between mb-4">
                                 <h6 class="">Country</h6>
-                                <h6>{{ address.get_country_display  }}</h6>
+                                <h6>{{ mailing_address.country  }}</h6>
                             </div>
                             <div class="d-flex justify-content-between mb-4">
                                 <h6 class="">State</h6>
-                                <h6>{{ address.get_state_display }}</h6>
+                                <h6>{{ mailing_address.state }}</h6>
                             </div> <div class="d-flex justify-content-between mb-4">
                                 <h6 class="">PIN Code</h6>
-                                <h6>{{address.pin}}</h6>
+                                <h6>{{mailing_address.pin}}</h6>
 
                             </div>
                             {% else %}

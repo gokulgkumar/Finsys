@@ -298,7 +298,11 @@
                             <td style="text-align: center;color:black;border: 1px solid black;">{{i.date}}</td>
                             <td style="text-align: center;color:black;border: 1px solid black;">{{i.round_off}}</td>
                         
-                            <td style="text-align: center;color:black;border: 1px solid black;"colspan="5" >{{p.tax}}</td>
+                            {% for b in pbill %}
+                            {% if b.bill_id == i.billid %}
+                            <td style="text-align: center;color:black;border: 1px solid black;"colspan="5"  >{{b.tax}}</td>
+                            {%endif%}
+                            {%endfor%}
                   
                             <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
                             <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ i.tax_amount}}</td>
@@ -322,7 +326,11 @@
                             <td style="text-align: center;color:black;border: 1px solid black;">{{ trans.debitdate }}</td>
                             <td style="text-align: center;color:black;border: 1px solid black;">{{ trans.round_off }}</td>
                           
-                            <td style="text-align: center;color:black;border: 1px solid black;"colspan="5" >{{d.tax}}</td>
+                            {% for d in pdebt1 %}
+                            {% if d.pdebit_id == trans.pdebitid %}
+                            <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >{{d.tax}}</td>
+                           {%endif%}
+                           {%endfor%}
                         
                             <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
                             <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ trans.taxamount}}</td>
@@ -344,8 +352,11 @@
                             <td style="text-align: center;color:black;border: 1px solid black;">{{i.billno}}</td>
                             <td style="text-align: center;color:black;border: 1px solid black;">{{i.start_date}}</td>
                             <td style="text-align: center;color:black;border: 1px solid black;">{{i.adjustment}}</td>
-                           
+                            {% for r in ritem %}
+                            {% if r.bill_id == i.rbillid %}
                             <td style="text-align: center;color:black;border: 1px solid black;"colspan="5" >{{r.tax}}</td>
+                            {%endif%}
+                            {%endfor%}
                            
                             <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
                             <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ i.tax_amount}}</td>

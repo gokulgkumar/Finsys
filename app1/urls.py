@@ -1385,6 +1385,61 @@ urlpatterns = [
     #end
     
     path('journal_details',views.journal_details,name='journal_details'),
+    
+    #bank holder  
+    path('bank_load',views.bank_load,name='bank_load'),
+    path('addbank',views.addbank,name='addbank'),
+    path('bank_account_holder/', views.bank_account_holder, name='bank_account_holder'),
+    path('bank_holder_view/<int:id>/', views.bank_holder_view, name='bank_holder_view'),
+    path('active_bank_account/<int:id>/',views.active_bank_account,name='active_bank_account'),
+    path('inactivate_bank_account/<int:id>/',views.inactivate_bank_account,name='inactivate_bank_account'),
+    path('edit_bank_account/<int:id>/', views.edit_bank_account, name='edit_bank_account'),
+
+    path('edit_bank_account_holder/<int:id>/',views.edit_bank_account_holder,name='edit_bank_account_holder'),
+    path('deletebank_holder/<int:id>/',views.deletebank_holder,name='deletebank_holder'),
+    #End
+    
+    path('salary_details',views.salary_details,name='salary_details'),
+    path('sort_employee_name_salary/', views.sort_employee_name_salary, name='sort_employee_name_salary'),
+    path('payroll_sort_employeesalary_by_month/',  views.payroll_sort_employeesalary_by_month, name='payroll_sort_employeesalary_by_month'),
+    
+    path('filter_by_status_save/', views.filter_by_status_save, name='filter_by_status_save'),
+    path('filter_by_status_draft/', views.filter_by_status_draft, name='filter_by_status_draft'),
+    path('payroll_addsalarydetails/', views.payroll_addsalarydetails, name='payroll_addsalarydetails'),
+    path('AddEmployeeInSalaryPage',views.AddEmployeeInSalaryPage,name='AddEmployeeInSalaryPage'),
+    path('newemployeesalary',views.newemployeesalary,name='newemployeesalary'),
+    path('listemployee_salary',views.listemployee_salary,name='listemployee_salary'),
+    path('getDays',views.get_days,name='getDays'),
+    path('calculate_salary/', views.calculate_salary, name='calculate_salary'),
+    path('app1/salary_overview/<str:employee_id>/<int:salary_id>/', views.salary_overview, name='salary_overview'),
+
+    
+    path('salarypdf/<str:employee_id>', views.salarypdf, name='salarypdf'),
+    path('deletesalary/<str:employee_id>/<int:salary_id>/', views.deletesalary, name='deletesalary'),
+    path('salaryedit/<str:employee_id>/<int:salary_id>/', views.salaryedit, name ='salaryedit'),
+    
+    path('bankdat',views.bankdat,name='bankdat'),
+    path('additional_loan_approve/<int:id>',views.additional_loan_approve,name='additional_loan_approve'),
+    path('additional_loan_transaction/<int:id>',views.additional_loan_transaction,name='additional_loan_transaction'),
+    path('LoanStatement_mail/<int:id>',views.LoanStatement_mail,name='LoanStatement_mail'),
+    path('edit_additional_LOan_transaction/<int:id>',views.edit_additional_LOan_transaction,name='edit_additional_LOan_transaction'),
+    path('edit_additional_LOan/<int:id>',views.edit_additional_LOan,name='edit_additional_LOan'),
+    # path('dd/<int:id>',views.dd,name='dd'),
+
+    path('vendor_check',views.vendor_check,name='vendor_check'),
+    path('vendor_check_name',views.vendor_check_name,name='vendor_check_name'),
+    path('VendorStatement_mail/<int:id>',views.VendorStatement_mail,name='VendorStatement_mail'),
+    path('vendor_statement/<int:id>',views.vendor_statement,name="vendor_statement"),
+    
+    #estimate
+    path('itemdata3',views.itemdata3,name="itemdata3"),
+    path('shareEstimateToEmail/<int:id>',views.shareEstimateToEmail, name='shareEstimateToEmail'),
+   
+    path('estimate_convert1/<int:id>/<str:conversion_type>/',views.estimate_convert1, name='estimate_convert1'),
+
+    path('covert_estimate_to_recinvoice/<int:id>/<str:conversion_type>',views.covert_estimate_to_recinvoice,name='covert_estimate_to_recinvoice'),
+    path('covert_estimate_to_salesorder/<int:id>/<str:conversion_type>',views.covert_estimate_to_salesorder,name='covert_estimate_to_salesorder'),
+    #End
     re_path(r'^create_item4/(?P<pdebit_id>\d+)/$', views.create_item4, name='create_item4'),
  
 ]
