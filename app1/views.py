@@ -37582,11 +37582,10 @@ def createpurchasedebit(request):
                     tax=ele[4],discount=ele[5],total=ele[6],pdebit=pdeb,cid=cmp1)
 
                     itemqty1 = itemtable.objects.get(name=ele[0],cid=cmp1)
-                    if itemqty1.stock != 0:
-                        temp=0
+                    if itemqty1.stock is not None and itemqty1.stock != 0:
                         temp = itemqty1.stock
-                        temp = temp-int(ele[2])
-                        itemqty1.stock =temp
+                        temp = temp - int(ele[2])
+                        itemqty1.stock = temp
                         itemqty1.save()
 
                     itemqty = itemtable.objects.get(name=ele[0],cid=cmp1)
@@ -49800,37 +49799,41 @@ def itemdatadebit(request):
             return redirect('/')
         else:
             
-            
 
             try:
                 # Try to get the purchasebill object with the specified bill_no
                 pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
                 print(pbill, 'pbill')
-
+               
                 # Try to get the purchasebill_item object with the specified conditions
                 try:
+                    print('purchasebill_item')
                     pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
-                    print('pb', pb)
                     quty = pb.quantity
                     taxs = pb.tax
+                    print('purchasebill_item quty', quty)
                     error_flag = 0
                 except ObjectDoesNotExist:
                     error_flag = 1
 
             except ObjectDoesNotExist:
                 # If purchasebill object is not found, try to get the recurring_bill object
+               
                 try:
+                    print('recurring_bill')
                     rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
                     re = recurringbill_item.objects.get(bill=rebill, item=id)
                     quty = re.qty
                     taxs = re.tax
+                   
+                    print('recurring_bill quty',quty)
                     error_flag = 0
                 except ObjectDoesNotExist:
                     error_flag = 1
 
             # Handle the error_flag accordingly
 
-            
+        print(quty,'quty is this')    
         print(error_flag,'err')
 
         toda = date.today()

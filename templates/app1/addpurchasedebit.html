@@ -131,6 +131,7 @@ input[name="service-city"] {
                     document.getElementById('email').value = json_data[key]['email'];
                     document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
                     document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    
 
                     if (json_data[key]['gsttype'] === 'unregistered Business' ){
                         gstNumDiv.hide();
@@ -214,13 +215,24 @@ input[name="service-city"] {
                                     <label for="validationCustom02">Debit Note Date</label>
                                     <input type="date" class="form-control" name="debitdate" id="date">
                                 </div>
+
+                                {% if deb_no == '' or deb_no is none %}
+
                                 <div class="col-md-5 mt-3">
-                                    <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This number is not continous <span class="text-white">)</span></span>
+                                    <label for="validationCustom02" >Debit Note Number</label>
                                    
                                      <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
                                     
                                 </div>
+                                {% else %}
 
+                                <div class="col-md-5 mt-3">
+                                    <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white">(</span> This number is not continous <span class="text-white">)</span></span>
+                                   
+                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
+                                    
+                                </div>
+                                {% endif %}
 
                                
 
@@ -231,7 +243,7 @@ input[name="service-city"] {
                                     <label>Place of supply</label>&nbsp;
                                     <select type="text" class="form-control" id="plosu" name="supply" onchange="state(this)">
                                         
-                                        <option  selected > </option>
+                                        <option  selected> </option>
                                         <option value="[AN] Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
                                     <option value="[AD] Andhra Predhesh">[AD] Andhra Predhesh</option>
                                     <option value="[AR] Arunachal Predesh">[AR] Arunachal Predesh</option>
@@ -370,7 +382,7 @@ input[name="service-city"] {
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
-                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty" hidden  >
+                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty"   hidden>
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
                                             <input type="number" name='quantity[]' oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
                                                     <div><span>Available Qty :</span> <span id="qtyspan"class='text-muted'></span></div>
@@ -386,6 +398,7 @@ input[name="service-city"] {
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
+                                                {% if cmp1.state == 'Kerala' %}
                                                 <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
@@ -393,7 +406,7 @@ input[name="service-city"] {
                                                 <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
-                                                
+                                                {% else %}
                                                 
                                                 <option id="ta5" value=0 text=" " hidden>Select</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
@@ -402,6 +415,7 @@ input[name="service-city"] {
                                                 <option value=12 text=" ">12.0% IGST(12%)</option>
                                                 <option value=18 text=" ">18.0% IGST(18%)</option>
                                                 <option value=28 text=" ">28.0% IGST(28%)</option>
+                                                {% endif %}
                                           </select>
                                         </td>
                                         <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce" 
@@ -450,6 +464,8 @@ input[name="service-city"] {
                                                    // Update the HTML elements based on the response
                                                    var data = response.hsn;
                                                    var data2 =  response.qty;
+
+                                                   console.log(data2,'data2')
                                                    var data3 = response.price;
                                                    var data4 = response.gst;
                                                    var data5 = response.sgst;
@@ -465,11 +481,19 @@ input[name="service-city"] {
                                                    document.getElementById('unit1').value = data3;
                                                    document.getElementById('taxs').value = data7;
                                                    document.getElementById('quantitys').value = data6;
+
+                                                   var place = 'Kerala'
                                                   
                                                    if (place == '{{ cmp1.state }}') {
+
                                                        document.getElementById('ta1').value = data4;
+                                                       
+                                                       
                                                    }
-                                                   document.getElementById('ta5').value = data5;
+                                                   else{
+                                                    document.getElementById('ta5').value = data5;
+                                                   }
+                                                   
                                            
                                            },
                                            
@@ -3518,11 +3542,11 @@ function qtychange1(inputElement) {
     }
     var difference = initialAvailableQuantity - enteredQuantity;
 
-    // if (enteredQuantity > initialAvailableQuantity) {
+    if (enteredQuantity > initialAvailableQuantity) {
        
-    //     alert('Error: Entered quantity cannot be greater than the available quantity'); 
-    //     difference = 0;
-    // }
+        // alert('Error: Entered quantity cannot be greater than the available quantity'); 
+        difference = 0;
+    }
     document.getElementById('qtyspan').innerText = difference;
     
 }
@@ -3704,10 +3728,44 @@ document.getElementById('qty3').addEventListener('change', function(event) {
 
 
 
+<!-- #entered quantity greater -->
 
 
 <script type="text/javascript">
-    $(document).on('change','#deb_no', function() {
+    $(document).on('input','.qty', function() {
+        qty = document.getElementById('quantitys').value;
+
+        quantity_value = $('.qty').val();
+
+        if(quantity_value > qty){
+            alert('Entered quantity greater than your bill')
+        }
+
+        console.log(qty,'qty')
+        console.log(quantity_value,'quantity_value')
+        // if(deb_value != deb){
+        //     document.getElementById('dangerdiv').style.display = 'block';
+        // }else{
+        //     document.getElementById('dangerdiv').style.display = 'none';
+        // }
+        // var deb_list = "{{ purdebit}}";
+        // deblist = deb_list.split(",");
+        // for(let i=0; i<deblist.length; i++){
+        //     if (deb_value == deblist[i]){
+        //         alert('Debit Number already in use.')
+        //         document.getElementById('dangerdiv').style.display = 'none';
+        //         document.getElementById('deb_no').value = ''
+        //     }
+        // }
+    })
+</script>
+
+
+
+
+
+<script type="text/javascript">
+    $(document).on('input','#deb_no', function() {
         deb = '{{deb_no}}'
         deb_value = $('#deb_no').val();
         if(deb_value != deb){
