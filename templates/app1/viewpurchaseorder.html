@@ -99,6 +99,9 @@
             height: 29.7cm;
             overflow: hidden;
         }
+        .p-4 {
+            padding: 0 !important;
+        }
         .bb {
             border-bottom: 3px solid var(--darkWhite);
         }
@@ -361,7 +364,19 @@
             border: 1px solid white;
             border-radius: 5px;
         }
-        
+        .equal-length-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%; /* Make the container fill the height of the column */
+            margin-left: 2vh;
+            margin-right: 2vh;
+        }
+
+        .equal-length-item {
+            flex: 1;
+            text-align: center;
+        }
     </style>
 
     <!-- <script>
@@ -390,7 +405,7 @@
                         <div class="collapse navbar-collapse tab" id="navbarSupportedContent">
                             <ul class="navbar-nav mr-auto">
                                 <li class="nav-item">
-                                    <a class="nav-link btn " role="button" onclick="Details()" style="color: white;"><i class="fa fa-info-circle" style="font-size: large;">&nbsp;Details</i><span class="sr-only">(current)</span></a>
+                                    <a class="nav-link btn " role="button" onclick="Details()" style="color: white;"><i class="fa fa-info-circle" style="font-size: large;">&nbsp;Overview</i><span class="sr-only">(current)</span></a>
                                 </li>
                                 
                                 <!-- <li class="nav-item">
@@ -398,6 +413,9 @@
                                 </li> -->
                                 <li class="nav-item">
                                     <a class="nav-link btn " role="button" onclick="Statment()" style="color: white;"><i class="fa fa-tasks" style="font-size: large;">&nbsp;Statement</i></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn " role="button" id="showSlipButton" onclick="showSlip()" style="color: white;"><i class="fa fa-clipboard" style="font-size: large;">&nbsp;Slip</i></a>
                                 </li>
                             </ul>
                             <ul class="navbar-nav navbar-right">
@@ -789,6 +807,7 @@
                     <button type="button" id="button3" class="btn btn-outline-info btn-sm" style="color: white; margin: 5px;">3</button>
                 </div>
                 <div id="transation">
+                    <!-- template1 -->
                     <div class="printable" id="whatToPrint1">
                 <div class="my-5 page" size="A4" >
                     <div class="p-5">
@@ -859,7 +878,7 @@
                         <section class="product-area mt-2">
                             <table class="table table-hover table-bordered table-primary">
                                 <thead>
-                                    <tr class="table-primary">
+                                    <tr class="" style="background-color: #22B8D1;">
                                         <th class="text-center" style="color:#000">Items</th>
                                         <th class="text-center" style="color:#000">HSN Code</th>
                                         <th class="text-center" style="color:#000">Quantity</th>
@@ -891,7 +910,7 @@
                                     <table class="table table-borderless">
                                         <tbody>
                                             
-                                            <tr >
+                                            <!-- <tr >
                                                 <td style="color: #000;text-align: left;">Payment Type</td>
                                                 <td style="color: #000;text-align: left;">:</td>
                                                 
@@ -900,7 +919,7 @@
                                                 {% else %}
                                                 <th style="color: #000;text-align: center;">{{pordr.payment_type}}</th>
                                                 {% endif %}
-                                            </tr>
+                                            </tr> -->
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -1006,41 +1025,25 @@
             </div>
         </div>
                     <div class="printable" id="whatToPrint2">
+                                    <!-- template2 -->
                 <div class="my-5 page" size="A4">
-                    <div class="p-5">
-                <div style=" background: linear-gradient(to bottom, #427D9D, #164863);">
-                        <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis">
-                            <div class="ribbon-inner ribbon-open" style="background-color: #1c72b4;">{{pordr.status}}<!----></div>
+                    <div class="p-4">
+                <div class="row px-5 py-4" style="background-color:#268ddd;">
+                        <div id="ember2512" class="col-md-4 d-flex justify-content-start tooltip-container ember-view ribbon text-ellipsis">
+                            <div class="text-white d-flex align-items-center px-5" style="border-radius: 1vh; background-color:#999999">{{pordr.status}}<!----></div>
                         </div>
-                        <div>
+                        <div class="col-md-4 d-flex justify-content-center">
                             <center class="h3" style="color: #fff;"><b>PURCHASE ORDER</b></center>
                         </div>
-                        <div class="row mt-5">
-                            <div class="col-md-8">
-                                <h5 class="text-white" style="font-weight: bold;">{{cmp1.cname }}</h5>
-                                <p class="address" style="font-weight: bold;color: #fff;"> {{cmp1.caddress}}<br>
-                                    {{cmp1.city}},
-                                    {{cmp1.state}}<br>
-                                    {{cmp1.pincode}}<br>
-                                    {{cmp1.cemail}}<br>
-                                    {{cmp1.phone}}<br>
-                                </p> 
+                        <div class="col-md-4 d-flex justify-content-end">
+                            <div class="text-white">
+                                <p class="mb-0 mt-2">Order NO #: <b>PO - {{pordr.puchaseorder_no }}</b></p>
                             </div>
-                            <div class="col-md-4">
-                                <div class="top-left">
-                                    <div class="graphic-path">
-                                        <p style="color:#fff;background-color: #1c72b4;">Order NO : <b>PO - {{pordr.puchaseorder_no }}</b></p>
-                                    </div>
-                                    <div class="mt-2">
-                                        
-                                        <p style="color:#fff">Date : <b>{{ pordr.date | date:'d-m-Y' }}</b></p>
-                                        <!-- <p style="color:#fff">Excpected Date : <b>{{ pordr.deliver_date | date:'d-m-Y' }}</b></p> -->
-                                    </div>
-                                </div>
-                            </div>
+                            
                         </div>
-                        </div>
-                        <section class="top-content bb d-flex justify-content-between">
+
+                    </div>                       
+                        <!-- <section class="top-content bb d-flex justify-content-between">
                             <div class="logo">
                                 
                             </div>
@@ -1048,15 +1051,15 @@
                             <div class="top-left">
                                 
                             </div>
-                        </section>
+                        </section> -->
                     
-            
-                        <section class="store-user">
+                        <div class="px-5 py-1">
+                        <section class="store-user"><br><br>
                             <div class="col-12">
                                 <div class="row bb pb-3 mt-3">
-                                    <div class="col-4">
-                                        <label class="text-white w-100 p-1" style="background-color: #164863;"><b>BILL TO</b></label>
-                                        <h5 class="" style="font-weight: bold;color: #164863;">{{pordr.vendor_name}}</h5>
+                                    <div class="col-4 pl-0">
+                                        <label class="text-white w-100 p-1" style="background-color: #999999; border-top-right-radius: 4vh; border-bottom-right-radius: 4vh;"><b>BILL TO</b></label>
+                                        <h5 class="" style="font-weight: bold;color: #000;">{{pordr.vendor_name}}</h5>
                                         <p class="address" style="font-weight: bold;margin-top: 2px; color: #000;" >
                                             {{pordr.vendor_mail}} <br>
                                             {{ pordr.billing_address|linebreaksbr }}
@@ -1064,9 +1067,9 @@
                                         </p>  
                                     </div>
                                     <div class="col-4"></div>
-                                    <div class="col-4">
-                                        <label class="text-white w-100 p-1" style="background-color: #164863;"><b>DELIVER TO</b></label>
-                                        <h5 class="" style="font-weight: bold;color: #164863;">{{pordr.contact_name}}</h5>
+                                    <div class="col-4 pr-0">
+                                        <label class="text-white w-100 p-1" style="border-top-right-radius: 4vh; border-bottom-right-radius: 4vh; background-color: #999999;"><b>DELIVER TO</b></label>
+                                        <h5 class="" style="font-weight: bold;color: #000;">{{pordr.contact_name}}</h5>
                                         <p class="address" style="font-weight: bold;margin-top: 2px; color: #000;">{{ pordr.deliverto|linebreaksbr }} </p>   
                                     </div>
                                 </div>
@@ -1075,7 +1078,7 @@
                         </section>
             
                         <section class="product-area mt-2">
-                            <table class="table table-hover table-bordered" style="background-color: #164863;">
+                            <table class="table table-hover table-bordered table-dark">
                                 <thead>
                                     <tr class="">
                                         <th class="text-center">Items</th>
@@ -1109,7 +1112,7 @@
                                     <table class="table table-borderless">
                                         <tbody>
                                             
-                                            <tr >
+                                            <!-- <tr >
                                                 <td style="color: #000;text-align: left;">Payment Type</td>
                                                 <td style="color: #000;text-align: left;">:</td>
                                                 
@@ -1118,7 +1121,7 @@
                                                 {% else %}
                                                 <th style="color: #000;text-align: center;">{{pordr.payment_type}}</th>
                                                 {% endif %}
-                                            </tr>
+                                            </tr> -->
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -1224,26 +1227,26 @@
             </div>
         </div>
                     <div class="printable" id="whatToPrint3">
+                    <!-- template3 -->
                 <div class="my-5 page" size="A4">
-                    <div class="p-5">
-                        <div id="ember2512" class="tooltip-container ember-view ribbon text-ellipsis bg-dark">
-                            <div class="ribbon-inner ribbon-open bg-dark">{{pordr.status}}<!----></div>
-                        </div>
-                        <div>
-                            <center class="h3 bg-dark" style="color: #fff;background-color: #444;"><b>PURCHASE ORDER</b></center>
-                        </div>
-                        <div class="row mt-5">
-                            <div class="col-md-8">
-                                <h5 class="text-dark" style="font-weight: bold;">{{cmp1.cname }}</h5>
-                                <p class="address" style="font-weight: bold;color: #000;"> {{cmp1.caddress}}<br>
+                    <div class="p-4">
+                        <div class="row">    
+                            <div class="col-sm-12" style="background-image: linear-gradient(#1b83e8, black); color: white;">
+                                <p style="font-size: 4vh; text-align: center;">PURCHASE ORDER</p>
+                                <p style=" text-align: center;">{{cmp1.cname }} <br>
+                                    {{cmp1.caddress}}<br>
                                     {{cmp1.city}},
                                     {{cmp1.state}}<br>
                                     {{cmp1.pincode}}<br>
-                                    {{cmp1.cemail}}<br>
-                                    {{cmp1.phone}}<br>
+                                    <!-- {{cmp1.cemail}}<br> -->
+                                    <!-- {{cmp1.phone}}<br> -->
+                                    >Order NO : <b>PO - {{pordr.puchaseorder_no }}</b>
                                 </p> 
-                            </div>
-                            <div class="col-md-4">
+                            </div>   
+                        
+                        <div class="row col-12">
+                            <div class="col-md-1"></div>
+                            <!-- <div class="col-md-4">
                                 <div class="top-left">
                                     <div class="graphic-path">
                                         <p style="color:#fff;background-color: rgb(121, 122, 122);">Order NO : <b>PO - {{pordr.puchaseorder_no }}</b></p>
@@ -1251,11 +1254,10 @@
                                     <div class="mt-2">
                                         
                                         <p style="color:#000">Date : <b>{{ pordr.date | date:'d-m-Y' }}</b></p>
-                                        <!-- <p style="color:#000">Excpected Date : <b>{{ pordr.deliver_date | date:'d-m-Y' }}</b></p> -->
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </div> -->
+                        
                         <section class="top-content bb d-flex justify-content-between">
                             <div class="logo">
                                 
@@ -1271,9 +1273,9 @@
                             <div class="col-12">
                                 <div class="row bb pb-3 mt-3">
                                     <div class="col-4">
-                                        <label class="text-white bg-dark w-100 p-1"><b>BILL TO</b></label>
-                                        <h5 class="text-dark" style="font-weight: bold;">{{pordr.vendor_name}}</h5>
-                                        <p class="address" style="font-weight: bold;margin-top: 2px; color: #000;" >
+                                        <label class="text-dark"><b>BILL TO</b></label>
+                                        <h5 class="text-dark">{{pordr.vendor_name}}</h5>
+                                        <p class="address">
                                             {{pordr.vendor_mail}} <br>
                                             {{ pordr.billing_address|linebreaksbr }}
                                             
@@ -1281,15 +1283,17 @@
                                     </div>
                                     <div class="col-4"></div>
                                     <div class="col-4">
-                                        <label class="text-white bg-dark w-100 p-1"><b>DELIVER TO</b></label>
-                                        <h5 class="text-dark" style="font-weight: bold;">{{pordr.contact_name}}</h5>
-                                        <p class="address" style="font-weight: bold;margin-top: 2px; color: #000;">{{ pordr.deliverto|linebreaksbr }} </p>   
+                                        <label class="text-dark"><b>DELIVER TO</b></label>
+                                        <h5 class="text-dark">{{pordr.contact_name}}</h5>
+                                        <p class="address">{{ pordr.deliverto|linebreaksbr }} </p>   
                                     </div>
                                 </div>
                                
                             </div>
                         </section>
-            
+                    </div>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
                         <section class="product-area mt-2">
                             <table class="table table-hover table-bordered table-dark text-white">
                                 <thead>
@@ -1318,14 +1322,15 @@
                                 </tbody>
                             </table>
                         </section>
-            
-                        <section class="balance-info">
+                    </div>    
+                    </div>    
+                        <section class="balance-info p-5">
                             <div class="row mt-3">
                                 <div class="col-4">
                                     <table class="table table-borderless">
                                         <tbody>
                                             
-                                            <tr >
+                                            <!-- <tr >
                                                 <td style="color: #000;text-align: left;">Payment Type</td>
                                                 <td style="color: #000;text-align: left;">:</td>
                                                 
@@ -1334,7 +1339,7 @@
                                                 {% else %}
                                                 <th style="color: #000;text-align: center;">{{pordr.payment_type}}</th>
                                                 {% endif %}
-                                            </tr>
+                                            </tr> -->
                                             <tr>
                                                 <td></td>
                                                 <td></td>
@@ -1440,6 +1445,194 @@
             </div>
         </div>
         </div>
+
+        <div id="slipdiv" style="background-color: #243e54; border-radius: 2vh; display: none; ">
+            <div class="p-5">
+                <div class="my-5 page" size="A4">
+                    <div class="row printable" style="margin-top: 20%;" id="printslip">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-6 ml-3">
+                            <div class="card bg-white" style="border: 1px dotted black;">
+                                <div class="mt-2" style="text-align: center;">
+                                    <div class="text-center" style="font-size: 3vh; color: black;">
+                                        <b>{{cmp1.cname}} </b>
+                                    </div>
+                                    <span style="font-size: x-small; color: black;">{{ cmp1.caddress }} <br>
+                                        {{cmp1.city}},
+                                        {{cmp1.state}}
+                                        {{cmp1.pincode}} <br>
+                                        {{ cmp1.phone }} <br>{{ cmp1.cemail }} 
+                                    </span>
+                                </div>
+                                <div class="ml-4 mt-2" style="color: black;">
+                                    <div class="row">
+                                        <div class="col-md-6 text-left">Purchase Order NO:</div>
+                                        <div class="col-md-5 text-right">PO - {{pordr.puchaseorder_no }}</div>
+                                    </div>
+                                    <!-- {% if pbill.bill_no  %} -->
+                                    <!-- <div class="row">
+                                        <div class="col-md-6 text-left">Purchase Order NO:</div>
+                                        <div class="col-md-5 text-right">{{pbill.purchase_order_number }}</div>
+                                    </div> -->
+                                    <!-- {% endif %} -->
+                                    <div class="row">
+                                        <div class="col-md-6 text-left">Customer Name:</div>
+                                        <div class="col-md-5 text-right">{{pordr.contact_name}}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 text-left">Bill Date :</div>
+                                        <div class="col-md-5 text-right">{{ pordr.date | date:'d-m-Y' }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 text-left">Shipment Date:</div>
+                                        <div class="col-md-5 text-right">{{ pordr.due_date | date:'d-m-Y' }}</div>
+                                    </div>
+                                </div>
+                                <div><br>
+                                    <div class="equal-length-container" style="color: black; font-weight: bold;">
+                                        <div class="equal-length-item" style=" text-align: center;">
+                                            Product
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:95%">
+                                        </div>
+                                        <div class="equal-length-item ml-2"  style=" text-align:center;">
+                                            HSN
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%;">
+                                        </div>
+                                        <div class="equal-length-item"  style=" text-align: center; ">
+                                            Qty
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                        </div>
+                                        <div class="equal-length-item"  style=" text-align: center; ">
+                                            Price
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                        </div>
+                                        <div class="equal-length-item"  style=" text-align: center; ">
+                                            Tax
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                        </div>
+                                        <div class="equal-length-item" style=" text-align: center; ">
+                                            Total
+                                            <hr style="border-bottom: 1px solid black; margin-top:1vh; width:60%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    {% for pordr in pitem %}
+                                    <div class="equal-length-container" style="color: black; font-size: small; word-wrap: break-word; margin-bottom: 1vh;">
+                                        <div class="equal-length-item"  style="text-align: center; margin-left: 2px;">
+                                            {{ pordr.items }}
+                                        </div>
+                                        <div class="equal-length-item" style="text-align: right;">
+                                            {{ pordr.hsn }}
+                                        </div>
+                                        <div class="equal-length-item" style="text-align: center; ">
+                                            {{ pordr.quantity }}
+                                        </div>
+                                        <div class="equal-length-item" style="text-align: center; ">
+                                            {{ pordr.rate  }}
+                                        </div>
+                                        <div class="equal-length-item" style="text-align: center; ">
+                                            {{ pordr.tax  }}
+                                        </div>
+                                        <div class="equal-length-item" style="text-align: center; ">
+                                            {{ pordr.amount }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div><br>
+                                    {% if discount != 0 %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            Discount
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{ pordr.discount }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            Subtotal
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{pordr.sub_total}}
+                                        </div>
+                                    </div>
+                                    {% if pordr.igst != "0" %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left " style=" color: black;">
+                                            IGST
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{pordr.igst}}
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            CGST
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{pordr.cgst}}
+                                        </div>
+                                    </div>
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            SGST
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{pordr.sgst}}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if pordr.ship_charge != '0.00' %}
+                                    {% if pordr.ship_charge != 0.0 %}
+                                    {% if pordr.ship_charge != '0' %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            Shipping Charge
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{ pordr.ship_charge }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endif %}
+                                    {% if pordr.round_off != '0.00' %}
+                                    {% if pordr.round_off != 0.0 %}
+                                    {% if pordr.round_off != '0' %}
+                                    <div class="row ml-1">
+                                        <div class="col-md-5 text-left" style=" color: black;">
+                                            Adjust
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="color: black;">
+                                            {{ pordr.round_off }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endif %}
+                                    <hr class="ml-2 mr-2" style="color: black; border-bottom: 1px solid black; ">
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="row">
+                                        <div class="col-md-5 text-left ml-2" style=" font-size: large; color: black; font-weight: bold;">
+                                            Total
+                                        </div>
+                                        <div class="col-md-6 text-right ml-2" style="font-size: large; color: black; font-weight: bold;">
+                                            {{pordr.grand_total}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+                </div>
 
         <div class="modal fade" id="file" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -1569,6 +1762,7 @@ $(document).ready(function () {
                 console.log("Details function called");
                 document.getElementById('details').style.display = 'block';
                 document.getElementById('statment').style.display = 'none';
+                document.getElementById('slipdiv').style.display = 'none';
                 document.getElementById('b1').hidden = true;
                 document.getElementById('transation').hidden = true;  
             }
@@ -1577,11 +1771,19 @@ $(document).ready(function () {
                 console.log("Statment function called");
                 document.getElementById('details').style.display = 'none';
                 document.getElementById('statment').style.display = 'block';
+                document.getElementById('slipdiv').style.display = 'none';
                 document.getElementById('b1').hidden = false;
                 document.getElementById('transation').hidden = false;
             }
 
-
+            function showSlip() {
+                        console.log("Statment function called");
+                        document.getElementById('details').style.display = 'none';
+                        document.getElementById('statment').style.display = 'none';
+                        document.getElementById('slipdiv').style.display = 'block';
+                        document.getElementById('b1').hidden = false;
+                        document.getElementById('transation').hidden = false;
+                    }
 
         </script>
         <!-- <script>
@@ -1654,6 +1856,10 @@ $(document).ready(function () {
         $(".printable").hide();
         $("#whatToPrint3").show();
     });
+    $("#showSlipButton").click(function () {
+        $(".printable").hide();
+        $("#printslip").show();
+    });    
 });
 
 

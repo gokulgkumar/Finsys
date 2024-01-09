@@ -128,11 +128,11 @@
                             <tr class="table-row" data-employee-id="{{ salary_detail.employee.employeeno }}">
                             
                                 <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'salary_overview' employee_id=salary_detail.employee.employeeid salary_id=salary_detail.id %}">{{ salary_detail.employee.full_name }}</a></td>
+                                <td><a href="{% url 'salary_overview' employee_id=salary_detail.employee.employeeid salary_id=salary_detail.id %}">{{ salary_detail.employee.title }} {{ salary_detail.employee.firstname }} {{ salary_detail.employee.lastname }}</a></td>
 
                                 <td>{{ salary_detail.employee.employeeno }}</td>
                                 <td>{{ salary_detail.month }}-{{ salary_detail.year }}</td>
-                                <td>{{ salary_detail.monthly_salary|floatformat:2}}</td>
+                                <td>{{ salary_detail.total_salary}}</td>
                                 <td>
                                     {% if salary_detail.status == 'draft' %}
                                         Draft

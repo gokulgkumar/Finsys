@@ -1402,7 +1402,6 @@ urlpatterns = [
     path('salary_details',views.salary_details,name='salary_details'),
     path('sort_employee_name_salary/', views.sort_employee_name_salary, name='sort_employee_name_salary'),
     path('payroll_sort_employeesalary_by_month/',  views.payroll_sort_employeesalary_by_month, name='payroll_sort_employeesalary_by_month'),
-    
     path('filter_by_status_save/', views.filter_by_status_save, name='filter_by_status_save'),
     path('filter_by_status_draft/', views.filter_by_status_draft, name='filter_by_status_draft'),
     path('payroll_addsalarydetails/', views.payroll_addsalarydetails, name='payroll_addsalarydetails'),
@@ -1412,11 +1411,12 @@ urlpatterns = [
     path('getDays',views.get_days,name='getDays'),
     path('calculate_salary/', views.calculate_salary, name='calculate_salary'),
     path('app1/salary_overview/<str:employee_id>/<int:salary_id>/', views.salary_overview, name='salary_overview'),
-
-    
-    path('salarypdf/<str:employee_id>', views.salarypdf, name='salarypdf'),
+    path('app1/salarypdf/<int:employee_id>/<int:salary_id>/', views.salarypdf, name='salarypdf'),
     path('deletesalary/<str:employee_id>/<int:salary_id>/', views.deletesalary, name='deletesalary'),
     path('salaryedit/<str:employee_id>/<int:salary_id>/', views.salaryedit, name ='salaryedit'),
+    path('shareSalaryToEmail/<int:employee_id>/<int:salary_id>/', views.shareSalaryToEmail, name='shareSalaryToEmail'),
+    path('bank_account_holder_create_loan',views.bank_account_holder_create_loan,name='bank_account_holder_create_loan'),
+    path('edit_bank_account_holder_create_loan/<int:id>',views.edit_bank_account_holder_create_loan,name='edit_bank_account_holder_create_loan'),
     
     path('bankdat',views.bankdat,name='bankdat'),
     path('additional_loan_approve/<int:id>',views.additional_loan_approve,name='additional_loan_approve'),
@@ -1440,6 +1440,15 @@ urlpatterns = [
     path('covert_estimate_to_recinvoice/<int:id>/<str:conversion_type>',views.covert_estimate_to_recinvoice,name='covert_estimate_to_recinvoice'),
     path('covert_estimate_to_salesorder/<int:id>/<str:conversion_type>',views.covert_estimate_to_salesorder,name='covert_estimate_to_salesorder'),
     #End
+    
+    #.....mirna...urls...(new)...
+    path('porder_save', views.porder_save, name='porder_save'),
+    path('purchaseorder_cnvrtrecbill/<int:id>',views.purchaseorder_cnvrtrecbill,name='purchaseorder_cnvrtrecbill'),
+    path('converttoprecbill/<int:id>',views.converttoprecbill,name='converttoprecbill'),
+    #End
+    
+    path('loan_check',views.loan_check,name='loan_check'),
+    
     re_path(r'^create_item4/(?P<pdebit_id>\d+)/$', views.create_item4, name='create_item4'),
  
 ]

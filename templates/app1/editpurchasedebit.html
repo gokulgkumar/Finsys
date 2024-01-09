@@ -1195,24 +1195,21 @@
                                 </div>
 
 
-                              
-
+                               {% if pdebt.gsttype != 'unregistered Business'  %}
+                                
                                 <div class="col-md-5 mt-3" id="gstDiv">
                                     
                                     
                                     <label for="validationCustom02">GST Number</label>
                                     
-                                    <input type="text" class="form-control" name="gst_num" id="gst_num"  required >
-
-
-
-
-                                    
+                                    <input type="text" class="form-control" name="gst_num" id="gst_num"  required value="{{ pdebt.gstnumber }}">
                                 </div>
+
+                                {% else %}
                                 
                                 <div class="col-md-5 mt-3" id="showdiv1" style="display: none;">
                                 </div>
-                               
+                                {% endif %}
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Debit Note Date</label>
                                     <input type="date" class="form-control" value="{{ pdebt.debitdate| date:'Y-m-d' }}" name="debitdate">

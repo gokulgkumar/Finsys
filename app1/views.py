@@ -31693,28 +31693,28 @@ def view_item(request,id):
         
     sales = salesorder.objects.filter(cid=cmp1)
     purchase = purchaseorder.objects.all()
-    pitems  = purchaseorder_item.objects.all()
-    sitems  = sales_item.objects.all()
+    pitems  = purchaseorder_item.objects.filter(cid=cmp1)
+    sitems  = sales_item.objects.filter(cid=cmp1)
     est = estimate.objects.filter(cid=cmp1)
-    eitems = estimate_item.objects.all()
+    eitems = estimate_item.objects.filter(cid=cmp1)
     inv = invoice.objects.filter(cid=cmp1)
-    iitems = invoice_item.objects.all()
-    bill = purchasebill.objects.all()
-    bitems = purchasebill_item.objects.all()
+    iitems = invoice_item.objects.filter(cid=cmp1)
+    bill = purchasebill.objects.filter(cid=cmp1)
+    bitems = purchasebill_item.objects.filter(cid=cmp1)
     payments =payment.objects.filter(cid=cmp1).all()
     payitem =paymentitems.objects.all()
     creditnote = salescreditnote.objects.all()
     credititem = salescreditnote1.objects.all()
-    pdebit = purchasedebit.objects.all()
-    pdebit_item = purchasedebit1.objects.all()
-    dchallan=challan.objects.all()
-    dchallanitem=challanitem.objects.all()
-    retinvoices=RetainerInvoices.objects.all()
+    pdebit = purchasedebit.objects.filter(cid=cmp1)
+    pdebit_item = purchasedebit1.objects.filter(cid=cmp1)
+    dchallan=challan.objects.filter(cid=cmp1)
+    dchallanitem=challanitem.objects.filter(cid=cmp1)
+    retinvoices=RetainerInvoices.objects.filter(cid=cmp1)
     retinvoicesitem=RetainerInvoiceItems.objects.all()
-    recinvoices=  recinvoice.objects.all()
-    recinvoiceitem=recinvoice_item.objects.all()
-    rbill=recurring_bill.objects.all()
-    rbillitems=recurringbill_item.objects.all()
+    recinvoices=  recinvoice.objects.filter(cid=cmp1)
+    recinvoiceitem=recinvoice_item.objects.filter(cid=cmp1)
+    rbill=recurring_bill.objects.filter(cid=cmp1)
+    rbillitems=recurringbill_item.objects.filter(cid=cmp1)
     e_waybill=e_waybills.objects.all()
     e_waybillitem=e_waybill_item.objects.all()
 
@@ -33870,7 +33870,13 @@ def viewvendor(request, id):
         tot8 = purchasedebit.objects.filter(cid=cmp1, vendor=su).all().aggregate(t2=Sum('balance_amount'))
 
         # Corrected total balance calculation
-        total_balance = (float(tot6['t2'] or 0) +float(tot1['t2'] or 0) +float(tot4['t2'] or 0) +float(tot8['t2'] or 0))
+        total_balance = (
+            float(vndr.openingbalance) * (-1 if vndr.opening_balance_type == 'Credit' else 1) +
+
+            float(tot6['t2'] or 0) +
+            float(tot1['t2'] or 0) +
+            float(tot4['t2'] or 0) +
+            float(tot8['t2'] or 0) )
 
 
 
@@ -34824,10 +34830,10 @@ def addpurchaseorder(request):
             return redirect('/')
 
         cmp1 = company.objects.get(id=request.session['uid'])
-        vndr = vendor.objects.filter(cid=cmp1)
-        itm = itemtable.objects.filter(cid=cmp1)
+        active_vendors = vendor.objects.filter(cid=cmp1, is_active=True)
+        itm = itemtable.objects.filter(cid=cmp1, status='Active')
         unit = unittable.objects.filter(cid=cmp1)
-        cust = customer.objects.filter(cid=cmp1)
+        cust = customer.objects.filter(cid=cmp1, status='Active')
         cpd = creditperiod.objects.filter(cid=cmp1)
         acc2 = accounts1.objects.filter(cid=cmp1, acctype='Sales')
         acc1 = accounts1.objects.filter(cid=cmp1, acctype='Cost of Goods Sold')
@@ -34840,7 +34846,7 @@ def addpurchaseorder(request):
 
         context = {
             'cmp1': cmp1,
-            'vndr': vndr,
+            'vndr': active_vendors,
             'item': itm,
             'unit': unit,
             'cust': cust,
@@ -34867,10 +34873,11 @@ def createpurchaseorder(request):
             vname = request.POST['vendor_name']
             vendor_mail=request.POST['email']
             baddress = request.POST['billing_address']
-            vgsttype=request.POST['gsttype']
-            vgstin=request.POST['gstin']
+            vgsttype = request.POST.get('vgsttype', '')
+            vgstin=request.POST.get('vgstin','')
             puchaseorder_no=request.POST['puchaseorder_no']
             supply=request.POST['sourceofsupply']
+            csourceofsupply=request.POST['csourceofsupply']
             destsupply=request.POST['destiofsupply']
             branch=request.POST['branch']
             reference=request.POST['reference']
@@ -34906,7 +34913,7 @@ def createpurchaseorder(request):
             try:
                 with transaction.atomic():
                     porder = purchaseorder(vendor_name=vname,vendor_mail=vendor_mail,billing_address=baddress,
-                                    sourceofsupply=supply,vendor_gsttype=vgsttype,vendor_gstin=vgstin,
+                                    sourceofsupply=supply,vendor_gsttype=vgsttype,vendor_gstin=vgstin,csourceofsupply=csourceofsupply,
                                     destiofsupply=destsupply,branch=branch,reference=reference,puchaseorder_no=puchaseorder_no,
                                     contact_name=contact_name,deliverto=deliverto,customer_gsttype=cgsttype,customer_gstin=cgstin,
                                     date=date,cheque_number=cheque_number,upi_number=upi_number,account_number=account_number,
@@ -35105,6 +35112,7 @@ def editpurchaseorder(request,id):
             pordr.customer_gstin = request.POST['cgstin']
             pordr.puchaseorder_no= request.POST['puchaseorder_no']
             pordr.sourceofsupply=request.POST['sourceofsupply']
+            pordr.csourceofsupply=request.POST['csourceofsupply']
             pordr.destiofsupply=request.POST['destiofsupply']
             pordr.branch=request.POST['branch']
             pordr.reference=request.POST['reference']
@@ -35502,10 +35510,10 @@ def addbilling(request):
         else:
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
-        vndr = vendor.objects.filter(cid=cmp1)
-        itm = itemtable.objects.filter(cid=cmp1)
+        active_vendors = vendor.objects.filter(cid=cmp1, is_active=True)
+        itm = itemtable.objects.filter(cid=cmp1, status='Active')
         unit = unittable.objects.filter(cid=cmp1)
-        cust = customer.objects.filter(cid=cmp1)
+        cust = customer.objects.filter(cid=cmp1, status='Active')
         cpd = creditperiod.objects.filter(cid=cmp1)
         acc2 = accounts1.objects.filter(cid=cmp1, acctype='Sales')
         acc1 = accounts1.objects.filter(cid=cmp1, acctype='Cost of Goods Sold')
@@ -35514,7 +35522,7 @@ def addbilling(request):
         next_reference = latest_reference + 1
         context = {
             'cmp1': cmp1,
-            'vndr': vndr,
+            'vndr': active_vendors,
             'item': itm,
             'unit': unit,
             'cust': cust,
@@ -35537,70 +35545,77 @@ def createbill(request):
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
         if request.method == 'POST':
-            vname = request.POST['vendor_name']
-            vendor_mail=request.POST['email']
-            baddress = request.POST['billing_address']
-            vgsttype=request.POST['gsttype']
-            vgstin=request.POST['gstin']
-            # vbalance=request.POST['Balance']
-            cgsttype=request.POST['cgsttype']
-            cgstin=request.POST['cgstin']
-            bill_no=request.POST['bill_no']
-            sourceofsupply=request.POST['sourceofsupply']
-            destsupply=request.POST['destiofsupply']
-            branch=request.POST['branch']
-            reference=request.POST['reference']
-            contact_name=request.POST['contact_name']
-            deliverto=request.POST['deliverto']
-            date=request.POST['date']
-            credit_period=request.POST['credit_period']
-            due_date=request.POST['due_date']
-            sub_total=request.POST['sub_total']
-            sgst=request.POST['sgst']
-            cgst=request.POST['cgst']
-            igst=request.POST['igst']
-            tax_amount=request.POST['tax_amount']
-            tcs=request.POST['tcs']
-            tcs_amount=request.POST['tcs_amount']
-            round_off=request.POST['round_off']
-            grand_total=request.POST['grand_total']
-            balance_due=request.POST['balance_due']
-            amtrecvd=request.POST['amtrecvd']
-            note=request.POST['note']
-            total_discount=request.POST['tot_dis']
-            shipping_charge=request.POST['shipcharge']
-            paid_amount=request.POST['paid']
-            payment_type=request.POST['paytype']  
-            balance_amount=float(grand_total)-float(paid_amount)
-            cheque_number = request.POST['chequeNumber']
-            upi_number = request.POST['upiNumber']
-            account_number = request.POST['accountNumber']
-            porder_number = request.POST['purchase_order_number']
-            save_type = request.POST.get('save_type')
+            vname = request.POST.get('vendor_name', '')
+            vendor_mail = request.POST.get('email', '')
+            baddress = request.POST.get('billing_address', '')
+            vgsttype = request.POST.get('gsttype', '')
+            vgstin = request.POST.get('vgstin', '')
+            # Check if 'vgstin' has a value
+            if not vgstin:
+                # Handle the case where 'vgstin' is not provided
+                vgstin = 'No GSTIN Provided'  # Or any default value you want
+            cgsttype = request.POST.get('cgsttype', '')
+            cgstin = request.POST.get('cgstin', '')
+            bill_no = request.POST.get('bill_no', '')
+            sourceofsupply = request.POST.get('sourceofsupply', '')
+            csourceofsupply = request.POST.get('csourceofsupply', '')
+            destsupply = request.POST.get('destiofsupply', '')
+            branch = request.POST.get('branch', '')
+            reference = request.POST.get('reference', '')
+            contact_name = request.POST.get('contact_name', '')
+            deliverto = request.POST.get('deliverto', '')
+            date = request.POST.get('date', '')
+            credit_period = request.POST.get('credit_period', '')
+            due_date = request.POST.get('due_date', '')
+            sub_total = request.POST.get('sub_total', '')
+            sgst = request.POST.get('sgst', '')
+            cgst = request.POST.get('cgst', '')
+            igst = request.POST.get('igst', '')
+            tax_amount = request.POST.get('tax_amount', '')
+            tcs = request.POST.get('tcs', '')
+            tcs_amount = request.POST.get('tcs_amount', '')
+            round_off = request.POST.get('round_off', '')
+            grand_total = request.POST.get('grand_total', '')
+            balance_due = request.POST.get('balance_due', '')
+            amtrecvd = request.POST.get('amtrecvd', '')
+            note = request.POST.get('note', '')
+            total_discount = request.POST.get('tot_dis', '')
+            shipping_charge = request.POST.get('shipcharge', '')
+            paid_amount = request.POST.get('paid', '')
+            payment_type = request.POST.get('paytype', '')
+            balance_amount = float(grand_total) - float(paid_amount)
+            cheque_number = request.POST.get('chequeNumber', '')
+            upi_number = request.POST.get('upiNumber', '')
+            account_number = request.POST.get('accountNumber', '')
+            porder_number = request.POST.get('purchase_order_number', '')
+            save_type = request.POST.get('save_type', '')
             
             if save_type == 'draft':
-                billed = purchasebill(vendor_name=vname,vendor_mail=vendor_mail,billing_address=baddress,
-                                    sourceofsupply=sourceofsupply,purchase_order_number=porder_number,customer_gsttype=cgsttype,customer_gstin=cgstin,
-                                    destiofsupply=destsupply,branch=branch,reference=reference,vendor_gsttype=vgsttype,vendor_gstin=vgstin,
-                                    contact_name=contact_name,deliverto=deliverto,is_from_purchase_order=False,bill_no=bill_no,
-                                    date=date,cheque_number=cheque_number,upi_number=upi_number,account_number=account_number,
-                                    credit_period=credit_period,due_date=due_date,sub_total=sub_total,sgst=sgst,
-                                    cgst=cgst,igst=igst,tax_amount=tax_amount,tcs=tcs,tcs_amount=tcs_amount,round_off=round_off,
-                                    grand_total=grand_total,balance_due=balance_due,amtrecvd=amtrecvd,note=note,cid=cmp1,
-                                    total_discount=total_discount,ship_charge=shipping_charge,paid_amount=paid_amount,balance_amount=balance_amount,
-                                    payment_type=payment_type,status='Draft')
-
+                billed = purchasebill(
+                    vendor_name=vname, vendor_mail=vendor_mail, billing_address=baddress, csourceofsupply=csourceofsupply,
+                    sourceofsupply=sourceofsupply, purchase_order_number=porder_number, customer_gsttype=cgsttype, customer_gstin=cgstin,
+                    destiofsupply=destsupply, branch=branch, reference=reference, vendor_gsttype=vgsttype, vendor_gstin=vgstin,
+                    contact_name=contact_name, deliverto=deliverto, is_from_purchase_order=False, bill_no=bill_no,
+                    date=date, cheque_number=cheque_number, upi_number=upi_number, account_number=account_number,
+                    credit_period=credit_period, due_date=due_date, sub_total=sub_total, sgst=sgst,
+                    cgst=cgst, igst=igst, tax_amount=tax_amount, tcs=tcs, tcs_amount=tcs_amount, round_off=round_off,
+                    grand_total=grand_total, balance_due=balance_due, amtrecvd=amtrecvd, note=note, cid=cmp1,
+                    total_discount=total_discount, ship_charge=shipping_charge, paid_amount=paid_amount, balance_amount=balance_amount,
+                    payment_type=payment_type, status='Draft'
+                )
             elif save_type == 'save':
-                billed = purchasebill(vendor_name=vname,vendor_mail=vendor_mail,billing_address=baddress,bill_no=bill_no,
-                                    sourceofsupply=sourceofsupply,purchase_order_number=porder_number,customer_gsttype=cgsttype,customer_gstin=cgstin,
-                                    destiofsupply=destsupply,branch=branch,reference=reference,vendor_gsttype=vgsttype,vendor_gstin=vgstin,
-                                    contact_name=contact_name,deliverto=deliverto,is_from_purchase_order=False,
-                                    date=date,cheque_number=cheque_number,upi_number=upi_number,account_number=account_number,
-                                    credit_period=credit_period,due_date=due_date,sub_total=sub_total,sgst=sgst,
-                                    cgst=cgst,igst=igst,tax_amount=tax_amount,tcs=tcs,tcs_amount=tcs_amount,round_off=round_off,
-                                    grand_total=grand_total,balance_due=balance_due,amtrecvd=amtrecvd,note=note,cid=cmp1,
-                                    total_discount=total_discount,ship_charge=shipping_charge,paid_amount=paid_amount,balance_amount=balance_amount,
-                                    payment_type=payment_type,status='Save')
+                billed = purchasebill(
+                    vendor_name=vname, vendor_mail=vendor_mail, billing_address=baddress, bill_no=bill_no, csourceofsupply=csourceofsupply,
+                    sourceofsupply=sourceofsupply, purchase_order_number=porder_number, customer_gsttype=cgsttype, customer_gstin=cgstin,
+                    destiofsupply=destsupply, branch=branch, reference=reference, vendor_gsttype=vgsttype, vendor_gstin=vgstin,
+                    contact_name=contact_name, deliverto=deliverto, is_from_purchase_order=False,
+                    date=date, cheque_number=cheque_number, upi_number=upi_number, account_number=account_number,
+                    credit_period=credit_period, due_date=due_date, sub_total=sub_total, sgst=sgst,
+                    cgst=cgst, igst=igst, tax_amount=tax_amount, tcs=tcs, tcs_amount=tcs_amount, round_off=round_off,
+                    grand_total=grand_total, balance_due=balance_due, amtrecvd=amtrecvd, note=note, cid=cmp1,
+                    total_discount=total_discount, ship_charge=shipping_charge, paid_amount=paid_amount, balance_amount=balance_amount,
+                    payment_type=payment_type, status='Save'
+                )
             
             billed.save()
             if len(request.FILES) != 0:
@@ -35969,7 +35984,12 @@ def editpurchasebill(request,id):
             pbill.vendor_name = request.POST['vendor_name']
             pbill.billing_address = request.POST['billing_address']
             pbill.bill_no= request.POST['bill_no']
+            pbill.vgsttype=request.POST['gsttype']
+            pbill.vgstin=request.POST['vgstin']
+            pbill.cgsttype=request.POST['cgsttype']
+            pbill.cgstin=request.POST['cgstin']
             pbill.sourceofsupply=request.POST['sourceofsupply']
+            pbill.csourceofsupply=request.POST['csourceofsupply']
             pbill.destiofsupply=request.POST['destiofsupply']
             pbill.branch=request.POST['branch']
             pbill.reference=request.POST['reference']
@@ -36197,6 +36217,187 @@ def editpurchasebill(request,id):
         return render(request,'app1/gobilling.html',{'cmp1': cmp1})
     return redirect('/') 
 
+def porder_save(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+    pordr = purchaseorder.objects.filter(cid=cmp1,status='Save').all()
+    return render(request,'app1/gopurchaseorder.html',{'cmp1':cmp1,'pordr':pordr})
+
+def converttoprecbill(request,id):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        
+        cmp1 = company.objects.get(id=request.session['uid'])
+        pordr = purchaseorder.objects.get(porderid=id)
+        pordr.status = 'Billed'
+        pordr.save()
+        
+        if request.method == 'POST':
+            vname = request.POST['vendor_name']
+            cname=request.POST['customer_name']
+            purchaseorderno=request.POST['ponumber']
+            # bill_no= '1000'
+            billno = request.POST.get('bill_code_number')
+            profile_name=request.POST.get('profile_name')
+            payment_method=request.POST['payment_method']
+            upi=request.POST['upi_id']
+            cheque=request.POST['cheque_id']
+            payment_terms=request.POST['payment_terms']
+            sourceofsupply=request.POST['sourceof_supply']
+            place_supply=request.POST['placosupply']
+            repeat_every=request.POST.get('repeat_every')
+            # start_date=request.POST.POST['start_date']
+            # sub_total=request.POST['end_date']
+            shipping_charge=request.POST.get('shipping_charge')
+            adjustment=request.POST['adjustment']
+            sgst=request.POST['sgst']
+            cgst=request.POST['cgst']
+            igst=request.POST['igst']
+            tax_amount=request.POST['tax_amount']
+            sub_total=request.POST['sub_total']
+            grand_total=request.POST.get('grand_total')
+            # balance=request.POST.get('balance')
+            adjustment=request.POST.get('adjustment')
+            note=request.POST['note']
+            start_date=request.POST.get('start_date')
+            end_date=request.POST.get('end_date')
+            paid_amount=request.POST.get('paid_amount')
+            paid_amount = float(paid_amount)
+            grand_total = float(grand_total)
+            save = request.POST.get('Save')
+            draft = request.POST.get('Draft')
+            vendor_mail = request.POST.get('email_inp')
+            Reference = request.POST.get('Reference')
+            print(save)
+            # balance = float(grand_total - paid_amount)
+            balance = round(float(grand_total - paid_amount), 3)
+            bill = recurring_bill(
+                vendor_name=vname, customer_name=cname, repeat_every=repeat_every, profile_name=profile_name,
+                payment_method=payment_method, start_date=start_date, end_date=end_date, paid_amount=paid_amount,
+                source_supply=sourceofsupply, sub_total=sub_total, sgst=sgst, adjustment=adjustment, balance=balance,
+                note=note, shipping_charge=shipping_charge, payment_terms=payment_terms,
+                cgst=cgst, igst=igst, tax_amount=tax_amount,
+                grand_total=grand_total, cid=cmp1, billno=billno, purchase_order=purchaseorderno, vendor_mail=vendor_mail,
+                refference=Reference)
+
+            if len(request.FILES) != 0:
+                bill.file=request.FILES['file'] 
+            bill.save()
+            # bill.bill_no = int(bill.bill_no) + bill.billid
+            # bill.save()
+            if save != None:
+                bill.status = 'Save'
+                bill.save()
+            else:
+                bill.status = 'Draft'
+                bill.save()
+            # if payment_method == 'cash':
+            #     cmp1.cash -= int(grand_total)
+            #     cmp1.save()
+            # elif payment_method == 'upi':
+            #      bill.upi_no = upi
+            #      bill.save()
+            # elif payment_method == 'cheque':
+            #      bill.cheque_no = cheque
+            #      bill.save()
+            # else:
+            #     received_bank = bankings_G.objects.get(bankname=payment_method)
+            #     received_bank.balance -= int(grand_total)
+            #     received_bank.save()
+            try:
+                if payment_method == 'cash':
+                    cmp1.cash -= int(grand_total)
+                    cmp1.save()
+                elif payment_method == 'upi':
+                    bill.upi_no = upi
+                    bill.save()
+                elif payment_method == 'cheque':
+                    bill.cheque_no = cheque
+                    bill.save()
+                else:
+                    received_bank = bankings_G.objects.get(bankname=payment_method)
+                    received_bank.balance -= int(grand_total)
+                    received_bank.save()
+            except bankings_G.DoesNotExist:
+                # Handle the case where the bank doesn't exist
+                raise Http404("Bank does not exist")
+            cmp1.prfile += 1
+            cmp1.save()
+            item = request.POST.getlist("item[]")
+            hsn  = request.POST.getlist("hsn[]")
+            qty = request.POST.getlist("qty[]")
+            price = request.POST.getlist("price[]")
+            discount = request.POST.getlist("discount[]")
+            if request.POST.get('sourceof_supply') == request.POST.get('placosupply'):
+                print("Place of supply matches cmp1.state")
+                print("sourceof_supply:", request.POST.get('sourceof_supply'))
+                tax = request.POST.getlist("tax1[]")
+            else:
+                tax = request.POST.getlist("tax2[]")
+
+            print(tax)
+            print('tax')
+            total = request.POST.getlist("total[]")
+
+            # billid=recurring_bill.objects.get(rbillid = bill.rbillid)
+
+            if len(item)==len(hsn)==len(qty)==len(price)==len(tax)==len(discount)==len(total) and item and hsn and qty and price and tax and discount and total:
+                mapped=zip(item,hsn, qty,price,tax,discount, total)
+                mapped=list(mapped)
+                for ele in mapped:
+                    billAdd = recurringbill_item.objects.create(item = ele[0],hsn=ele[1],
+                    qty=ele[2],price=ele[3],tax=ele[4],discount = ele[5],total=ele[6],bill=billid, cid=cmp1 )
+
+
+            return redirect('gopurchaseorder')
+        return render(request,'app1/purchaseorder_cnvrttorecbill.html',{'cmp1': cmp1})
+    return redirect('/')
+    
+@login_required(login_url='regcomp')
+def purchaseorder_cnvrtrecbill(request,id):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+        cmp1 = company.objects.get(id=request.session['uid'])
+        item = itemtable.objects.all()
+        pordr=purchaseorder.objects.get(porderid=id)
+        pitem = purchaseorder_item.objects.filter(porder=id)
+        banks=bankings_G.objects.filter(cid=cmp1)
+        re = repeatevery.objects.filter(cid=cmp1)
+        ref = recurring_bill.objects.filter(cid=cmp1).last()
+        ref_n = cmp1.prfile + 1
+        
+        ref_no = ref_n
+        ord_no = 1000+ref_no
+        bank_id=pordr.payment_type
+        
+        if str(bank_id).isnumeric():
+            bank = bankings_G.objects.get(id=bank_id, cid=cmp1)
+            # Perform the task with the 'bank' object
+        else:
+            # Handle the case where 'bank_id' is not a number
+            bank=None  # Or provide an appropriate action
+        
+        
+        context={
+            'cmp1': cmp1,
+            'pordr':pordr,
+            'pitem':pitem,
+            'item':item,
+            'banks':banks,
+            'bank':bank,
+            're':re,
+            'ord_no':ord_no,
+            'ref_no':ref_no,
+
+        }
+        return render(request,'app1/purchaseorder_cnvrttorecbill.html',context)
+    return redirect('gopurchaseorder')
+    
 @login_required(login_url='regcomp')
 def deletebill(request, id):
     if 'uid' in request.session:
@@ -36395,7 +36596,7 @@ def createexpense(request):
 
             return redirect('goexpenses')
         return render(request,'app1/goexpenses.html',{'cmp1': cmp1})
-    return redirect('/')  
+    return redirect('/') 
 
 @login_required(login_url='regcomp')
 def viewexpense(request,id):
@@ -37582,6 +37783,13 @@ def createpurchasedebit(request):
                     tax=ele[4],discount=ele[5],total=ele[6],pdebit=pdeb,cid=cmp1)
 
                     itemqty1 = itemtable.objects.get(name=ele[0],cid=cmp1)
+
+                    if itemqty1.stock == 0:
+                        temp = 0
+                        temp = temp - int(ele[2])
+                        itemqty1.stock = temp
+                        itemqty1.save()
+
                     if itemqty1.stock is not None and itemqty1.stock != 0:
                         temp = itemqty1.stock
                         temp = temp - int(ele[2])
@@ -48408,32 +48616,44 @@ def holidayss(request):
     }
 
     return render(request, 'app1/holidays.html', context)
-    
+
+@login_required(login_url='regcomp')    
 def addholidays(request):
     if 'uid' in request.session:
         uid = request.session.get('uid')
         if uid:
-            cmp1 = company.objects.get(id=uid)
+            logged_in_company = company.objects.get(id=uid)
             if request.method == 'POST':
                 name = request.POST.get('name')
                 start_date = request.POST.get('start_date')
                 end_date = request.POST.get('end_date')
-                # Create a new Holiday instance
-                hdays = holidays(name=name, start_date=start_date, end_date=end_date, cid=cmp1)
                 
-                # Check if the date already exists in the Holiday model   ###### akshaya   ##########
-                if holidays.objects.filter(start_date=start_date).exists() or holidays.objects.filter(end_date=end_date).exists():
+                # Check if the date already exists for the current company in the Holiday model
+                try:
+                    existing_holiday = holidays.objects.get(cid=logged_in_company, start_date=start_date)
                     messages.error(request, 'This date is already marked as a holiday....!')
                     return redirect('addholidays')
+                except ObjectDoesNotExist:
+                    pass
+                
                 try:
-                    hdays.save()  # Save the holiday
-                    messages.success(request, 'Holiday marked successfully...!')
+                    existing_holiday = holidays.objects.get(cid=logged_in_company, end_date=end_date)
+                    messages.error(request, 'A holiday already exists with the same end date for your company.')
+                    return redirect('addholidays')
+                except ObjectDoesNotExist:
+                    pass
+                
+                # Create a new Holiday instance for the logged-in company
+                try:
+                    new_holiday = holidays(name=name, start_date=start_date, end_date=end_date, cid=logged_in_company)
+                    new_holiday.save()  # Save the holiday
+                    messages.success(request, 'Holiday added successfully.')
                     return redirect('holidayss')
                 except IntegrityError as e:
-                    return HttpResponse("An error occurred while adding the holiday.")  #endakshaya
+                    return HttpResponse("An error occurred while adding the holiday.")
             else:
                 # Handle GET request for rendering form
-                return render(request, 'app1/holiday_add.html', {'cmp1': cmp1})
+                return render(request, 'app1/holiday_add.html', {'cmp1': logged_in_company})
         else:
             return redirect('/')
     else:
@@ -48951,6 +49171,14 @@ def create_loan(request):
     loan = loan_account.objects.filter(cid=cmp1)
     bank = bankings_G.objects.filter(cid=cmp1)
     accounts = BankAccount.objects.filter(cid=cmp1)
+    cmp1 = company.objects.get(id=request.session['uid'])
+    account_holder=BankAccountHolder.objects.filter(cid=cmp1)
+    account=BankAccount.objects.filter(cid=cmp1)
+    account_configuration=BankConfiguration.objects.filter(cid=cmp1)
+    mailing_address = MailingAddress.objects.filter(cid=cmp1)
+    bank_details = BankingDetails.objects.filter(cid=cmp1)
+    opening_balance = OpeningBalance.objects.filter(cid=cmp1)
+    bank =bankings_G.objects.filter(cid=cmp1)
 
     # Get the current date
     current_date = date.today().strftime('%Y-%m-%d')
@@ -48961,10 +49189,279 @@ def create_loan(request):
         'bank': bank,
         'accounts': accounts,
         'current_date': current_date,
+        'account_holder':account_holder,
+        'account':account,
+        'account_configuration':account_configuration,
+        'mailing_address':mailing_address,
+        'bank_details':bank_details,
+        'opening_balance':opening_balance,
+        'bank':bank
+        
     }
 
     return render(request, 'app1/loan_creat.html', context)
+
+def edit_bank_account_holder_create_loan(request,id):
+    cmp1 = company.objects.get(id=request.session["uid"])
+
     
+    if request.method == "POST":
+        account_name = request.POST['name']
+        account_number = request.POST['accountNumber']
+        ifsc_code = request.POST['ifscCode']
+        swift_code = request.POST['swiftCode']
+        bank_name = request.POST['bank_name']
+        branch_name = request.POST['branch_name']
+        name = request.POST['name']
+        alias = request.POST['alias']
+        phone_number = request.POST['phone_number']
+        email = request.POST['email']
+        account_type = request.POST['account_type']
+        mailing_name = request.POST['mailingName']
+        address = request.POST['address']
+        country = request.POST['country']
+        state = request.POST['state']
+        pin = request.POST['pin']
+        date = request.POST['date']
+        amount = request.POST['Opening']
+        pan_it_number = request.POST['pan_it_number']
+        registration_type = request.POST['registration_type']
+        gstin_un = request.POST['gstin_un']
+        types = request.POST['termof']
+        set_cheque_book_range = request.POST['set_cheque_book_range']
+        enable_cheque_printing = request.POST['enable_cheque_printing']
+        set_cheque_printing_configuration = request.POST['set_cheque_printing_configuration']
+    
+        print(
+        account_name,
+        account_number,
+        ifsc_code,
+        swift_code,
+        bank_name,
+        branch_name,
+        name,
+        alias,
+        phone_number,
+        email,
+        account_type,
+        set_cheque_book_range,
+        enable_cheque_printing,
+        set_cheque_printing_configuration,
+        pan_it_number,
+        registration_type,
+        gstin_un,
+        
+        mailing_name,
+        address,
+        country,
+        state,
+        pin,
+        date,
+        amount,)
+        # Create BankAccountHolder instance
+        account_holder = BankAccountHolder(
+            name=name,
+            alias=alias,
+            phone_number=phone_number,
+            email=email,
+            account_type=account_type,
+            cid=cmp1,
+        )
+        account_holder.save()
+
+        # Create BankAccount instance with the related BankAccountHolder
+        account = BankAccount(
+            holder=account_holder,
+            holder_name=account_name,
+            account_number=account_number,
+            ifsc_code=ifsc_code,
+            swift_code=swift_code,
+            bank_name=bank_name,
+            branch_name=branch_name,
+            cid=cmp1,
+        )
+        account.save()
+        # Create MailingAddress instance with the related BankAccountHolder
+        mailing_address = MailingAddress(
+            holder=account_holder,
+            mailing_name=mailing_name,
+            address=address,
+            country=country,
+            state=state,
+            pin=pin,
+            cid=cmp1,
+        )
+        mailing_address.save()
+
+        # Create OpeningBalance instance with the related BankAccountHolder
+        opening_balance = OpeningBalance(
+            holder=account_holder,
+            date=date,
+            amount=amount,
+            Open_type=types,
+            cid=cmp1,
+        )
+        opening_balance.save()
+        
+
+        # Create BankingDetails instance with the related BankAccountHolder
+        bank_details = BankingDetails(
+            holder=account_holder,
+            pan_it_number=pan_it_number,
+            registration_type=registration_type,
+            gstin_un=gstin_un,
+            cid=cmp1,
+           
+        )
+        bank_details.save()
+        
+        # Create BankConfiguration instance with the related BankAccountHolder
+        account_configuration = BankConfiguration(
+            holder=account_holder,
+            set_cheque_book_range = True if set_cheque_book_range == "Yes" else False,
+            enable_cheque_printing = True if enable_cheque_printing == "Yes" else False,
+            set_cheque_printing_configuration = True if set_cheque_printing_configuration == "Yes" else False,
+            cid=cmp1,
+
+        )
+        account_configuration.save()
+        
+        
+
+        return redirect('edit_loan',id)
+    else:
+        return redirect('edit_loan',id)
+        
+def bank_account_holder_create_loan(request):
+    cmp1 = company.objects.get(id=request.session["uid"])
+
+    
+    if request.method == "POST":
+        account_name = request.POST['name']
+        account_number = request.POST['accountNumber']
+        ifsc_code = request.POST['ifscCode']
+        swift_code = request.POST['swiftCode']
+        bank_name = request.POST['bank_name']
+        branch_name = request.POST['branch_name']
+        name = request.POST['name']
+        alias = request.POST['alias']
+        phone_number = request.POST['phone_number']
+        email = request.POST['email']
+        account_type = request.POST['account_type']
+        mailing_name = request.POST['mailingName']
+        address = request.POST['address']
+        country = request.POST['country']
+        state = request.POST['state']
+        pin = request.POST['pin']
+        date = request.POST['date']
+        amount = request.POST['Opening']
+        pan_it_number = request.POST['pan_it_number']
+        registration_type = request.POST['registration_type']
+        gstin_un = request.POST['gstin_un']
+        types = request.POST['termof']
+        set_cheque_book_range = request.POST['set_cheque_book_range']
+        enable_cheque_printing = request.POST['enable_cheque_printing']
+        set_cheque_printing_configuration = request.POST['set_cheque_printing_configuration']
+    
+        print(
+        account_name,
+        account_number,
+        ifsc_code,
+        swift_code,
+        bank_name,
+        branch_name,
+        name,
+        alias,
+        phone_number,
+        email,
+        account_type,
+        set_cheque_book_range,
+        enable_cheque_printing,
+        set_cheque_printing_configuration,
+        pan_it_number,
+        registration_type,
+        gstin_un,
+        
+        mailing_name,
+        address,
+        country,
+        state,
+        pin,
+        date,
+        amount,)
+        # Create BankAccountHolder instance
+        account_holder = BankAccountHolder(
+            name=name,
+            alias=alias,
+            phone_number=phone_number,
+            email=email,
+            account_type=account_type,
+            cid=cmp1,
+        )
+        account_holder.save()
+
+        # Create BankAccount instance with the related BankAccountHolder
+        account = BankAccount(
+            holder=account_holder,
+            holder_name=account_name,
+            account_number=account_number,
+            ifsc_code=ifsc_code,
+            swift_code=swift_code,
+            bank_name=bank_name,
+            branch_name=branch_name,
+            cid=cmp1,
+        )
+        account.save()
+        # Create MailingAddress instance with the related BankAccountHolder
+        mailing_address = MailingAddress(
+            holder=account_holder,
+            mailing_name=mailing_name,
+            address=address,
+            country=country,
+            state=state,
+            pin=pin,
+            cid=cmp1,
+        )
+        mailing_address.save()
+
+        # Create OpeningBalance instance with the related BankAccountHolder
+        opening_balance = OpeningBalance(
+            holder=account_holder,
+            date=date,
+            amount=amount,
+            Open_type=types,
+            cid=cmp1,
+        )
+        opening_balance.save()
+        
+
+        # Create BankingDetails instance with the related BankAccountHolder
+        bank_details = BankingDetails(
+            holder=account_holder,
+            pan_it_number=pan_it_number,
+            registration_type=registration_type,
+            gstin_un=gstin_un,
+            cid=cmp1,
+           
+        )
+        bank_details.save()
+        
+        # Create BankConfiguration instance with the related BankAccountHolder
+        account_configuration = BankConfiguration(
+            holder=account_holder,
+            set_cheque_book_range = True if set_cheque_book_range == "Yes" else False,
+            enable_cheque_printing = True if enable_cheque_printing == "Yes" else False,
+            set_cheque_printing_configuration = True if set_cheque_printing_configuration == "Yes" else False,
+            cid=cmp1,
+
+        )
+        account_configuration.save()
+        
+        
+
+        return redirect('create_loan')
+    else:
+        return redirect('create_loan')    
     
 def create_loan_account(request):
     cid = company.objects.get(id=request.session["uid"])
@@ -49014,7 +49511,7 @@ def create_loan_account(request):
         elif received_bank == 'cheque':
             received_bankname = 'cheque'
         else:
-            received = bankings_G.objects.get(bankname=received_bank)
+            received = bankings_G.objects.get(cid=cid,bankname=received_bank)
             received_bankname = received.bankname
             received.balance += balance
             received.save()
@@ -49028,7 +49525,7 @@ def create_loan_account(request):
         elif paid == 'cheque':
             processing_bankname = 'cheque'
         else:
-            processing_bank = bankings_G.objects.get(bankname=paid)
+            processing_bank = bankings_G.objects.get(cid=cid,bankname=paid)
             processing_bankname = processing_bank.bankname
             processing_bank.balance -= processing
             processing_bank.save()
@@ -49231,7 +49728,7 @@ def edit_loan_account(request, id):
         elif loan.recieced_bank == 'cheque':
             loan.recieced_bank = 'upi'
         else:
-            received = bankings_G.objects.get(bankname=loan.recieced_bank)
+            received = bankings_G.objects.get(cid=cid,bankname=loan.recieced_bank)
             received.balance += loan.recieved_amount
             received.save()
 
@@ -49246,7 +49743,7 @@ def edit_loan_account(request, id):
         elif loan.paid == 'cheque':
             loan.paid = 'cheque'
         else:
-            received = bankings_G.objects.get(bankname=loan.paid)
+            received = bankings_G.objects.get(cid=cid,create_loan_accountbankname=loan.paid)
             received.balance += loan.recieved_amount
             received.save()
         # Check if paid bank is cash
@@ -49325,7 +49822,7 @@ def edit_loan_account(request, id):
 
 
         loan.save()
-        return redirect('loan')
+        return redirect('loan_list',id)
 
     # Handle GET request and render the edit form
     return render(request, 'app1/loan_edit.html')
@@ -49383,6 +49880,20 @@ def loan_list(request,id):
         
         }
     return render(request,'app1/loan_list.html',context)
+
+def loan_check(request):
+    pan_number = request.GET.get('emp', None)
+    cmp1 = company.objects.get(id=request.session['uid'])
+    print(pan_number)
+    data = {
+        'is_tak': loan_account.objects.filter(cid=cmp1, account_name=pan_number).exists()
+        
+    }
+    print(data)
+    if data['is_tak']:
+        data['error_message'] = 'Loan Account  already exists.'
+
+    return JsonResponse(data)
     
 def loan_trans(request,id):
     global loan_id_global
@@ -49548,50 +50059,65 @@ def edit_loan_payment(request, id):
     
     
     
-def loan_statement(request,id):
-    loan=loan_account.objects.get(id=id)
+def loan_statement(request, id):
+    loan = loan_account.objects.get(id=id)
     cmp1 = company.objects.get(id=request.session["uid"])
     current_date = date.today().strftime('%Y-%m-%d')
 
     if request.method == 'POST':
-        sdate=request.POST.get('sdate')
-        edate=request.POST.get('edate')
-        print
-        searchrslt = loan_transaction.objects.filter(
-            loan_id=loan,
-            loan_date__range=(sdate, edate)
-        )
-        print(searchrslt)
-        context={
-        'cmp1':cmp1,
-        'bnk':searchrslt,
-        'sdate':sdate,
-        'edate':edate,
-        'ids':id,
-        'loan':loan,
-        'current_date':current_date,
+        sdate = request.POST.get('sdate')
+        edate = request.POST.get('edate')
 
-        }
-        return render(request,'app1/loan_statement.html',context)
-    
-    else:
-        bnk=loan_transaction.objects.filter(loan_id=id)
-        loan=loan_account.objects.get(id=id)
-        cmp1 = company.objects.get(id=request.session["uid"])
-        current_date = date.today().strftime('%Y-%m-%d')
+        if sdate and edate:  # If start date and end date are provided
+            # Calculate balance for the specified date range
+            search = loan_transaction.objects.filter(
+                loan_id=loan,
+                loan_date__range=(sdate, edate))
+            total_debits = loan_transaction.objects.filter(
+                loan_id=loan,
+                loan_date__range=(sdate, edate),
+            ).aggregate(total_debits=Sum('loan_amount'))['total_debits'] or 0
 
-        
+            
 
-        context={
-            'cmp1':cmp1,
-            'bnk':bnk,
-            'ids':id,
-            'loan':loan,
-            'current_date':current_date,
-
-
+            balance = total_debits
+            context = {
+                'cmp1': cmp1,
+                'balance': balance,
+                'sdate': sdate,
+                'edate': edate,
+                'ids': id,
+                'loan': loan,
+                'current_date': current_date,
+                'bnk':search
+                
             }
-        return render(request,'app1/loan_statement.html',context)
+        else:
+            # If start date and end date are not provided, display all transactions
+            searchrslt = loan_transaction.objects.filter(loan_id=loan)
+            context = {
+                'cmp1': cmp1,
+                'bnk': searchrslt,
+                'ids': id,
+                'loan': loan,
+                'current_date': current_date,
+                'balance':loan.balance,
+            }
+
+        return render(request, 'app1/loan_statement.html', context)
+
+    else:
+        # If it's a GET request, display all transactions by default
+        bnk = loan_transaction.objects.filter(loan_id=id)
+        context = {
+            'cmp1': cmp1,
+            'bnk': bnk,
+            'ids': id,
+            'loan': loan,
+            'current_date': current_date,
+            'balance':loan.balance,
+        }
+        return render(request, 'app1/loan_statement.html', context)    
         
         
 def loan_pdf(request,id):
@@ -49799,41 +50325,37 @@ def itemdatadebit(request):
             return redirect('/')
         else:
             
+            
 
             try:
                 # Try to get the purchasebill object with the specified bill_no
                 pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
                 print(pbill, 'pbill')
-               
+
                 # Try to get the purchasebill_item object with the specified conditions
                 try:
-                    print('purchasebill_item')
                     pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
+                    print('pb', pb)
                     quty = pb.quantity
                     taxs = pb.tax
-                    print('purchasebill_item quty', quty)
                     error_flag = 0
                 except ObjectDoesNotExist:
                     error_flag = 1
 
             except ObjectDoesNotExist:
                 # If purchasebill object is not found, try to get the recurring_bill object
-               
                 try:
-                    print('recurring_bill')
                     rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
                     re = recurringbill_item.objects.get(bill=rebill, item=id)
                     quty = re.qty
                     taxs = re.tax
-                   
-                    print('recurring_bill quty',quty)
                     error_flag = 0
                 except ObjectDoesNotExist:
                     error_flag = 1
 
             # Handle the error_flag accordingly
 
-        print(quty,'quty is this')    
+            
         print(error_flag,'err')
 
         toda = date.today()
@@ -52883,7 +53405,7 @@ def shareholidaysToEmail(request,year,month):
         emails_string = request.POST['email_ids']
         emails_list = [email.strip() for email in emails_string.split(',')]
         # recipient_email = request.POST.get('email_ids')
-        html_message = render_to_string('app1\pdf_holidays.html',context)#add ur html
+        html_message = render_to_string('app1/pdf_holidays.html',context)#add ur html
         # vyaparapp\templates\index.html
         # vyaparapp\templates\company\gstr3B_pdf.html
         plain_message = strip_tags(html_message)
@@ -53012,7 +53534,7 @@ def shareattendanceToEmail(request,year,month,employee):
 
         employee_attendance['holidays'] = total_holidays
         employee_attendance['working_days'] = total_working_days
-        template_path = 'app1/pdf_attendance.html'
+        template_path = 'app1\pdf_attendance.html'
         context = {
             'cmp1': cmp1,
             'employee_attendance': employee_attendance,
@@ -53027,7 +53549,7 @@ def shareattendanceToEmail(request,year,month,employee):
         emails_string = request.POST['email_ids']
         emails_list = [email.strip() for email in emails_string.split(',')]
         # recipient_email = request.POST.get('email_ids')
-        html_message = render_to_string('app1\pdf_attendance.html',context)#add ur html
+        html_message = render_to_string('app1/pdf_attendance.html',context)#add ur html
         # vyaparapp\templates\index.html
         # vyaparapp\templates\company\gstr3B_pdf.html
         plain_message = strip_tags(html_message)
@@ -53634,11 +54156,13 @@ def listemployee_salary(request):
             employeeno = cust.employeeno
             joindate = cust.joindate
             amount = cust.amount
+            designation = cust.designation
             return JsonResponse({
                 'email': email,
                 'employeeno': employeeno,
                 'joindate': joindate,
-                'amount': amount,                
+                'amount': amount,
+                'designation': designation,                
             }, safe=False)
         except payrollemployee.DoesNotExist:
             return JsonResponse({'error': 'Selected employee not found.'}, status=404)
@@ -53646,6 +54170,20 @@ def listemployee_salary(request):
 
 
 import calendar
+MONTH_NAMES = {
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December',
+}
 @login_required(login_url='regcomp')
 def get_days(request):
     if request.method == 'POST':
@@ -53683,12 +54221,14 @@ def get_days(request):
                 date__range=(start_date, end_date),
                 status='absent'
             ).count()
-            holidays_count = holidays.objects.filter(start_date__range=(start_date, end_date)).count()
+            holidays_count = holidays.objects.filter(cid=comp,start_date__range=(start_date, end_date)).count()
             print(holidays_count,leave_count)
             _, num_days = calendar.monthrange(year, month)
             working_days = num_days - holidays_count
+            
             try:
                 return JsonResponse({
+                    'month': MONTH_NAMES.get(month, ''),
                     'holiday': holidays_count,
                     'leave': leave_count,   
                     'working_days' : working_days,         
@@ -53699,7 +54239,7 @@ def get_days(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
+from decimal import Decimal
 @login_required(login_url='regcomp')
 def calculate_salary(request):
     if request.method == 'POST':
@@ -53713,7 +54253,10 @@ def calculate_salary(request):
         salary = Decimal(request.POST.get('salary', 0))
         leaves = int(request.POST.get('attendance', 0))
         holiday = int(request.POST.get('holiday', 0))
-        wg = salary / 30  
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year', 0))
+        _, num_days = monthrange(year, month)
+        wg = salary / num_days
         s1 = wg * leaves
         monthly_salary = (salary - s1 - other_cuttings) + add_bonus
         monthly_salary = int(monthly_salary)
@@ -53801,7 +54344,6 @@ def payroll_addsalarydetails(request):
         
         
     }
-
     return render(request, 'app1/payroll_addsalarydetails.html', context)
 
 
@@ -53939,8 +54481,6 @@ def salary_overview(request, employee_id, salary_id=None):
     try:
         cmp1 = company.objects.get(id=request.session["uid"])
         employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
-        
-        # If salary_id is provided, filter by it; otherwise, get all salary details for the employee
         if salary_id:
             salary_details = SalaryDetails1.objects.filter(employee=employee, id=salary_id)
         else:
@@ -53971,24 +54511,34 @@ def salary_payslip(request):
     except:
         return redirect('salary_details')
 
-def salarypdf(request, employee_id):
-    cmp1 = company.objects.get(id=request.session["uid"])
-    employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
-    salary_details = SalaryDetails1.objects.filter(employee=employee)
+def salarypdf(request, employee_id, salary_id):
+    try:
+        cmp1 = company.objects.get(id=request.session["uid"])
+        employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+        salary_details = get_object_or_404(SalaryDetails1, id=salary_id, employee=employee)
+
+    except company.DoesNotExist:
+        return HttpResponse('Company not found', status=404)
+    except payrollemployee.DoesNotExist:
+        return HttpResponse('Employee not found', status=404)
+
     template_path = 'app1/salarypdf.html'
-    context ={
-        'employee':employee,
-        'cmp1':cmp1,
-        'salary_details': salary_details,
+    context = {
+        'employee': employee,
+        'cmp1': cmp1,
+        'salary_details': [salary_details],  # Convert to a list for consistent processing
     }
+
     fname = employee.employeeno
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename={fname}.pdf'
     template = get_template(template_path)
     html = template.render(context)
     pisa_status = pisa.CreatePDF(html, dest=response)
+
     if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
     return response
 
 def deletesalary(request,employee_id,salary_id=None):
@@ -54000,7 +54550,7 @@ def deletesalary(request,employee_id,salary_id=None):
     else:
         salary_details = SalaryDetails1.objects.filter(employee=employee)
         salary_details.delete()
-    return redirect('salary_details')  
+    return redirect('salary_details') 
 
 
 from django.http import Http404
@@ -54019,9 +54569,12 @@ def salaryedit(request, employee_id,salary_id=None):
     except SalaryDetails1.DoesNotExist:
         raise Http404("Salary details not found")
 
-
+    salary_detail.month = int(salary_detail.month)
+    salary_detail.month_name = calendar.month_name[salary_detail.month]
     print("Employee ID:", employee.employeeid)
     print("Salary ID:", salary_id) 
+    print("Salary Month:", salary_detail.month)
+    
 
     if request.method == 'POST':
         salary_detail.salary_date = request.POST.get('salary_date')
@@ -54041,7 +54594,8 @@ def salaryedit(request, employee_id,salary_id=None):
         return redirect('salary_details')
     
     employees = payrollemployee.objects.filter(cid=cmp1)
-    months = list(calendar.month_name)[1:]
+    months = [{'value': i, 'name': calendar.month_name[i], 'selected': i == salary_detail.month} for i in range(1, 13)]
+    years = range(2000, 2030)
     years = range(2000, 2030)
     holiday = holidays.objects.filter(cid=cmp1)
     leave = attendance.objects.filter(cid=cmp1)
@@ -54069,7 +54623,58 @@ def bankdat(request):
     data = {'bank': bank.account_number}
     return JsonResponse(data)
 
+def shareSalaryToEmail(request, employee_id, salary_id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
 
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+
+                cmp1 = company.objects.get(id=request.session["uid"])
+                employee = payrollemployee.objects.get(employeeid=employee_id, cid=cmp1)
+                salary_details = get_object_or_404(SalaryDetails1, id=salary_id, employee=employee)
+
+                context = {
+                    'employee': employee,
+                    'cmp1': cmp1,
+                    'salary_details': [salary_details],
+                }
+
+                template_path = 'app1/salarypdf.html'
+                template = get_template(template_path)
+                html = template.render(context)
+
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                pdf = result.getvalue()
+
+                filename = f'Salary_Statement_{employee.employeeno}.pdf'
+                subject = f"Salary Statement for {employee.firstname} {employee.lastname}"
+                from_email = settings.EMAIL_HOST_USER 
+                to_email = emails_list
+
+                email = EmailMessage(subject, email_message, from_email, to_email)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                messages.success(request, 'Salary statement has been shared via email successfully..!')
+                return redirect('salary_overview', employee_id=employee_id, salary_id=salary_id)
+        
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+
+            # Print more information for debugging
+            print(f"employee_id: {employee_id}")
+            print(f"salary_id: {salary_id}")
+            print(f"request.user.id: {request.user.id}")
+
+            messages.error(request, f'{e}')
+            return redirect('salary_overview', employee_id=employee_id, salary_id=salary_id)
+
+    return HttpResponse("Unauthorized", status=401)
+    
 def additional_loan_approve(request,id):
     cid = company.objects.get(id=request.session["uid"])
 
@@ -55004,63 +55609,8 @@ def vendor_statement(request,id):
     return render(request,'app1/vendor_statement.html',context)
 
     
-# ---------------------
 
 
-
-        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
-                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
-
-                }
-
-    return render(request,'app1/vendor_statement.html',context)
-
-    
-
-
-        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
-                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
-
-                }
-
-    return render(request,'app1/vendor_statement.html',context)
-
-    
-
-
-        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
-                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
-
-                }
-
-    return render(request,'app1/vendor_statement.html',context)
-
-    
-
-
-        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
-                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
-
-                }
-
-    return render(request,'app1/vendor_statement.html',context)
-
-    
-
-
-        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
-                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
-                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
-
-                }
-
-    return render(request,'app1/vendor_statement.html',context)
-
-    
 
 
 

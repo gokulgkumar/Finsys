@@ -57,7 +57,7 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{% url 'gopurchaseorder' %}">All</a>
                                 <a class="dropdown-item" href="{% url 'porder_draft' %}">Draft</a>
-                                <a class="dropdown-item" href="{% url 'porder_billed' %}">Billed</a>
+                                <a class="dropdown-item" href="{% url 'porder_save' %}">Save</a>
                                
                             </div>
                             <a href="{% url 'addpurchaseorder' %}" class="btn btn-outline-info fa fa-plus text-white" role="button">&nbsp;New</a>
@@ -102,15 +102,33 @@
                                 
                                 {% if p.status == 'Draft' %}
                                 <td>
-                                    <a href="{% url 'purchaseorder_convert' p.porderid %}">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-info btn-sm text-white dropdown-toggle" type="button" id="convertToBillDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Convert to 
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="convertToBillDropdown">
+                                            <a class="dropdown-item" href="{% url 'purchaseorder_convert' p.porderid %}">Bill</a>
+                                            <a class="dropdown-item" href="#">Recurring Bill</a>
+                                        </div>
+                                    </div>
+                                    <!-- <a href="{% url 'purchaseorder_convert' p.porderid %}">
                                         <button class="btn btn-outline-info btn-sm text-white">Convert to Bill</button>
-                                    </a>
+                                    </a> -->
                                 </td>
                             {% elif p.status == 'Save' %}
                                 <td>
-                                    <a href="{% url 'purchaseorder_convert' p.porderid %}">
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-info btn-sm text-white dropdown-toggle" type="button" id="convertToBillDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Convert to 
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="convertToBillDropdown">
+                                            <a class="dropdown-item" href="{% url 'purchaseorder_convert' p.porderid %}">Bill</a>
+                                            <a class="dropdown-item" href="{% url 'purchaseorder_cnvrtrecbill' p.porderid %}">Recurring Bill</a>
+                                        </div>
+                                    </div>
+                                    <!-- <a href="{% url 'purchaseorder_convert' p.porderid %}">
                                         <button class="btn btn-outline-info btn-sm text-white">Convert to Bill</button>
-                                    </a>
+                                    </a> -->
                                 </td>
                             {% else %}
                                 <td>Completed</td>

@@ -139,14 +139,7 @@
                             <option value="SEZ Developer">SEZ Developer (A person or organization who owns atleast 26%
                                 eqaulity in creating business units in special economic zone)</option>
 
-                            <!-- <option value="GST-registered-Regular">GST-registered-Regular</option>
-                                    <option value="GST-registered-Composition">GST-registered-Composition</option>
-                                    <option value="GST-unregistered">GST-unregistered</option>
-                                    <option value="Consumer">Consumer</option>
-                                    <option value="Overseas">Overseas</option>
-                                    <option value="SEZ">SEZ</option>
-                                    <option value="Deemed exports - EOU's STP's EHTP's etc">Deemed exports - EOU's STP's EHTP's etc</option>
-                                    <option value="Exempt">Exempt</option> -->
+                            
                         </select>
                         <div class="invalid-feedback">Please select a valid registration type.</div>
                     </div>
@@ -162,27 +155,8 @@
                     </div>
 
 
-                    <!-- <div class="col-md-4 mt-3" id="hai">
-                                <div >
-                                    <label for="validationCustom05">BUSINESS LEGAL NAME</label>
-                                    <input type="text" class="form-control" 
-                                           
-                                           style="background-color: #43596c;color: white;"
-                                           >
-                                    <div class="text-danger m-2" id="warngst"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mt-3" id="hai1">
-                                <div >
-                                    <label for="validationCustom05">BUSINESS TRADE NAME</label>
-                                    <input type="text" class="form-control" 
-                                           
-                                           style="background-color: #43596c;color: white;"
-                                           >
-                                    <div class="text-danger m-2" id="warngst"></div>
-                                </div>
-                            </div> -->
+                   
+                
 
 
 
@@ -215,37 +189,7 @@
                         <div class="text-danger m-2"></div>
                     </div>
 
-                    <!-- <div class="col-md-4 mt-3" id="hai1">
-                                <div >
-                                    <label for="validationCustom05">PLACE OF SUPPLY</label>
-                                    <input type="text" class="form-control" 
-                                           
-                                           style="background-color: #43596c;color: white;"
-                                           >
-                                    <div class="text-danger m-2" id="warngst"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mt-3" id="hai1">
-                                <div >
-                                    <label for="validationCustom05">TAX PERFERENCE</label>
-                                    <input type="text" class="form-control" 
-                                           
-                                           style="background-color: #43596c;color: white;">
-                                    <div class="text-danger m-2" id="warngst"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mt-3" >
-                                <div>
-                                    <label for="validationCustom05">TAX RETURNS</label><br>
-                                    <input type="radio" name="Returns" 
-                                           
-                                           style="background-color: #43596c;color: white;"> Taxable
-                                           <input type="radio" name="Returns"  
-                                           style="background-color: #43596c;color: white;"> Non Taxable
-                                    <div class="text-danger m-2" id="warngst"></div>
-                                </div>
-                            </div> -->
+          
                 </div>
 
 
@@ -341,7 +285,7 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-row">
                                     <label for="state">State</label>
-                                    <select type="text" class="form-control" id="state" name="state" required
+                                    <select type="text" class="form-control" id="state" name="state" 
                                         style="background-color: #43596c; color: white;">
                                         <option value="" selected hidden>Choose</option>
                                         <option value="Andaman and Nicobar Islads">Andaman and Nicobar Islands</option>
@@ -436,7 +380,7 @@
                             <div class="col-md-6 mt-3">
                                 <div class="form-row">
                                     <label for="shipstate">State</label>
-                                    <select type="text" class="form-control" id="plosu" name="shipstate" required
+                                    <select type="text" class="form-control" id="plosu" name="shipstate" 
                                         style="background-color: #43596c; color: white;">
                                         <option id="shipst" selected hidden>Choose</option>
                                         <option value="Andaman and Nicobar Islads">Andaman and Nicobar Islands</option>
@@ -578,23 +522,9 @@
 </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
 
-    // Select the form and the container for the terms rows
     const form = document.getElementById('terms-form');
     const termsContainer = document.getElementById('terms-container');
 
@@ -644,17 +574,13 @@
         deleteBtn.appendChild(deleteBtnEl);
         newRow.appendChild(deleteBtn);
 
-        // Append the new row to the container
         termsContainer.appendChild(newRow);
     });
 
-    // Add event listener to the form to delete rows
     termsContainer.addEventListener('click', (event) => {
-        // If the target element is a delete button
+        
         if (event.target.classList.contains('delete-term-row')) {
-            // Find the row to delete
             const row = event.target.closest('.form-row');
-            // Remove the row
             row.remove();
         }
     });

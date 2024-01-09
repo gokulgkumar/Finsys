@@ -1250,8 +1250,8 @@
             <form action="{% url 'VendorStatement_mail' vndr.vendorid %}" method="post" class="needs-validation"
               id="share_to_email_form" autocomplete="off">
               {% csrf_token %}
-              <input name="FromD" class="inputdate form-control"  id="date1"  type="date"   >
-              <input name="ToD" class="inputdate form-control"  id="date2" type="date" >
+              <input name="FromD" class="inputdate form-control"  id="date1"  type="date"  hidden >
+              <input name="ToD" class="inputdate form-control"  id="date2" type="date" hidden >
               <div class="form-group">
                 
                 <label for="emailIds">Email IDs</label>

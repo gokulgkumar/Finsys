@@ -6,7 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django_countries.fields import CountryField
-
+from decimal import Decimal
 
 class sign(models.Model):
     sid = models.AutoField(('SID'), primary_key=True)
@@ -1426,6 +1426,7 @@ class purchaseorder(models.Model):
     vendor_gstin = models.CharField(max_length=100, default='')
     puchaseorder_no = models.IntegerField(default=1000)
     sourceofsupply = models.CharField(max_length=100, null=True)
+    csourceofsupply = models.CharField(max_length=100, null=True)
     destiofsupply = models.CharField(max_length=100, null=True)
     branch = models.CharField(max_length=100, null=True)
     reference = models.CharField(max_length=100, null=True)
@@ -1493,6 +1494,7 @@ class purchasebill(models.Model):
     customer_gstin = models.CharField(max_length=100, default='')
     bill_no = models.IntegerField(default=1000)
     sourceofsupply = models.CharField(max_length=100, null=True)
+    csourceofsupply = models.CharField(max_length=100, null=True)
     destiofsupply = models.CharField(max_length=100, null=True)
     branch = models.CharField(max_length=100, null=True)
     reference = models.IntegerField(default=0)
@@ -2398,7 +2400,7 @@ class holidays(models.Model):
 # reshna attendence#
 class attendance(models.Model):
     cid = models.ForeignKey(company, on_delete=models.CASCADE,null=True)
-    employeeid= models.ForeignKey(payrollemployee, on_delete=models.CASCADE,default='')
+    employeeid = models.ForeignKey(payrollemployee, on_delete=models.CASCADE, null=True, blank=True,default='')
     atid = models.AutoField(('hid'), primary_key=True)
     date = models.DateField(null=True,blank=True)
     employee= models.CharField(max_length=100,null=True,blank=True)
@@ -2559,14 +2561,22 @@ class SalaryDetails1(models.Model):
     add_bonus = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField(blank=True, null=True)
     total_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
     status = models.CharField(max_length=20, default='Draft')  
     
-    @property
+
     def monthly_salary(self):
-        employee_amount = self.employee.amount
-        wages_amount = employee_amount / 30  
-        leaves = self.leave - self.casual_leave  
-        return  employee_amount- (leaves * wages_amount)  - self.other_cuttings + self.add_bonus 
-    def __str__(self):
-        return f"{self.employee.employeeid} - {self.month} {self.year} Salary"
+        try:
+            employee_amount = Decimal(self.employee_amount)
+            leave = int(self.leave)
+            other_cuttings = Decimal(self.other_cuttings)
+            add_bonus = Decimal(self.add_bonus)
+
+            month_days = monthrange(self.year, self.month)[1]
+            wg = employee_amount / Decimal(month_days)
+            s1 = wg * leave
+            monthly_salary = (employee_amount - s1 - other_cuttings) + add_bonus
+            monthly_salary += (Decimal(self.casual_leave) * wg) if leave != 0 else 0
+
+            return monthly_salary
+        except (ValueError, Decimal.InvalidOperation):
+            return Decimal(0)

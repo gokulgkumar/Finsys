@@ -541,6 +541,10 @@
     </script>
 
     <script>
+        window.onload = function () {
+        var status = document.getElementById("gsttyp");
+        hidinput('hello', status);
+    };
         function hidinput(divId, element) {
             if (element.value == 'unregistered Business' || element.value == 'Consumer' || element.value == 'Overseas') {
                 document.getElementById(divId).style.display = 'none';

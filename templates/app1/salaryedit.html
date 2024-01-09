@@ -16,8 +16,6 @@
         }
     }
 </style>
-
-{{ employee.employeeid }}
 <form action="{% url 'salaryedit' employee_id=employee.employeeid salary_id=salary_detail.id %}" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -25,6 +23,7 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="{% static 'assets/plugins/select2/js/select2.min.js' %}"></script>
+    
     <script>
         function fetchEmployeeDetails() {
             console.log("Fetching employee details...");
@@ -94,11 +93,35 @@
         }
     </script>
     <script>
+        $(document).ready(function () {
+            setCurrentDate({
+                salary_month: '{{ salary_detail.month }}',
+                salary_year: '{{ salary_detail.year }}'
+            });
+            $('#empl_id').on('change', function () {
+                fetchDays();
+            });
+        });
+        function setCurrentDate(data) {
+            var currentDate = new Date();
+            var currentYear = currentDate.getFullYear();
+            var currentMonth = currentDate.getMonth() + 1; 
+            var selectedMonth = data.salary_month || currentMonth;
+            var selectedYear = data.salary_year || currentYear;
+            var formattedDate = currentYear + '-' + (selectedMonth < 10 ? '0' : '') + selectedMonth + '-' + (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate();
+            $('#salary_date').val(formattedDate);
+            $('#month').val(selectedMonth);
+            $('#year_').val(selectedYear);
+        }
         function fetchDays() {
             var selectedEmployeeId = $('#empl_id').val();
             var sd = $('#salary_date').val();
             var selectedMonth = $('#month').val();
             var selectedYear = $('#year_').val();
+
+            var existingLeave = parseFloat($('#attendance').val()) || 0;
+            var existingHoliday = parseFloat($('#holidays').val()) || 0;
+            var existingWorkingDays = parseFloat($('#working_days').val()) || 0;
             $.ajax({
                 type: 'POST',
                 url: "{% url 'getDays' %}",
@@ -122,40 +145,47 @@
                     document.getElementById('error_msg').innerHTML = error.responseJSON && error.responseJSON.error || 'Unknown error';
                 }
             });
-        } 
+        }  
     </script>
+    
     <script>
         function calculateSalary() {
-            var casualLeave = $('#casual_leave').val() || 0;
-            var otherCuttings = $('#other_cuttings').val() || 0;
-            var addBonus = $('#add_bonus').val() || 0;
-            var salary = $('#Salary').val() || 0;
-            var holiday = $('#holidays').val() || 0;
-            var leave = $('#attendance').val()|| 0;
+            var casualLeave = parseFloat($('#casual_leave').val()) || 0;
+            var otherCuttings = parseFloat($('#other_cuttings').val()) || 0;
+            var addBonus = parseFloat($('#add_bonus').val()) || 0;
+            var salary = parseFloat($('#Salary').val()) || 0;
+            var holiday = parseFloat($('#holidays').val()) || 0;
+            var leave = parseFloat($('#attendance').val()) || 0;
+            var month = $('#month').val();
+           
             $.ajax({
                 type: 'POST',
                 url: "{% url 'calculate_salary' %}",
                 data: {
-                    leave : leave,
-                    holiday : holiday,
-                    attendance : leave,
+                    leave: leave,
+                    holiday: holiday,
+                    attendance: leave,
                     casual_leave: casualLeave,
                     other_cuttings: otherCuttings,
                     add_bonus: addBonus,
-                    salary:salary,
+                    salary: salary,
+                    month: month,
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                 },
                 dataType: 'json',
                 success: function (data) {
                     console.log("Monthly salary calculated:", data);
-                    document.getElementById('monthly_salary').value = data.monthly_salary;;
-                    {% comment %} updateMonthlySalary(data); {% endcomment %}
+                    var formattedSalary = parseFloat(data.monthly_salary).toFixed(2);
+                    document.getElementById('monthly_salary').value = formattedSalary;
                 },
                 error: function (error) {
-                    console.error("Error calculating monthly salary:", error);
+                    console.error("Error calculating monthly salary:", error.responseText);
+
+                    $('#error_msg').text("Error calculating monthly salary");
                 }
             });
         }
+
         function updateMonthlySalary(data) {
             var monthlySalaryElement = document.getElementById('monthly_salary');
     
@@ -166,6 +196,27 @@
             }
         }   
     </script>
+    <script>
+        function updateFormFields(data) {
+            console.log(data);
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('eid').value = data.employeeno || '';
+            document.getElementById('joindate').value = data.joindate || '';
+            document.getElementById('Salary').value = data.amount || '';
+            document.getElementById('month').value = data.salary_month || '';
+            document.getElementById('year_').value = data.salary_year || '';
+            document.getElementById('attendance').value = data.leave || '';
+            document.getElementById('casual_leave').value = data.casual_leave || '';
+            document.getElementById('holidays').value = data.holiday || '';
+            document.getElementById('working_days').value = data.working_days || '';
+            document.getElementById('other_cuttings').value = data.other_cuttings || '';
+            document.getElementById('add_bonus').value = data.add_bonus || '';
+            document.getElementById('monthly_salary').value = data.total_salary || '';
+            document.getElementById('description').value = data.description || '';
+
+        }
+    </script>
+    
     <div class="page-content">
         <h2 id="hel"></h2>
         <div class="card radius-15">
@@ -185,29 +236,36 @@
                 </div>
                 <div class="row mt-3">
                     <div class="col-md-5 ml-4">
-                        <label class="col-form-label">Employee</label>
-                        <input type="text" class="form-control" id="employee" name="employee"
-                            placeholder="Employee" value="{{employee.firstname}} {{employee.lastname}}" readonly>
+                        <label class="col-form-label">Employee*</label>
+                        <div class="d-flex">
+                            <select name="employee" id="empl_id" class="form-control" style="width: 95%;" required onchange="fetchEmployeeDetails()">
+                                <option value="{{employee.employeeid }}" selected>{{ employee.title }} {{ employee.firstname }} {{ employee.lastname }}</option>
+                            </select>
+                        </div>
                     </div>
+                    
                     <div class="col-md-5 ml-4">
-                        <label class="col-form-label">Employee No</label>
-                        <input type="text" class="form-control" id="employeeid" name="employeeid"
-                            placeholder="Employee Id" value="{{employee.employeeno}}" readonly>
+                        <label class="col-form-label">Employee Id</label>
+                        <input type="text" class="form-control" id="eid" name="employeeno" placeholder="Employee Id" value="{{employee.employeeno}}"required>
                     </div>
                 </div>
 
                 <div class="row mt-3">
                     <div class="col-md-5 ml-4 " style="width: 100%;">
                         <label class="col-form-label">Email</label>
-                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{employee.email}}" readonly>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{employee.email}}" required>
                     </div>
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Salary</label>
-                        <input type="text" class="form-control" id="Salary" name="Salary" placeholder="Salary" value="{{employee.amount}}" readonly>
+                        <input type="number" class="form-control" id="Salary" name="Salary" placeholder="Salary" value="{{employee.amount}}" required>
                     </div>
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Join Date</label>
-                        <input type="date" class="form-control"  id="joindate" name="joindate" value="{{employee.joindate}}" readonly><br>
+                        <input type="date" class="form-control" id="joindate" name="joindate" value="{{employee.joindate}}" required><br>
+                    </div>
+                    <div class="col-md-5 ml-4">
+                        <label class="col-form-label">Designation</label>
+                        <input type="text" class="form-control" id="designation" name="designation" placeholder="Designation" value="{{employee.designation}}" required><br>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -218,8 +276,8 @@
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Month</label>
                         <select name="month" id="month" class="form-control" required onchange="fetchDays()">
-                            {% for month_name in months %}
-                                <option value="{{ forloop.counter}}" {% if month == salary_detail.month %}selected{% endif %}>{{ month_name }}</option>
+                            {% for month_info in months %}
+                                <option value="{{ month_info.value }}" {% if salary_detail.month == month_info.value %}selected{% endif %}>{{ month_info.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -257,7 +315,7 @@
                 <div class="row mt-3">
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Other Cuttings</label>
-                        <input type="number" class="form-control" name="other_cuttings" id="other_cuttings" value="{{ salary_detail.other_cuttings }}" placeholder="Other Cuttings">
+                        <input type="number" class="form-control" name="other_cuttings" id="other_cuttings" value="{{ salary_detail.other_cuttings }}" placeholder="Other Cuttings" >
                     </div>
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Add Bonus</label>
@@ -266,7 +324,7 @@
                     
                     <div class="col-md-5 ml-4">
                         <label class="col-form-label">Calculate Salary</label>
-                        <input type="text" class="form-control" id="monthly_salary" name="monthly_salary" value="{{ salary_detail.total_salary }}" readonly>
+                        <input type="text" class="form-control" id="monthly_salary" name="monthly_salary" value="{{ salary_detail.total_salary }}">
                         <button type="button" class="btn btn-primary" onclick="calculateSalary();">Calculate Salary</button>
                     </div>
                 </div>
@@ -278,17 +336,13 @@
                     </div>
                 </div>
 
-                <div class="row mt-3 text-center">
-                    <div class="col-md-5 mb-10">
-                        <button type="submit" name="submit" value="draft" class="btn btn-secondary">Draft</button>
-                    </div>
-                    <div class="col-md-5 mb-10">
-                        <button type="submit" name="submit" value="save" class="btn btn-primary">Save</button>
+                
+                <div class="row justify-content-end">
+                    
+                    <div class="col-md-2">
+                        <button name="submit"  value="save" class="btn btn-outline-info rounded-pill text-grey w-100 mt-3 mb-3" type="submit">Save </button>
                     </div>
                 </div>
-                
-                
-                
             </div>
         </div>
     </div>
