@@ -407,7 +407,6 @@ input[name="service-city"] {
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
                                                 {% else %}
-                                                
                                                 <option id="ta5" value=0 text=" " hidden>Select</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
@@ -2101,6 +2100,7 @@ function qtychange2(incval,roinc) {
                             <td style="width: 20%;">
                                 <div class="d-flex">
                                     
+                                    
                                     <select name='items[]' id="product${roinc}" class="form-control select2 change" >
                                                     <option selected>Choose..</option>
                                                     {% for i in item %}
@@ -2125,8 +2125,9 @@ function qtychange2(incval,roinc) {
 
                                 <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys${roinc}" class="form-control quty" hidden >     
                                 <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput${roinc}" value="0" class="form-control quty" hidden  >
-                                <input type="number" name='quantity[]' oninput="qtychange2(this,${roinc})"   style='margin-top:21px' placeholder='Enter Qty' id="qty3${roinc}" class="form-control qty" step=0 min=0>
+                                <input type="number" name='quantity[]' oninput="qtychange2(this,${roinc})"   style='margin-top:21px' placeholder='Enter Qty' id="qty3${roinc}" class="form-control qty qtys" step=0 min=0>
                                 <div><span>Available Qty :</span> <span id="qtyspan${roinc}"class='text-muted'></span></div>
+                                <div id="quantitychange" style="color: red;"></div>
                             </td>                
                             <td>
                                 <input type="number" name='price[]' id="unit1${roinc}" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0">
@@ -2193,7 +2194,14 @@ function qtychange2(incval,roinc) {
   });
    
     
-            // $('.select2').select2(); 
+
+
+
+
+
+
+
+
 
 
             // show taxable options
@@ -2238,6 +2246,8 @@ console.log('product1')
                var input = document.getElementById('qty31')
                input.setAttribute('data-quantity',data2)
                $('#qty31').attr('data-quantity', data2);   
+
+              
 
                   
                   if (place == '{{ cmp1.state }}')
@@ -3527,6 +3537,49 @@ console.log('product1')
         } 
 //     </script>
 
+
+
+
+<!-- Innerhtml entered Qty -->
+
+<script type="text/javascript">
+    $(document).on('input', '.qtys', function() {
+        var quantity_value = $(this).val(); //row number
+
+        var roinc = $(this).attr('id').replace('qty3', ''); // Extract the roinc value from the input field's ID
+
+        quantity_stock = $('.qty').val();  //1st row input value
+
+        qty = document.getElementById('quantitys').value;
+       
+        var selectedValue = document.getElementById(`product${roinc}`).value;
+      
+        var select = $('#product').val();
+       
+        if (selectedValue == select ){
+
+            $('#quantitychange').text("Please change the quantity above");
+
+            // alert('Please change the quantity above')
+        }
+        else{
+            $('#quantitychange').text("");
+        }
+
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
 
 
@@ -3692,7 +3745,7 @@ document.getElementById('qty3').addEventListener('change', function(event) {
             var placeOfSupply = $('#plosu').val();
             var gstOptions = `
                 <option value="0" hidden>Select</option>
-                <option value=0>00 % GST(00%)</option>
+                <option value=0>00 % GST(00%)</option>}
                 <option value=3>03 % GST(03%)</option>
                 <option value=5>05 % GST(05%)</option>
                 <option value=12>12 % GST(12%)</option>
@@ -3741,22 +3794,8 @@ document.getElementById('qty3').addEventListener('change', function(event) {
             alert('Entered quantity greater than your bill')
         }
 
-        console.log(qty,'qty')
-        console.log(quantity_value,'quantity_value')
-        // if(deb_value != deb){
-        //     document.getElementById('dangerdiv').style.display = 'block';
-        // }else{
-        //     document.getElementById('dangerdiv').style.display = 'none';
-        // }
-        // var deb_list = "{{ purdebit}}";
-        // deblist = deb_list.split(",");
-        // for(let i=0; i<deblist.length; i++){
-        //     if (deb_value == deblist[i]){
-        //         alert('Debit Number already in use.')
-        //         document.getElementById('dangerdiv').style.display = 'none';
-        //         document.getElementById('deb_no').value = ''
-        //     }
-        // }
+       
+     
     })
 </script>
 
