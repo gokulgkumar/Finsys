@@ -124,13 +124,23 @@ input[name="service-city"] {
 
                     var gstNumDiv = $('#gstDiv');
                     var showdiv1 = $('#showdiv1');
-
-
-                    console.log(json_data[key]['email'])
-                    console.log(json_data[key]['gsttype'])
                     document.getElementById('email').value = json_data[key]['email'];
                     document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
-                    document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    // document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    var sourceOfSupplyValue = json_data[key]['sourceofsupply']
+                    $('#sourcesupply').text(sourceOfSupplyValue);
+                    console.log('sourceOfSupplyValue',sourceOfSupplyValue)
+
+                    var sourceOfSupplyValueinside= 'Kerala';
+
+                    if (sourceOfSupplyValue == '[KL] Kerala'){
+                        $('#sourcesupply').text(sourceOfSupplyValueinside);
+                        console.log('Kerala')
+                    }
+
+
+
+            
                     
 
                     if (json_data[key]['gsttype'] === 'unregistered Business' ){
@@ -147,11 +157,11 @@ input[name="service-city"] {
 
                     document.getElementById('gst_type').value = json_data[key]['gsttype'];
                     
-                console.log(json_data[key]['vendorid']);
+                
                 
                 reloadbill(json_data[key]['vendorid']) ;
                 }
-                console.log(json_data);
+                
                 
                 })
                 
@@ -242,8 +252,9 @@ input[name="service-city"] {
                                 <div class="col-md-5 mt-3">
                                     <label>Place of supply</label>&nbsp;
                                     <select type="text" class="form-control" id="plosu" name="supply" onchange="state(this)">
-                                        
-                                        <option  selected> </option>
+                                        <!-- <option  selected id="sourcesupply2" > </option> -->
+                                        <option  selected id="sourcesupply" > </option>
+
                                         <option value="[AN] Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
                                     <option value="[AD] Andhra Predhesh">[AD] Andhra Predhesh</option>
                                     <option value="[AR] Arunachal Predesh">[AR] Arunachal Predesh</option>
@@ -3558,12 +3569,16 @@ console.log('product1')
        
         if (selectedValue == select ){
 
+
+
             $('#quantitychange').text("Please change the quantity above");
+            $('#qty3' + roinc).prop('disabled', true); 
 
             // alert('Please change the quantity above')
         }
         else{
             $('#quantitychange').text("");
+            $('#qty3' + roinc).prop('disabled', false); 
         }
 
     });

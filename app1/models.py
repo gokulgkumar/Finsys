@@ -1492,7 +1492,7 @@ class purchasebill(models.Model):
     vendor_gstin = models.CharField(max_length=100, default='')
     customer_gsttype = models.CharField(max_length=100, null=True)
     customer_gstin = models.CharField(max_length=100, default='')
-    bill_no = models.IntegerField(default=1000)
+    bill_no = models.CharField(max_length=100,default=1000)
     sourceofsupply = models.CharField(max_length=100, null=True)
     csourceofsupply = models.CharField(max_length=100, null=True)
     destiofsupply = models.CharField(max_length=100, null=True)
