@@ -57,7 +57,7 @@ input[name="service-city"] {
     <!--<h1>Taxes</h1>-->
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 
-    <form action="{% url 'createpurchasedebit' %}" method="post"  novalidate>
+    <form action="{% url 'editpurchasedebit' pdebt.pdebitid %}" method="post"  novalidate>
         {% csrf_token %}
         <div class="page-content">
             <!--breadcrumb-->
@@ -79,12 +79,13 @@ input[name="service-city"] {
                                     <label for="validationCustom02">Vendor</label>
                                     <div class="d-flex"  >
                                       
-<select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
-    <option selected disabled hidden>Select Vendor</option>
-    {% for v in vndr %}
-    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
-    {% endfor %}
-</select>
+    <select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
+        <option  value="{{ pdebt.vendor }}" selected>{{ pdebt.vendor }}</option>
+        {% for v in vndr %}
+
+        <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
+        {% endfor %}
+    </select>
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
   <!-- Include Select2 -->
@@ -160,6 +161,8 @@ input[name="service-city"] {
                 
                 
                 reloadbill(json_data[key]['vendorid']) ;
+
+                console.log('hiy',json_data[key]['vendorid'])
                 }
                 
                 
@@ -168,7 +171,7 @@ input[name="service-city"] {
 
             })
            
-
+            $('#selected').trigger('change');
 
 </script>   
 
@@ -231,7 +234,7 @@ input[name="service-city"] {
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02" >Debit Note Number</label>
                                    
-                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" required>
+                                     <input type="text" class="form-control" name="debitno" id="deb_no" placeholder="{{deb_no}}" value="{{ pdebt.debit_no }}" >
                                     
                                 </div>
                                 {% else %}
@@ -298,14 +301,10 @@ input[name="service-city"] {
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">Bill Number</label>
                                     <select name="billno" id="billno" class="form-control">
-                                        <option selected>No Bill</option>
                                         
-                                        <!-- {% for r in rbill %}
-                                        <option>{{ r.billno }}</option>
-                                        {% endfor %}
-                                        {% for p in pbill %}
-                                        <option>{{ p.billno }}</option>
-                                        {% endfor %}  -->
+                                        <option value="{{ pdebt.billno }}" selected >{{ pdebt.billno }} </option>
+                                        
+                                       
                                     </select>
                                 </div>
                             </div>
@@ -350,33 +349,26 @@ input[name="service-city"] {
                                     </tr>
                                     </thead>
                                     <tbody id="items-table-body">
+                                    {% for pro in pdebt1 %}
                                     <tr id='addr0'>
                                         <td>1</td>
                                         <td style="width: 20%;">
                                             <div class="d-flex">
-<!-- 
-                                                <input list="brow" name='items[]' class="form-control " id="product">
-<datalist id="brow" >
-    {% for i in item %}
-    <option value="{{ i.name }}" data-tokens="{{ i.name }}" >{{ i.name }}</option>
-
-
-    {% endfor %}
-</datalist>   -->
-
-<!-- <select class="form-control select2 vendor" data-width="100%" id="selected">
-    {% for v in vndr %}
-    <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
-    {% endfor %}
-  </select> 
- -->
 
                                                 <select name='items[]' id="product" class="form-control select2">
-                                                    <option selected>Choose..</option>
+                                                   
                                                     {% for i in item %}
-                                                        <option value="{{ i.name }}" data-tokens="{{ i.name }}">
-                                                            {{ i.name }}
+                                                    {% if i.name == pro.items %}
+                                                        <option value="{{ i.name }}" data-tokens="{{ i.name }}" selected>
+            
+                                                            {{ i.name }} 
                                                         </option>
+                                                    {% else %}
+                                                    <option value="{{ i.name }}" data-tokens="{{ i.name }}">
+                                    
+                                                        {{ i.name }}
+                                                    </option>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </select>
 
@@ -389,28 +381,28 @@ input[name="service-city"] {
                                             <div id="errorLabel" style="color: red;"></div>
                                         </td>
                                         <td>
-                                            <input type="text" name='hsn[]' id="hsn1" placeholder='HSN'
+                                            <input type="text" name='hsn[]' id="hsn1" placeholder='HSN' value="{{pro.hsn}}"
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
                                             <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty"   hidden>
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
-                                            <input type="number" name='quantity[]' oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
+                                            <input type="number" name='quantity[]' value="{{pro.quantity}}" oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
                                                     <div><span>Available Qty :</span> <span id="qtyspan"class='text-muted'></span></div>
                                         </td> 
                                         
                                         <td>
                                             
-                                            <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'
+                                            <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'  value="{{pro.price}}"
                                             class="form-control price" step="0.00" min="0"/>
                                         </td>
                                         
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
-                                            class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
+                                            class="form-control taxs"  onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
-                                                {% if cmp1.state == 'Kerala' %}
-                                                <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
+                                                {% if pdebt.supply == cmp1.state %}
+                                                <option value= {{ pro.tax }} text={{ cmp1.state }} hidden>{{pro.tax}} % GST</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
                                                 <option value=5 text={{ cmp1.state }}>05% GST(05%)</option>
@@ -418,7 +410,7 @@ input[name="service-city"] {
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
                                                 {% else %}
-                                                <option id="ta5" value=0 text=" " hidden>Select</option>
+                                                <option  value={{ pro.tax }} text=" " hidden>{{ pro.tax }} % IGST</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
                                                 <option value=5 text=" ">05.0% IGST(05%)</option>
@@ -439,6 +431,7 @@ input[name="service-city"] {
                                             <input type="text" name='taxamount1' id="taxamount1" class="form-control taxamount"/>
                                         </td>
                                     </tr>
+                                    {% endfor %}
                                     </tbody>
                                     <tr>
                                         <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="addrow" onclick="add_item_row()">+</a></td>
@@ -446,14 +439,19 @@ input[name="service-city"] {
                                 </table>
 
                                 <script>
+
+
                                     $('.select2').select2();
                                     console.log('hi')
+                                   
                                     $(document).on('change', '#product', function () {
                                    
-                                        console.log('hhhhh')
+                                       
                                        var select = $('#product').val();
                                        var vid = $('#billno').val();
-                                       console.log('hhhhh',vid,select)
+
+                                       console.log(select,'select is')
+                                      
                                        $.ajax({
                                            type: "GET",
                                            url: "{% url 'itemdatadebit' %}",
@@ -462,26 +460,101 @@ input[name="service-city"] {
                                                vid: vid
                                            },
                                            success: function (response) {
-                                            console.log(response,'res')
                                             
-                                               if (response.error_flag === 1) {
-                                                   // Show error message in a label
-                                                   $('#errorLabel').text("Item is not purchased for this bill number");
-                                               }else {
-                                                   // Remove the error message if error_flag is zero
-                                                   $('#errorLabel').text("");
-                                               }
-                                                   // Update the HTML elements based on the response
+                                            
+                                              
                                                    var data = response.hsn;
                                                    var data2 =  response.qty;
 
-                                                   console.log(data2,'data2')
+                                                  
                                                    var data3 = response.price;
                                                    var data4 = response.gst;
                                                    var data5 = response.sgst;
                                                    var data6 = response.quty;
+
+                                                   
                                                    var data7 =response.taxs;
-                                                   console.log(data7);
+                                                   
+                                              
+                                                   document.getElementById('hsn1').value = data;
+                                   
+                                       
+                                   
+                                                   document.getElementById('qtyspan').innerHTML = data2 ;
+                                                   document.getElementById('unit1').value = data3;
+                                                   document.getElementById('taxs').value = data7;
+                                                   document.getElementById('quantitys').value = data6;
+
+                                                   console.log(response.error_flag,'response.error_flag')
+
+                                                   if (response.error_flag == 1) {
+                                                   console.log('1')
+                                                   $('#errorLabel').text("Item is not purchased for this bill number");
+                                               }else {
+                                                console.log('0')
+                                                   $('#errorLabel').text("");
+                                               }
+                                                  
+
+                                                   var place = 'Kerala'
+                                                  
+                                                   if (place == '{{ cmp1.state }}') {
+
+                                                       document.getElementById('ta1').value = data4;
+                                                       
+                                                       
+                                                   }
+                                                   else{
+                                                    document.getElementById('ta5').value = data5;
+                                                   }
+                                                   
+                                           
+                                           },
+                                           
+                                       });
+                                   });
+
+
+
+
+                                             $(document).on('change', '#product', function () {
+                                   
+                                       
+                                       var select = $('#product').val();
+                                       var vid = $('#billno').val();
+
+                                       console.log(select,'select is')
+                                      
+                                       $.ajax({
+                                           type: "GET",
+                                           url: "{% url 'itemdatadebit' %}",
+                                           data: {
+                                               id: select,
+                                               vid: vid
+                                           },
+                                           success: function (response) {
+                                            
+                                            
+                                               if (response.error_flag == 1) {
+                                                   
+                                                   $('#errorLabel').text("Item is not purchased for this bill number");
+                                               }else {
+                                                  
+                                                   $('#errorLabel').text("");
+                                               }
+                                                  
+                                                   var data = response.hsn;
+                                                   var data2 =  response.qty;
+
+                                                  
+                                                   var data3 = response.price;
+                                                   var data4 = response.gst;
+                                                   var data5 = response.sgst;
+                                                   var data6 = response.quty;
+
+                                                   
+                                                   var data7 =response.taxs;
+                                                   
                                               
                                                    document.getElementById('hsn1').value = data;
                                    
@@ -509,9 +582,19 @@ input[name="service-city"] {
                                            
                                        });
                                    });
+
+
+
+
+                                    // $(document).ready(function () {
+                                       
+                                       
+                                       
+                                    // });
+                               
                                    
                         function reloadbill(vid) {
-                console.log(vid);
+                console.log(vid,'hello');
                 $.ajax({
                     url: "{% url 'get_vendor_data_bill' %}",
                     type: "GET",
@@ -522,10 +605,15 @@ input[name="service-city"] {
                     success: function(data) {
                         console.log(data,'hie')
                         var dropdow = $('#billno');
-                        dropdow.empty();
+                        // dropdow.empty();
                         $.each(data, function(key, value) {
+                            
                             dropdow.append($('<option></option>').attr('value', key).text(value).val(value));
+                            
                         });
+
+                     
+                        
                         
                     },
                     error: function(xhr, status, error) {
@@ -536,7 +624,12 @@ input[name="service-city"] {
 
                 });
             }
-                                   
+                 
+            
+                                        
+                              $('#billno').trigger('change'); 
+                                        $('#product').trigger('change');
+                                        
                                    
                                                                                    </script>
                                    
@@ -2232,7 +2325,7 @@ console.log('product1')
               vid: vid 
               },
               success:function(response){
-              if (response.error_flag === 1) {
+              if (response.error_flag == 1) {
           // Show error message in a label
           $('#errorLabel1').text("Item is not purchased for this bill number");
       }else {
@@ -2463,7 +2556,7 @@ console.log('product1')
                         $('#errorLabel2').text("");
 
 
-                    if (response.error_flag === 1) {
+                    if (response.error_flag == 1) {
                
                 $('#errorLabel2').text("Item is not purchased for this bill number");
             }else {

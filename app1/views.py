@@ -37926,6 +37926,7 @@ def goeditpurchasedebit(request,id):
         acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
         acc2 = accounts1.objects.filter(cid=cmp1,acctype='Sales')
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
+        
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
         banks=bankings_G.objects.filter(cid=cmp1)
@@ -37946,7 +37947,7 @@ def goeditpurchasedebit(request,id):
                     'acc1':acc1,
                     'acc2':acc2   
                 }
-        return render(request,'app1/editpurchasedebit.html',context)
+        return render(request,'app1/editpurchasedebitnew.html',context)
     return redirect('/')
 
 def editpurchasedebit(request,id):
@@ -50295,7 +50296,7 @@ def itemdatadebit(request):
         print(id,'id')
         vid_param = request.GET.get('vid')
        
-        print(vid_param)
+        print(vid_param,'bill')
 
        
         quty = 0
@@ -50304,7 +50305,7 @@ def itemdatadebit(request):
 
         if not vid_param:
             item = itemtable.objects.get(name=id, cid=cmp1)
-            print(item)
+            print(item,'items')
 
             hsn = item.hsn
             qty = item.stock
@@ -50348,6 +50349,7 @@ def itemdatadebit(request):
                 try:
                     rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
                     re = recurringbill_item.objects.get(bill=rebill, item=id)
+                    print('re', re)
                     quty = re.qty
                     taxs = re.tax
                     error_flag = 0
