@@ -33801,6 +33801,7 @@ def createvendor(request):
             title=request.POST['title']
             first_name = request.POST['firstname'].replace(" ", "")
             last_name = request.POST['lastname'].replace(" ", "")
+            full_name= first_name + ' ' + last_name
             cmpnm=request.POST['company_name']
             email=request.POST['email']
             website=request.POST['website']
@@ -33827,7 +33828,7 @@ def createvendor(request):
             shipcountry=request.POST['shipcountry']
             creditlimit=request.POST['credit_limit']
             
-            vndr = vendor(title=title, firstname=first_name, lastname=last_name, companyname= cmpnm, gsttype=gsttype, gstin=gstin, 
+            vndr = vendor(title=title, firstname=first_name, lastname=last_name,full_name=full_name, companyname= cmpnm, gsttype=gsttype, gstin=gstin, 
                         panno=panno, email=email,sourceofsupply=supply,currency=currency, website=website, mobile=mobile, date=date,
                         openingbalance=balance,opblnc_due=due,opening_balance_type=opb_type, street=street, city=city, state=state, paymentterms=payment,
                         pincode=pincode, country=country, shipstreet=shipstreet, shipcity=shipcity, shipstate=shipstate,
@@ -37919,16 +37920,29 @@ def goeditpurchasedebit(request,id):
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
         pdebt=purchasedebit.objects.get(pdebitid=id)
+
+        pdebt
         
         print(pdebt.pdebitid,'pdebt')
         vendor_name=pdebt.vendor
-        print(vendor_name)
+        print(vendor_name,'vendor_name')
         acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
         acc2 = accounts1.objects.filter(cid=cmp1,acctype='Sales')
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
-        
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
+        
+        print(vndr,'vndr')
+
+        full_name = []
+        print(full_name, 'full_name')
+
+        for v in vndr:
+            name = f"{v.firstname} {v.lastname}"
+            full_name.append(name)
+
+        print(full_name)
+
         banks=bankings_G.objects.filter(cid=cmp1)
         vndr_gst=''
         for v in vndr:

@@ -79,13 +79,31 @@ input[name="service-city"] {
                                     <label for="validationCustom02">Vendor</label>
                                     <div class="d-flex"  >
                                       
-    <select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
+    <!-- <select class="form-control select2 vendor " data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
         <option  value="{{ pdebt.vendor }}" selected>{{ pdebt.vendor }}</option>
         {% for v in vndr %}
 
+        {% if v.full_name == pdebt.vendor %}
+
+        <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" hidden >{{ v.firstname }} {{ v.lastname }}</option>
+
+        {% endif %}
         <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" >{{ v.firstname }} {{ v.lastname }}</option>
+
+        
+        {% endfor %}
+    </select> -->
+
+    <select class="form-control select2 vendor" data-width="100%" id="selected" style="background-color: #243e54; color: white;" name="vendor">
+        {% for v in vndr %}
+            {% if v.full_name == pdebt.vendor %}
+                <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}" selected>{{ v.firstname }} {{ v.lastname }}</option>
+            {% else %}
+                <option value="{{ v.firstname }} {{ v.lastname }}" data-tokens="{{ v.firstname }} {{ v.lastname }}">{{ v.firstname }} {{ v.lastname }}</option>
+            {% endif %}
         {% endfor %}
     </select>
+    
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
   <!-- Include Select2 -->

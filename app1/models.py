@@ -1384,6 +1384,7 @@ class vendor(models.Model):
     title = models.CharField(max_length=10,null=True)
     firstname = models.CharField(max_length=100,null=True)
     lastname = models.CharField(max_length=100,null=True)
+    full_name=models.CharField(max_length=100,null=True,default='')
     companyname = models.CharField(max_length=100,null=True)
     email = models.CharField(max_length=100,null=True)
     website = models.CharField(max_length=100, default='')
