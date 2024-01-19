@@ -483,7 +483,7 @@ input[name="service-city"] {
                                                    var data7 =response.taxs;
                                                    console.log(data7);
                                               
-                                                   document.getElementById('hsn1').value = data;
+                                                   document.getElementById('hsn1').value = data; 
                                    
                                        
                                    
@@ -3802,8 +3802,12 @@ document.getElementById('qty3').addEventListener('change', function(event) {
 <script type="text/javascript">
     $(document).on('input','.qty', function() {
         qty = document.getElementById('quantitys').value;
-
-        quantity_value = $('.qty').val();
+        qty = parseInt(qty);
+        quantity_value = parseInt($('.qty').val());
+        
+        // quantity_value = $('.qty').val();
+        console.log('quantity_value',quantity_value)
+        console.log('qty',qty)
 
         if(quantity_value > qty){
             alert('Entered quantity greater than your bill')

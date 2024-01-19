@@ -37921,7 +37921,7 @@ def goeditpurchasedebit(request,id):
         cmp1 = company.objects.get(id=request.session['uid'])
         pdebt=purchasedebit.objects.get(pdebitid=id)
 
-        pdebt
+        
         
         print(pdebt.pdebitid,'pdebt')
         vendor_name=pdebt.vendor
@@ -37931,8 +37931,6 @@ def goeditpurchasedebit(request,id):
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
-        
-        print(vndr,'vndr')
 
         full_name = []
         print(full_name, 'full_name')
@@ -37959,7 +37957,10 @@ def goeditpurchasedebit(request,id):
                     'vndr_gst':vndr_gst,
                     'banks':banks,
                     'acc1':acc1,
-                    'acc2':acc2   
+                    'acc2':acc2,
+                    
+
+                     
                 }
         return render(request,'app1/editpurchasedebitnew.html',context)
     return redirect('/')
@@ -37979,7 +37980,7 @@ def editpurchasedebit(request,id):
             pdebt.supply=request.POST['supply']
             pdebt.debitdate=request.POST['debitdate']
             pdebt.email=request.POST['email']
-            pdebt.billno=request.POST['billno']
+            pdebt.billno=request.POST['bill_no']
             pdebt.subtotal=request.POST['sub_total']
             pdebt.cgst=request.POST['cgst']
             pdebt.sgst=request.POST['sgst']
