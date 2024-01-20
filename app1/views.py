@@ -50317,7 +50317,7 @@ def itemdatadebit(request):
         quty = 0
         error_flag = 0
         taxs=0
-
+        placesx=0
         if not vid_param:
             item = itemtable.objects.get(name=id, cid=cmp1)
             print(item,'items')
@@ -50351,10 +50351,14 @@ def itemdatadebit(request):
 
                 # Try to get the purchasebill_item object with the specified conditions
                 try:
+                    # pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
                     pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
                     print('pb', pb)
+                    placesx=pb.bill.sourceofsupply
+                    # placesx=pbill.sourceofsupply
                     quty = pb.quantity
                     taxs = pb.tax
+                    print(placesx,'placesx is')
                     error_flag = 0
                 except ObjectDoesNotExist:
                     error_flag = 1
@@ -50365,9 +50369,11 @@ def itemdatadebit(request):
                     rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
                     re = recurringbill_item.objects.get(bill=rebill, item=id)
                     print('re', re)
+                    placesx=re.bill.source_supply
                     quty = re.qty
                     taxs = re.tax
                     error_flag = 0
+                    print(placesx,'placesx2')
                 except ObjectDoesNotExist:
                     error_flag = 1
 
@@ -50388,6 +50394,7 @@ def itemdatadebit(request):
         gst = item.intra_st
         sgst = item.inter_st
         places = cmp1.state
+       
 
         return JsonResponse({
             "status": "not",
@@ -50399,6 +50406,7 @@ def itemdatadebit(request):
             'sgst': sgst,
             "quty": quty,
             "taxs":taxs,
+            "placesx":placesx,
             "error_flag": error_flag
         })
 
