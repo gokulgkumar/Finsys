@@ -111,6 +111,7 @@ input[name="service-city"] {
                 console.log('hello')
                 
                 select = $('#selected').val();
+                console.log(select,'select')
                 $('#billno').val('');
                 $.ajax({
                 type: "GET",
@@ -131,11 +132,21 @@ input[name="service-city"] {
                     $('#sourcesupply').text(sourceOfSupplyValue);
                     console.log('sourceOfSupplyValue',sourceOfSupplyValue)
 
-                    var sourceOfSupplyValueinside= 'Kerala';
+                    // var sourceOfSupplyValueinside= 'Kerala';
 
                     if (sourceOfSupplyValue == '[KL] Kerala'){
-                        $('#sourcesupply').text(sourceOfSupplyValueinside);
+                        $('#sourcesupply').text(sourceOfSupplyValue);
                         console.log('Kerala')
+                    }
+
+                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
+                        document.getElementById('cgst1').style.display = 'flex';
+                        document.getElementById('sgst1').style.display = 'flex';
+                        document.getElementById('igst1').style.display = 'none';
+                    } else {
+                        document.getElementById('cgst1').style.display = 'none';
+                        document.getElementById('sgst1').style.display = 'none';
+                        document.getElementById('igst1').style.display = 'flex';
                     }
 
 
@@ -409,7 +420,7 @@ input[name="service-city"] {
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
-                                                
+                                                {% if cmp1.state == 'Kerala' %}
                                                 <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
@@ -417,7 +428,7 @@ input[name="service-city"] {
                                                 <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
-                                                
+                                                {% else %}
                                                 <option id="ta5" value=0 text=" " hidden>Select</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
@@ -425,7 +436,7 @@ input[name="service-city"] {
                                                 <option value=12 text=" ">12.0% IGST(12%)</option>
                                                 <option value=18 text=" ">18.0% IGST(18%)</option>
                                                 <option value=28 text=" ">28.0% IGST(28%)</option>
-                                                
+                                                {% endif %}
                                           </select>
                                         </td>
                                         <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce" 
@@ -481,13 +492,10 @@ input[name="service-city"] {
                                                    var data5 = response.sgst;
                                                    var data6 = response.quty;
                                                    var data7 =response.taxs;
-                                                   var data8 =response.placesx
-                                                   console.log(data7,'data7');
-                                                   console.log(data4,'data4');
-                                                   console.log(data5,'data5');
-                                                   console.log(data8,'data8');
+                                                   console.log(data7);
+                                              
                                                    document.getElementById('hsn1').value = data; 
-
+                                   
                                        
                                    
                                                    document.getElementById('qtyspan').innerHTML = data2 ;
@@ -495,9 +503,9 @@ input[name="service-city"] {
                                                    document.getElementById('taxs').value = data7;
                                                    document.getElementById('quantitys').value = data6;
 
-                                                   
+                                                   var place = 'Kerala'
                                                   
-                                                   if (places == '{{ cmp1.state }}') {
+                                                   if (place == '{{ cmp1.state }}') {
 
                                                        document.getElementById('ta1').value = data4;
                                                        
@@ -2250,7 +2258,6 @@ console.log('product1')
                   data5 = response.sgst
                   data6 = response.quty
                   data7 =response.taxs
-                  
              
                   document.getElementById('hsn11').value = data
                   document.getElementById('qtyspan1').innerHTML = data2;

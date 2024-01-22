@@ -126,10 +126,11 @@ input[name="service-city"] {
     
     console.log("select is 'select2'");
 
-    $('#selected').on('change', function() {
+    $('#selected').on('input', function() {
                 console.log('hello')
                 
                 select = $('#selected').val();
+                console.log(select,'select')
                 $('#billno').val('');
                 $.ajax({
                 type: "GET",
@@ -141,38 +142,45 @@ input[name="service-city"] {
                 var json_data = JSON.parse(response);
                 for (key in json_data) {
 
+
+
                     var gstNumDiv = $('#gstDiv');
                     var showdiv1 = $('#showdiv1');
+                    
                     document.getElementById('email').value = json_data[key]['email'];
                     document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
                     // document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
                     var sourceOfSupplyValue = json_data[key]['sourceofsupply']
                     $('#sourcesupply').text(sourceOfSupplyValue);
+                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
                     
-                    console.log('sourceOfSupplyValue',sourceOfSupplyValue)
+
+                    // document.getElementById('gst_num') =json_data[key]['gstin']
+                    // console.log(gst_num,'gst_num')
+
                     var sourceOfSupplyValueinside= 'Kerala';
 
                     if (sourceOfSupplyValue == '[KL] Kerala'){
                         $('#sourcesupply').text(sourceOfSupplyValue);
-                        
+                        console.log('Kerala')
                     }
 
-                    // if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
-                    //     document.getElementById('cgst1').style.display = 'flex';
-                    //     document.getElementById('sgst1').style.display = 'flex';
-                    //     document.getElementById('igst1').style.display = 'none';
-                    // } else {
-                    //     document.getElementById('cgst1').style.display = 'none';
-                    //     document.getElementById('sgst1').style.display = 'none';
-                    //     document.getElementById('igst1').style.display = 'flex';
-                    // }
+                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
+                        document.getElementById('cgst1').style.display = 'flex';
+                        document.getElementById('sgst1').style.display = 'flex';
+                        document.getElementById('igst1').style.display = 'none';
+                    } else {
+                        document.getElementById('cgst1').style.display = 'none';
+                        document.getElementById('sgst1').style.display = 'none';
+                        document.getElementById('igst1').style.display = 'flex';
+                    }
 
 
-
+                    
             
                     
 
-                    if (json_data[key]['gsttype'] === 'unregistered Business' || json_data[key]['gsttype'] === 'Overseas' ){
+                    if (json_data[key]['gsttype'] == 'unregistered Business' || json_data[key]['gsttype'] == 'Overseas' ){
                         gstNumDiv.hide();
                         showdiv1.show()  
 
@@ -185,6 +193,7 @@ input[name="service-city"] {
 
 
                     document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    
                     
                 
                 
@@ -238,16 +247,40 @@ input[name="service-city"] {
                                     <textarea class="form-control" name="address" rows="5" id="mailaddr"></textarea>
                                 </div>
                                 <div class="col-md-5 mt-3"></div>
+
+
+
+                                
+                                
+
+
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">GST Treatment</label>
                                     
-                                    <input type="text" class="form-control" name="gst_type" id="gst_type" required>
+                                    <input type="text" class="form-control" name="gst_type" id="gst_type" >
                                 </div>
+
+                              
+                                
                                 <div class="col-md-5 mt-3" id="gstDiv">
+                                  
                                     <label for="validationCustom02">GST Number</label>
+                                    <input type="text" class="form-control" name="gst_num" id="gst_num" >
                                     
-                                    <input type="text" class="form-control" name="gst_num" id="gst_num" required>
-                                </div>
+                            
+                                   
+                                </div> 
+                                
+                                <script>
+
+                                    // var gst_type= document.getElementById('gst_type').value
+                                    //  if 
+     
+                                    //  var b = '{{pdebt.gsttype}}'
+                                    //  var a ='{{pdebt.gstnumber}}'
+                                    //  console.log('a',a)
+                                    //  console.log('b',b)
+                                 </script>
 
                                 <div class="col-md-5 mt-3" id="showdiv1" style="display: none;">
                                 </div>
@@ -765,9 +798,6 @@ input[name="service-city"] {
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
                                     </div>
-
-                              
-
                                 <div class="row container-fluid p-2 m-0" id="igst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
@@ -776,9 +806,7 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                               
-                                {% if pdebt.cgst %}
-                                <div class="row container-fluid p-2 m-0"  id="cgst1">
+                                <div class="row container-fluid p-2 m-0" style="display: none;" id="cgst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='cgst' step="any" id="cgst" placeholder=0 
@@ -786,9 +814,7 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                                {% endif %}
-                                {% if pdebt.sgst != '' or pdebt.sgst != 0 %}
-                                <div class="row container-fluid p-2 m-0" id="sgst1">
+                                <div class="row container-fluid p-2 m-0" style="display: none;" id="sgst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='sgst' step="any" id="sgst" placeholder=0 
@@ -796,7 +822,6 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                                {% endif %}
                                 <div class="row container-fluid p-2 m-0">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Tax Amount</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
@@ -842,7 +867,7 @@ input[name="service-city"] {
                                 <div class="row container-fluid p-2 m-0">
                                     <div class="col-sm-4 mt-2"><a class="text-center">Adjustments</a></div>
                                     <div class="col-sm-1 mt-2">:</div>
-                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off" value="0" placeholder=0 
+                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off"  placeholder=0 
                                         class="form-control" value="{{ pdebt.round_off }}"/>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
@@ -2156,17 +2181,17 @@ input[name="service-city"] {
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script>
 
-        // function state(element) {
-        //     if (element.value == "Kerala" ) {
-        //         document.getElementById('cgst1').style.display = 'flex';
-        //         document.getElementById('sgst1').style.display = 'flex';
-        //         document.getElementById('igst1').style.display = 'none'; 
-        //     } else {
-        //         document.getElementById('cgst1').style.display = 'none';
-        //         document.getElementById('sgst1').style.display = 'none';
-        //         document.getElementById('igst1').style.display = 'flex';
-        //     }
-        // }
+        function state(element) {
+            if (element.value == "Kerala" ) {
+                document.getElementById('cgst1').style.display = 'flex';
+                document.getElementById('sgst1').style.display = 'flex';
+                document.getElementById('igst1').style.display = 'none'; 
+            } else {
+                document.getElementById('cgst1').style.display = 'none';
+                document.getElementById('sgst1').style.display = 'none';
+                document.getElementById('igst1').style.display = 'flex';
+            }
+        }
     </script>
 
     <script>

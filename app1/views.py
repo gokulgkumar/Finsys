@@ -34742,6 +34742,7 @@ def getvendordata(request):
         if x[2] is not None:
             b = x[1] + " " + x[2]
             vendobject = vendor.objects.get(firstname=a, lastname=b)
+           
             list = []
             dict = {'vendorid': vendobject.vendorid, 'title': vendobject.title, 'firstname': vendobject.firstname,
                     'lastname': vendobject.lastname, 'companyname': vendobject.companyname, 'gsttype': vendobject.gsttype,
@@ -34754,7 +34755,9 @@ def getvendordata(request):
             list.append(dict)
         else:
             vendorbject = vendor.objects.get(firstname=a, lastname=b)
+           
             list = []
+
             dict = {'vendorid': vendobject.vendorid, 'title': vendobject.title, 'firstname': vendobject.firstname,
                     'lastname': vendobject.lastname, 'companyname': vendobject.companyname, 'gsttype': vendobject.gsttype,
                     'gstin': vendobject.gstin, 'panno': vendobject.panno, 'email':vendobject.email, 'website': vendobject.website,
@@ -48552,6 +48555,7 @@ def get_vendor_data_bill(request):
     company1 = company.objects.get(id=request.session["uid"])
     id = request.GET.get('id')
     print(id, 'id')
+    print('company1',company1.cid)
     options = {}
     vendor_object = vendor.objects.get(vendorid=id)
     
@@ -48559,10 +48563,10 @@ def get_vendor_data_bill(request):
     emails = str(' ') + str(vendor_object.email)
     print(emails, 'vendor_object email')
 
-    vendor_recurring = recurring_bill.objects.filter(vendor_mail=emails)
-    print(vendor_recurring)
+    vendor_recurring = recurring_bill.objects.filter(vendor_mail=emails,cid=company1.cid)
+    print(vendor_recurring,'vendor_recurring')
 
-    option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email)
+    option_objects = purchasebill.objects.filter(vendor_mail=vendor_object.email,cid=company1.cid)
     print(option_objects, 'option objects')
 
     if option_objects or vendor_recurring:
