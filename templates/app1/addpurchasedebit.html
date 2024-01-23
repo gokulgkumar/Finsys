@@ -111,7 +111,7 @@ input[name="service-city"] {
                 console.log('hello')
                 
                 select = $('#selected').val();
-                console.log(select,'select')
+                
                 $('#billno').val('');
                 $.ajax({
                 type: "GET",
@@ -139,7 +139,7 @@ input[name="service-city"] {
                         console.log('Kerala')
                     }
 
-                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
+                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala' || json_data[key]['sourceofsupply'] == '[KL] Kerala') {
                         document.getElementById('cgst1').style.display = 'flex';
                         document.getElementById('sgst1').style.display = 'flex';
                         document.getElementById('igst1').style.display = 'none';

@@ -34733,6 +34733,8 @@ def getvendordata(request):
         else:
             return redirect('/')
         cmp1 = company.objects.get(id=request.session['uid'])
+        print('cmp1',cmp1.cid)
+        
         id = request.GET.get('id')
         x = id.split()
         print(id,'id is')
@@ -34742,7 +34744,7 @@ def getvendordata(request):
         if x[2] is not None:
             b = x[1] + " " + x[2]
             vendobject = vendor.objects.get(firstname=a, lastname=b)
-           
+            
             list = []
             dict = {'vendorid': vendobject.vendorid, 'title': vendobject.title, 'firstname': vendobject.firstname,
                     'lastname': vendobject.lastname, 'companyname': vendobject.companyname, 'gsttype': vendobject.gsttype,
@@ -34755,6 +34757,7 @@ def getvendordata(request):
             list.append(dict)
         else:
             vendorbject = vendor.objects.get(firstname=a, lastname=b)
+            
            
             list = []
 
@@ -48578,13 +48581,6 @@ def get_vendor_data_bill(request):
             options[option.rbillid] = [option.billno]
     else:
         options = {}
-
-    # if vendor_recurring:
-    #     for option in vendor_recurring:
-    #         options[option.rbillid] = [option.billno]
-    # else:
-    #     options = {}
-
     print('options', options)
 
     return JsonResponse(options, safe=False)
@@ -50349,15 +50345,16 @@ def itemdatadebit(request):
             
 
             try:
-                # Try to get the purchasebill object with the specified bill_no
+                # Try to get the purchasebill object with the specified bill_no 
                 pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
                 print(pbill, 'pbill')
 
                 # Try to get the purchasebill_item object with the specified conditions
                 try:
+                    
                     # pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
-                    pb = purchasebill_item.objects.get(bill_id=pbill, items=id)
-                    print('pb', pb)
+                    pb = purchasebill_item.objects.get(bill_id=pbill.billid, items=id)
+                    print('pb is', pb)
                     placesx=pb.bill.sourceofsupply
                     # placesx=pbill.sourceofsupply
                     quty = pb.quantity
@@ -50371,6 +50368,7 @@ def itemdatadebit(request):
                 # If purchasebill object is not found, try to get the recurring_bill object
                 try:
                     rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
+                    print('rebill',rebill)
                     re = recurringbill_item.objects.get(bill=rebill, item=id)
                     print('re', re)
                     placesx=re.bill.source_supply

@@ -284,12 +284,11 @@ input[name="service-city"] {
                     if (sourceOfSupplyValue == '[KL] Kerala'){
                         $('#sourcesupply').text(sourceOfSupplyValueinside);
                        
-                        
-                        console.log('Kerala')
-                        $('#sourcesupply').val(sourceOfSupplyValueinside);
+                       
+                        // $('#sourcesupply').val(sourceOfSupplyValueinside);
                     }
 
-                    if (json_data[key]['sourceofsupply'] == 'Kerala') {
+                    if (json_data[key]['sourceofsupply'] == 'Kerala' || json_data[key]['sourceofsupply'] == '[KL] Kerala') {
                         document.getElementById('cgst1').style.display = 'flex';
                         document.getElementById('sgst1').style.display = 'flex';
                         document.getElementById('igst1').style.display = 'none';
