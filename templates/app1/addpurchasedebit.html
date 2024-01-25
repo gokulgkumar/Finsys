@@ -420,7 +420,7 @@ input[name="service-city"] {
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
-                                                {% if cmp1.state == 'Kerala' %}
+                                               
                                                 <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
@@ -428,7 +428,7 @@ input[name="service-city"] {
                                                 <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
-                                                {% else %}
+                                               
                                                 <option id="ta5" value=0 text=" " hidden>Select</option>
                                                 <option value=0 text=" ">0.0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
@@ -436,7 +436,7 @@ input[name="service-city"] {
                                                 <option value=12 text=" ">12.0% IGST(12%)</option>
                                                 <option value=18 text=" ">18.0% IGST(18%)</option>
                                                 <option value=28 text=" ">28.0% IGST(28%)</option>
-                                                {% endif %}
+                                               
                                           </select>
                                         </td>
                                         <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce" 
@@ -492,7 +492,9 @@ input[name="service-city"] {
                                                    var data5 = response.sgst;
                                                    var data6 = response.quty;
                                                    var data7 =response.taxs;
-                                                   console.log(data7);
+                                                   var data8 = response.placesx
+                                                   console.log(data8,'data8');
+                                                   console.log(data7,'data7');
                                               
                                                    document.getElementById('hsn1').value = data; 
                                    
@@ -500,7 +502,8 @@ input[name="service-city"] {
                                    
                                                    document.getElementById('qtyspan').innerHTML = data2 ;
                                                    document.getElementById('unit1').value = data3;
-                                                   document.getElementById('taxs').value = data7;
+                                                   document.getElementById('tax1').value = data7;
+
                                                    document.getElementById('quantitys').value = data6;
 
                                                    var place = 'Kerala'
@@ -561,7 +564,7 @@ input[name="service-city"] {
                         <div class="col-md-6">
                             <label for="">Payment Type</label>
                             <div class="d-flex">
-                                <select class="form-control my-select" name="paytype" id="pay_method" required style="width:70%;">
+                                <select class="form-control my-select" name="paytype" id="pay_method"  style="width:70%;">
                                     <option value="" hidden>Select</option>
                                     
                                     <option value="Cash">Cash</option>
@@ -749,7 +752,7 @@ input[name="service-city"] {
                                         <div class="col-sm-1 mt-2"></div>
                                         <div class="col-sm-7 mt-2">
                                             <input type="number" name='bal_due' id="bal_due" placeholder="0" step="any" 
-                                            class="form-control"  readonly>
+                                            class="form-control" value="0" readonly>
                                             
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
@@ -1896,6 +1899,7 @@ input[name="service-city"] {
         var discount = document.getElementById("disc1").value
         var shipCharge = parseFloat(document.getElementById("shipcharge").value); // Getting the shipping charge amount
         var adjustments = parseFloat(document.getElementById("round_off").value);
+       
         
         tcs=0
         tcs =a/100 * total
@@ -1909,9 +1913,10 @@ input[name="service-city"] {
         var gt = Math.round(amount-disc0+ shipCharge + adjustments);
         
         $('#tcs_amount').val(parseFloat(tcs.toFixed(2)));
-        $('#grandtotal').val(parseFloat(gt.toFixed(2)));
         $('#due').val(parseFloat(y.toFixed(2)));
         $('#baldue').val(parseFloat(gt.toFixed(2)));
+        $('#grandtotal').val(parseFloat(gt.toFixed(2)));
+        
         // $('#round_off').val(parseFloat(y.toFixed(2)));
         // $('#due').val((y).toFixed(2));
         // $('#round_off').val((y).toFixed(2));   
@@ -1950,18 +1955,25 @@ input[name="service-city"] {
 </script>
 
 
+
+
+
 <script>
     const grandTotalInput = document.getElementById("grandtotal");
     const paidInput = document.getElementById("paid");
     const balanceDueInput = document.getElementById("bal_due");
     const paidCheckbox = document.getElementById("invalidCheck");
     
+    
 
     paidCheckbox.addEventListener("change", function () {
         if (paidCheckbox.checked) {
             paidInput.value = grandTotalInput.value;
+            
+
         } else {
-            paidInput.value = "";
+            paidInput.value = "0";
+            calculateBalance();
         }
         calculateBalance();
     });
@@ -1983,6 +1995,12 @@ input[name="service-city"] {
         const paidAmount1 = parseFloat(paidInput.value);
         const balanceDue = grandTotal - paidAmount1;
         balanceDueInput.value = balanceDue.toFixed(2);
+
+
+      
+
+
+
     }
 
     grandTotalInput.addEventListener("input", function () {
