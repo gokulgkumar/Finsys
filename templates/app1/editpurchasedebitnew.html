@@ -1695,6 +1695,20 @@ input[name="service-city"] {
                         
                     }
 
+                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
+
+                    console.log('True')
+
+
+                    document.getElementById('cgst1').style.display = 'flex';
+                    document.getElementById('sgst1').style.display = 'flex';
+                    document.getElementById('igst1').style.display = 'none';
+                    } else {
+                    console.log('False')
+                    document.getElementById('cgst1').style.display = 'none';
+                    document.getElementById('sgst1').style.display = 'none';
+                    document.getElementById('igst1').style.display = 'flex';
+                    }
 
 
 
@@ -1720,20 +1734,7 @@ input[name="service-city"] {
                     console.log('sourceofsupply',json_data[key]['sourceofsupply'])
 
                     
-                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
-
-                        console.log('True')
-
-
-                        document.getElementById('cgst1').style.display = 'flex';
-                        document.getElementById('sgst1').style.display = 'flex';
-                        document.getElementById('igst1').style.display = 'none';
-                    } else {
-                        console.log('False')
-                        document.getElementById('cgst1').style.display = 'none';
-                        document.getElementById('sgst1').style.display = 'none';
-                        document.getElementById('igst1').style.display = 'flex';
-                    }
+                   
                     
                 
                 
@@ -2183,17 +2184,17 @@ input[name="service-city"] {
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script>
 
-        // function state(element) {
-        //     if (element.value == "Kerala" ) {
-        //         document.getElementById('cgst1').style.display = 'flex';
-        //         document.getElementById('sgst1').style.display = 'flex';
-        //         document.getElementById('igst1').style.display = 'none'; 
-        //     } else {
-        //         document.getElementById('cgst1').style.display = 'none';
-        //         document.getElementById('sgst1').style.display = 'none';
-        //         document.getElementById('igst1').style.display = 'flex';
-        //     }
-        // }
+        function state(element) {
+            if (element.value == "Kerala" ) {
+                document.getElementById('cgst1').style.display = 'flex';
+                document.getElementById('sgst1').style.display = 'flex';
+                document.getElementById('igst1').style.display = 'none'; 
+            } else {
+                document.getElementById('cgst1').style.display = 'none';
+                document.getElementById('sgst1').style.display = 'none';
+                document.getElementById('igst1').style.display = 'flex';
+            }
+        }
     </script>
 
     <script>

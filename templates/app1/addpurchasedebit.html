@@ -419,8 +419,7 @@ input[name="service-city"] {
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
-                                            <select name='tax[]' id="tax1" class="form-control tax">
-                                               
+                                            <select name='tax[]' id="tax1" class="form-control tax ">
                                                 <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
                                                 <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
                                                 <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
@@ -428,9 +427,10 @@ input[name="service-city"] {
                                                 <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
                                                 <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
                                                 <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
-                                               
+                                            </select>
+                                            <select name='tax[]' id="tax2" class="form-control tax d-none">
                                                 <option id="ta5" value=0 text=" " hidden>Select</option>
-                                                <option value=0 text=" ">0.0% IGST(00%)</option>
+                                                <option value=0 text=" ">0% IGST(00%)</option>
                                                 <option value=3 text=" ">03.0% IGST(03%)</option>
                                                 <option value=5 text=" ">05.0% IGST(05%)</option>
                                                 <option value=12 text=" ">12.0% IGST(12%)</option>
@@ -457,8 +457,19 @@ input[name="service-city"] {
                                 </table>
 
                                 <script>
+
+
+                              
+
+
+    // Your code here
+
                                     $('.select2').select2();
                                     console.log('hi')
+
+                                    
+
+
                                     $(document).on('change', '#product', function () {
                                    
                                         console.log('hhhhh')
@@ -493,6 +504,7 @@ input[name="service-city"] {
                                                    var data6 = response.quty;
                                                    var data7 =response.taxs;
                                                    var data8 = response.placesx
+                                                   
                                                    console.log(data8,'data8');
                                                    console.log(data7,'data7');
                                               
@@ -502,27 +514,53 @@ input[name="service-city"] {
                                    
                                                    document.getElementById('qtyspan').innerHTML = data2 ;
                                                    document.getElementById('unit1').value = data3;
-                                                   document.getElementById('tax1').value = data7;
+                                                   document.getElementById('tax1').value=data7;
 
                                                    document.getElementById('quantitys').value = data6;
 
-                                                   var place = 'Kerala'
-                                                  
-                                                   if (place == '{{ cmp1.state }}') {
 
-                                                       document.getElementById('ta1').value = data4;
+
+                                                   if (data8 == '{{ cmp1.state }}')
+                                                        {   document.getElementById('tax1').innerHTML=data7 + ' % GST';
+                                                            document.getElementById('tax1').value = data7 ;
+                                                //             document.getElementById('tax1').text = data4 + ' % GST';
+                                                //             document.getElementById('tax1').value=data4
+                                                        }
+                                                //         document.getElementById('tax1').innerHTML  = data5 + ' % IGST';
+                                                //         document.getElementById('tax1').value=data5
+
+
+
+
+                                                //    var place = 'Kerala'
+                                                  
+                                                //    if (data8 == '{{ cmp1.state }}') {
+
+                                                //     // document.getElementById('ta1').style.display = 'flex';
+                                                //     // document.getElementById('tax2').style.display = 'block' ;
+
+
+                                                //     //  document.getElementById('tax1').innerHTML = data4 + ' % GST';
+                                                //     //    document.getElementById('tax1').value = data4 ;
+
+                                                //     $('#tax1').val(data7);
                                                        
                                                        
-                                                   }
-                                                   else{
-                                                    document.getElementById('ta5').value = data5;
-                                                   }
+                                                //    }
+                                                //    else{
+                                                //     // document.getElementById('ta2').style.display = 'block';
+                                                //     // document.getElementById('tax1').style.display = 'flex' ;
+                                                //     document.getElementById('ta5').innerHTML = data4 + ' % IGST';
+                                                //     document.getElementById('tax2').value = data5 ;
+                                                //    }
                                                    
                                            
                                            },
                                            
                                        });
                                    });
+
+                               
                                    
                         function reloadbill(vid) {
                 console.log(vid);
@@ -550,7 +588,7 @@ input[name="service-city"] {
 
                 });
             }
-                                   
+                      
                                    
                                                                                    </script>
                                    
