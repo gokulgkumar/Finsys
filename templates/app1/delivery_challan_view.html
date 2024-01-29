@@ -722,7 +722,7 @@ transform: rotate(-45deg); */
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
+                <h5 class="modal-title" id="shareBillEmailLabel">Share Delivery Chalan Via Email</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
             </div>
@@ -929,18 +929,7 @@ transform: rotate(-45deg); */
 
                                     </div>
                                     <hr>
-                                    <div class="row">
-                                        <div class="col-md-4 ml-5 mr-5 mt-3">
-                                            <label for="title">
-                                                <h6><b>Challan Status </b></h6>
-                                            </label>
-                                        </div>
-                                        <div class="col-md-4 ml-5 mt-3">
-                                            <label for="title"><b>: {{ estimate.status }}</b></label>
-
-                                        </div>
-
-                                    </div>
+                                   
                                     <hr>
 
                                     <div class="row">
@@ -955,17 +944,7 @@ transform: rotate(-45deg); */
                                         </div>
                                     </div>
                                     <hr>
-                                    <div class="row">
-                                        <div class="col-md-4 ml-5  mr-5 mt-3">
-                                            <label for="title">
-                                                <h6><b>Challan Date </b></h6>
-                                            </label>
-                                        </div>
-                                        <div class="col-md-4 ml-5 mt-3">
-                                            <label for="title"><b>: {{ estimate.challan_date }}</b></label>
-
-                                        </div>
-                                    </div>
+                                   
                                     <hr>
                                     <div class="row">
                                         <div class="col-md-4 ml-5 mr-5 mt-3">
@@ -1134,9 +1113,16 @@ transform: rotate(-45deg); */
                                         <div class="col-md-3 mt-3 vl">
                                             <h6 class="mb-0">Tax</h6>
                                         </div>
+                                        {% if estimate.igst != 0 %}
+
                                         <div class="col-md-3 mt-3">
-                                            <p class="mb-0 text-right">{{ itm.tax }}</p>
+                                            <p class="mb-0 text-right">{{ itm.tax }}% IGST</p>
                                         </div>
+                                        {% else %}
+                                        <div class="col-md-3 mt-3">
+                                            <p class="mb-0 text-right">{{ itm.tax }}% GST</p>
+                                        </div>
+                                        {% endif %}
                                         <div class="col-md-3 mt-3">
                                             <h6 class="mb-0">Discount</h6>
                                         </div>
@@ -1275,13 +1261,17 @@ transform: rotate(-45deg); */
                                         {% endif %}
 
                                     </div>
+
                                     <div class="row d-flex justify-content-between align-items-center mb-3">
+                                        
+
                                         <div class="col-md-3 mt-3">
                                             <h6 class="mb-0">Shipping Charge</h6>
                                         </div>
                                         <div class="col-md-3 mt-3">
                                             <p class="mb-0 text-right">{{ estimate.shipping }}</p>
                                         </div>
+                                      
                                         <div class="col-md-3 mt-3 vl">
                                             <h6 class="mb-0">Adjustment</h6>
                                         </div>
@@ -1925,7 +1915,12 @@ transform: rotate(-45deg); */
                                     <td style="color:black">{{j.quantity}}</td>
                                     <td style="color:black">{{j.rate}}</td>
                                     <td style="color:black">{{j.discount}} </td>
-                                    <td style="color:black">{{j.tax}} % </td>
+                                    {% if estimate.igst != 0.0 %}
+                                    <td style="color:black">{{j.tax}} % IGST</td>
+                                    {% else %}
+                                    <td style="color:black">{{j.tax}} % GST</td>
+                                    {% endif %}
+
                                     <td style="color:black">{{j.total}}</td>
                                 </tr>
                                 {% endfor %}
@@ -1966,11 +1961,15 @@ transform: rotate(-45deg); */
                                             <td style="color: #000;">:</td>
                                             <td class="text-right" style="color: #000;">{{estimate.taxamount}}</td>
                                         </tr>
+                                        {% if estimate.shipping != 0 %}
+
                                         <tr>
                                             <td style="color: #000;">Shipping Charge</td>
                                             <td style="color: #000;">:</td>
                                             <td class="text-right" style="color: #000;">{{estimate.shipping}}</td>
                                         </tr>
+                                        {%endif%}
+
                                         {% if estimate.adjustment != 0 %}
                                         <tr>
                                             <td style="color: #000;">Adjustment</td>
@@ -2105,7 +2104,11 @@ transform: rotate(-45deg); */
                                         <td class="text-center" style="color:black">{{ itm.quantity }}</td>
                                         <td class="text-center" style="color:black">{{ itm.rate }}</td>
                                         <td class="text-center" style="color:black">{{ itm.discount }}</td>
-                                        <td class="text-center" style="color:black">{{ itm.tax }} %</td>
+                                        {% if estimate.igst != 0.0 %}
+                                        <td class="text-center" style="color:black">{{ itm.tax }} % IGST</td>
+                                        {% else %}
+                                        <td class="text-center" style="color:black">{{ itm.tax }} % GST</td>
+                                        {% endif %}
                                         <td class="text-center" style="color:black">{{ itm.total }}</td>
                                     </tr>
                                     {% endfor %}
@@ -2152,12 +2155,16 @@ transform: rotate(-45deg); */
                                                 <td class="text-right" style="color: #000;">{{estimate.taxamount}}
                                                 </td>
                                             </tr>
+                                            {% if estimate.shipping != 0 %}
+
                                             <tr>
                                                 <td style="color: #000;">Shipping Charge</td>
                                                 <td style="color: #000;">:</td>
                                                 <td class="text-right" style="color: #000;">{{estimate.shipping}}
                                                 </td>
                                             </tr>
+                                            {% endif %}
+
                                             {% if estimate.adjustment != 0 %}
                                             <tr>
                                                 <td style="color: #000;">Adjustment</td>
@@ -2277,7 +2284,11 @@ transform: rotate(-45deg); */
                                         <td class="text-center" style="color: black;">{{ itm.quantity }}</td>
                                         <td class="text-center" style="color: black;">{{ itm.rate }}</td>
                                         <td class="text-center" style="color: black;">{{ itm.discount }}</td>
-                                        <td class="text-center" style="color: black;">{{ itm.tax }} %</td>
+                                        {% if estimate.igst != 0.0 %}
+                                        <td class="text-center" style="color:black">{{ itm.tax }} % IGST</td>
+                                        {% else %}
+                                        <td class="text-center" style="color:black">{{ itm.tax }} % GST</td>
+                                        {% endif %}
                                         <td class="text-center" style="color: black;">{{ itm.total }}</td>
                                     </tr>
                                     {% endfor %}
@@ -2322,12 +2333,16 @@ transform: rotate(-45deg); */
                                             <td style="color: #000;">:</td>
                                             <td class="text-right" style="color: #000;">{{estimate.taxamount}}</td>
                                         </tr>
+                                        {% if estimate.shipping != 0 %}
+
                                         <tr>
                                             <td style="color: #000;">Shipping Charge</td>
                                             <td style="color: #000;">:</td>
                                             <td class="text-right" style="color: #000;">{{estimate.shipping}}
                                             </td>
                                         </tr>
+                                        {%endif%}
+
                                         {% if estimate.adjustment != 0 %}
                                         <tr>
                                             <td style="color: #000;">Adjustment</td>
@@ -2556,9 +2571,16 @@ transform: rotate(-45deg); */
                                     <div class="equal-length-item" style="text-align: center; ">
                                         {{j.discount}}
                                     </div>
+                                    
+                                    {% if estimate.igst != 0.0 %}
                                     <div class="equal-length-item" style="text-align: center; ">
-                                        {{j.tax}}%
-                                    </div>
+                                        {{j.tax}}% IGST
+                                    </div>                                    
+                                    {% else %}
+                                    <div class="equal-length-item" style="text-align: center; ">
+                                        {{j.tax}}%GST
+                                    </div>                                   
+                                     {% endif %}
                                     <div class="equal-length-item" style="text-align: center; ">
                                         {{j.total}}
                                     </div>
@@ -2610,6 +2632,8 @@ transform: rotate(-45deg); */
                                         {{estimate.taxamount}}
                                     </div>
                                 </div>
+                                {% if estimate.shipping != 0 %}
+
                                 <div class="row ml-1">
                                     <div class="col-md-5 text-left" style=" color: black;">
                                         Shipping Charge
@@ -2618,6 +2642,8 @@ transform: rotate(-45deg); */
                                         {{estimate.shipping}}
                                     </div>
                                 </div>
+                                {%endif%}
+
                                 {% if estimate.adjustment != 0 %}
                                 <div class="row ml-1">
                                     <div class="col-md-5 text-left" style=" color: black;">

@@ -147,7 +147,7 @@
                                                         </td> -->
 
                                                         <td>
-                                                            <input name="account" list="account" class="form-control" id="pin" required value="{{ a.account }}">
+                                                            <input name="account" list="account" class="form-control" id="pin"  value="{{ a.account }}">
                                                             <datalist id="account">
                                                               {% for a in acc %}
                                                                 <option value="{{ a.name }}">{{ a.name }}</option>
@@ -296,16 +296,16 @@
                                     </div>
                                     <div class="row mt-5 mb-5">
                                         <div class="col-md-4">
-                                            <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light">
+                                            <!-- <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light">
                                             BACK
-                                            </a>
+                                            </a> -->
                                         </div>
 
                                         <div class="" style="margin-bottom: 20rem;">
-                                            <button type="submit" name="draft" class="btn btn-outline-info rounded-pill w-10 text-light " 
-                                                >Save as Draft</button>&nbsp;&nbsp;
+                                            <!-- <button type="submit" name="draft" class="btn btn-outline-info rounded-pill w-10 text-light " 
+                                                >Save as Draft</button>&nbsp;&nbsp; -->
                                             <button type="submit" name="save" class="btn btn-outline-info rounded-pill w-10 text-light" 
-                                                >Save And Send</button>
+                                                >Save</button>
                                         
                                         </div>
 

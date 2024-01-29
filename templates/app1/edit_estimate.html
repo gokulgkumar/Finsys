@@ -5,29 +5,53 @@
 
 
 <style>
-    input {
-      background-color: #2f516f;
-      border: 0;
-      border-radius: 5px;
-      color: white;
+    .hide{
+        display: none;
     }
-    #customer{
-          
-          color: white;
-      }
-  
-      .selectize-input {
-          height: 5vh;
-          border-color:white;
-          border-radius: 5px;
-          background-color: #2f516f;
-      }
-  
-      .option:hover {
-          background-color: #3B71CA;
-          color: white;
-      }   
-  </style>
+    input:read-only {
+        background-color: #41586bff  !important;
+        color: #fff;
+    }
+    .form-control.select2.vendor,
+    .select2-container--default .select2-selection--single {
+        background-color: #41586bff !important;
+        color: white !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: white !important;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        background-color: black !important;
+        color: white !important;
+    }
+
+    .select2-container--default .select2-results__option {
+        color: white;
+        background-color: black;
+
+
+        }
+    .select2-container--default .select2-selection--single{
+        padding:6px;
+        height: 35px!important;
+
+
+
+        font-size: 1.2em;  
+        
+    }   
+</style>
+<script>
+    $(':input[readonly]').css({'background-color':'rgba(0,0,0,.4)'});
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+<!-- Include Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" ></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
+
 <form action="{% url 'updateestimate2' estimate.estimateid %}" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
   {% csrf_token %}
   <div class="page-content">
@@ -46,12 +70,12 @@
          <div class="row mt-3">
             <div class="col-md-4">
                 <label class="col-form-label">Reference Number</label>
-                <input type="text" class="form-control" name="Ref_No" value="{{ estimate.reference_number }}"><br> 
+                <input type="text" class="form-control" name="Ref_No" value="{{ estimate.reference_number }}" readonly><br> 
             </div>
             <div class="col-md-4">
                 <label class="col-form-label">EStimate No.</label><span class="text-danger mt-1 ml-3 " id="dangerdiv" style="display: none;"><span class="text-white"> (</span>This Id Should be Continous<span class="text-white">)</span></span>
                   
-                    <input type="text" class="form-control" name="ord_no" value="{{estimate.estimateno}}"  id="ord_no" style="background-color: #43596c;"><br>
+                    <input type="text" class="form-control" name="ord_no" value="{{estimate.estimateno}}"  id="ord_no" style="background-color: #43596c;" ><br>
                
             </div>
          </div>
@@ -60,7 +84,7 @@
             <div class="col-md-4">
               <label class="col-form-label">Customer</label>
               <div class="d-flex">
-                  <select name="customer_name" id="customer" class="form-control" style="width: 95%;">
+                  <select name="customer_name" id="customer" class="form-control select2" style="width: 95%;">
                       <option value="{{ estimate.customer_name }}" selected>{{cust.title}} {{ cust.firstname }} {{ cust.lastname }}
                       {% for cust in customers %}
                           {% if cust.cid_id == cmp1.cid %}
@@ -75,65 +99,7 @@
               </div>
               <label class="col-form-label">GST Type</label>
               <input type="text" class="form-control" id="gsttype" name="gsttype" value="{{cust.gsttype}}" style="background-color: #43596c;" readonly>
-            </div>
-          <div class="col-md-4">
-            <label class="col-form-label">Email</label>
-            <input type="text" class="form-control" id="cust_email" value="{{ estimate.email }}" name="email"
-                   placeholder="Email"><br>
-                
-                   
-                   
-                   {% if cust.gstin %}
-                    <div id="gstnodiv" >
-                        <label class="col-form-label">GSTIN</label>
-                        <input type="text" class="form-control" id="gstno" name="gstno" style="background-color: #43596c;" value="{{cust.gstin}}" readonly>
-                    </div>
-                    {% else %}
-                        <div id="gstnodiv" style="display: none;">
-                        <label class="col-form-label">GSTIN</label>
-                        <input type="text" class="form-control" id="gstno" name="gstno" style="background-color: #43596c;" readonly>
-                    </div>
-                    {% endif %}
-        </div>
-            <div class="col-md-4">
-              <label class="col-form-label">Billing Address</label>
-              <label for="billingaddress"></label>
-              <textarea class="form-control" rows="7" id="bname" value="{{estimate.billingaddress}}"
-                        name="billingaddress">{{ estimate.billingaddress }}</textarea>
-          </div>
-        </div>
-        <!-- <div class="row mt-3">
-            
-        </div> -->
-        <div class="row mt-3">
-            
-            
-            <div class="col-md-3">
-                <label class="col-form-label">Estimate Date</label>
-                <input type="date" class="form-control" value="{{ estimate.estimatedate | date:'Y-m-d'  }}"
-                       name="estimatedate" id="estimatedate"><br>
-            </div>
-            <div class="col-md-3">
-                <label class="col-form-label">Expiration Date</label>
-                <input type="date" class="form-control" value="{{ estimate.expirationdate | date:'Y-m-d'  }}"
-                       name="expirationdate" id="expirationdate"><br>
-            </div>
-            <div class="col-md-3">
-                <label class="col-form-label">Payment Term</label>
-                <div class="d-flex">
-                    <select type="text" class="form-control" id="pay_term" name="pay_term" style="background-color: #43596c; color: white;" >
-                      <option value="{{estimate.term_days}}" selected hidden>NET {{estimate.term_days}}</option>
-                      <option value="0">Due On Receipt</option>
-                      <option value="30">NET 30</option>
-                      <option value="60">NET 60</option>
-                      {% for term in terms %}
-                          <option value="{{term.days}}">{{term.term}}</option>
-                      {% endfor %}
-                    </select>
-                    <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newpayment" data-toggle="modal" id="termadd">+</a>
-                </div>
-              </div>
-            <div class="col-md-3 ">
+              
               <label class="col-form-label">Place of supply</label>
               <select type="text" class="form-control" id="plosu" name="placosupply" style="background-color: #2f516f; color: white;" onchange="state(this)">
                 <option value="{{ estimate.placeofsupply }}" selected> {{ estimate.placeofsupply }}</option>
@@ -177,6 +143,67 @@
                 <option value="West Bengal">West Bengal</option>
                 <option value="Other Territory">Other Territory</option>
               </select>
+            
+            </div>
+          <div class="col-md-4">
+            <label class="col-form-label">Email</label>
+            <input type="text" class="form-control" id="cust_email" value="{{ estimate.email }}" name="email"
+                   placeholder="Email"><br>
+                
+                   
+                   
+                   {% if cust.gstin %}
+                    <div id="gstnodiv" >
+                        <label class="col-form-label">GSTIN</label>
+                        <input type="text" class="form-control" id="gstno" name="gstno" style="background-color: #43596c;" value="{{cust.gstin}}" readonly>
+                    </div>
+                    {% else %}
+                        <div id="gstnodiv" style="display: none;">
+                        <label class="col-form-label">GSTIN</label>
+                        <input type="text" class="form-control" id="gstno" name="gstno" style="background-color: #43596c;" readonly>
+                    </div>
+                    {% endif %}
+        </div>
+            <div class="col-md-4">
+              <label class="col-form-label">Billing Address</label>
+              <label for="billingaddress"></label>
+              <textarea class="form-control" rows="7" id="bname" value="{{estimate.billingaddress}}"
+                        name="billingaddress">{{ estimate.billingaddress }}</textarea>
+          </div>
+        </div>
+        <!-- <div class="row mt-3">
+            
+        </div> -->
+        <div class="row mt-3">
+            
+            
+            <div class="col-md-4">
+                <label class="col-form-label">Estimate Date</label>
+                <input type="date" class="form-control" value="{{ estimate.estimatedate | date:'Y-m-d'  }}"
+                       name="estimatedate" id="estimatedate"><br>
+            </div>
+            <div class="col-md-4">
+                <label class="col-form-label">Expiration Date</label>
+                <input type="date" class="form-control" value="{{ estimate.expirationdate | date:'Y-m-d'  }}"
+                       name="expirationdate" id="expirationdate"><br>
+            </div>
+            <div class="col-md-4">
+                <label class="col-form-label">Payment Term</label>
+                <div class="d-flex">
+                    <select type="text" class="form-control" id="pay_term" name="pay_term" style="background-color: #43596c; color: white;" >
+                      <option value="{{estimate.term_days}}" selected hidden>NET {{estimate.term_days}}</option>
+                      <option value="0">Due On Receipt</option>
+                      <option value="30">NET 30</option>
+                      <option value="60">NET 60</option>
+                      {% for term in terms %}
+                          <option value="{{term.days}}">{{term.term}}</option>
+                      {% endfor %}
+                    </select>
+                    <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newpayment" data-toggle="modal" id="termadd">+</a>
+                </div>
+              </div>
+            <div class="col-md-3 ">
+             
             </div>
             
         </div>
@@ -212,7 +239,7 @@
                     </td>
                     <td style="width: 20%;">
                       <div class="d-flex">
-                      <select name='product[]' id="product{{ forloop.counter }}" class="form-control product" style="background-color: #2f516f; color: white;">
+                      <select name='product[]' id="product{{ forloop.counter }}" class="form-control product select2" style="background-color: #2f516f; color: white;">
 
                         <option value="{{ j.item }}" selected>{{ j.item }}</option>
                         {% for i in item %}
@@ -251,11 +278,11 @@
                       <select name='tax2[]' id="tax2{{ forloop.counter }}" class="form-control tax inter_tax d-none">
                         <option selected value="{{j.tax}}" hidden>{{j.tax}}% IGST</option>
                         <option value=28 >28% IGST</option>
-                        <option value=18 >18% IGST(18%)</option>
-                        <option value=12  >12% IGST(12%)</option>
-                            <option value=5  >5% IGST(05%)</option>
-                        <option value=3  >03.0% IGST(03%)</option>
-                            <option value=0  >0.0% IGST(0%)</option>
+                        <option value=18 >18% IGST</option>
+                        <option value=12  >12% IGST</option>
+                            <option value=5  >5% IGST</option>
+                        <option value=3  >3% IGST</option>
+                            <option value=0  >0% IGST</option>
                       </select>
                                        
                     </td>
@@ -1240,39 +1267,7 @@
 </script>
 
 
-<script>
-    $(document).ready(function () {
-        $('#customer').selectize({
-            sortField: 'value',
-            
-            render: {
-                item: function (item, escape) {
-                    if (item.value === '') {
-                        return '';
-                    }
-                    return '<div>' + escape(item.text) + '</div>';
-                }
-            }
-        });
-    });
 
-    // $(document).ready(function () {
-    //     $('.product').selectize({
-    //         sortField: 'value',
-            
-              
-            
-    //         render: {
-    //             item: function (item, escape) {
-    //                 if (item.value === '') {
-    //                     return '';
-    //                 }
-    //                 return '<div>' + escape(item.text) + '</div>';
-    //             }
-    //         }
-    //     });
-    // });
- </script>
 
 <script>
     $('#tab_logic tbody tr').each(function () {
@@ -1446,18 +1441,18 @@ function reloadterms(){
 
       new_row = `      
         <div class="col-6" >
-        <input type="text" value="Due On Receipt" class="form-control" style="background-color: #191c24; color: white;" readonly>
+
         </div>
 
         <div class="col-6">
-        <input type="text" value="0" class="form-control" style="background-color: #191c24; color: white;" readonly>
+       
         </div>       
 
         <div class="col-6" >
-        <input type="text" value="NET 30" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        
         </div>
         <div class="col-6">
-        <input type="text" value="30" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        
         </div>                                
         
         <div class="col-6" >
@@ -1589,6 +1584,7 @@ function reloadterms(){
 
 <script>
     $(document).ready(function () {
+        $('#customer').select2();
     $('#customer').on('change', function() {
         // console.log($('#customer').val());
         // console.log($('#customer').text());
@@ -1792,100 +1788,120 @@ function reloadterms(){
  
   $(document).ready(function(){
     
-        $('#add').click(function(){
-            
-            var table = document.getElementById("items-table-body");
-                    var roinc = table.rows.length;
-                    var bc = document.getElementById("plosu").value;
-                    var compstate = document.getElementById("cmpstate").value;
-                    
-                    roinc++;
-        
-            $('#items-table-body').append(
-        
-                    `<tr id='addr0${roinc}'>
-                            <td class="nnum" style="text-align:center;">${roinc} <input type="text"  name='id[]' value= 0 hidden></td></td>
-                            <td style="width: 20%;">
-                            <div class="d-flex">
-                            <select name='product[]' id="product${roinc}" class="form-control product" style="background-color: #43596c; color: white;" onchange="changeprd(this.id)">
-                                <option value=" " selected hidden>Select Product</option>
-                                
-                                    {% for i in item %}
-                                        {% if i.cid_id == cmp1.cid %}
-                                            <option 
-                                                    value="{{ i.name  }}">{{ i.name  }} </option>
-                                        {% endif %}
-                                    {% endfor %}
-                                    </select>
+    $('#add').click(function(){
+      var roinc = $("#items-table-body tr").length;
+      roinc++;
+      $('#items-table-body').append(
+          `
+          <tr id='addr0${roinc}'>
+            <td class = 'nnum'>${roinc}</td>
+            <td style="width: 20%;">
+              <div class="d-flex">
+                <select name='product[]' id="product${roinc}" class="form-control product select2" style="background-color: #112f4a;" placeholder="Select product">
+                  <option value=" " selected>Select Product</option>
+                    {% for i in item %}
+                      {% if i.cid_id == cmp1.cid %}
+                        <option value="{{ i.name  }}">{{ i.name  }} </option>
+                      {% endif %}
+                    {% endfor %}
+                </select>
 
-                                    <a href="#">
-                                        <button type="button" class="btn btn-outline-secondary ml-1" 
-                                        data-target="#newitem" data-toggle="modal">+</button>
-                                    </a>
-                                </div>
-                            </td>
-                            <td><input type="text" name='hsn[]' id="hsn${roinc}" placeholder='Enter HSN Code' class="form-control" style="background-color: #43596c; color: white;" /></td>
-                            <td><input type="number" name='qty[]'  placeholder='Enter Qty' id="qty${roinc}" value=0 class="form-control qty" step=0 min=0 style="background-color: #43596c;margin-top: 27px;;  color: white;" onchange="changeqty(this.id)" />
-                            <div><span></span><span id="qtyspan" class='' hidden></span></div>
-                            </td>
-                            <td><input type="number" name='price[]' id="unit${roinc}" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0" style="background-color: #43596c; color: white;" /></td>
-                            <td>
-                                        <input type="text"  id="select_tax" placeholder="Tax Rate" class="form-control seltax d-flex">
+                <a href="#">
+                    <button type="button" class="btn btn-outline-secondary ml-1" 
+                    data-target="#newitem" data-toggle="modal">+</button>
+                </a>
+              </div>
+            </td>
+            <td><input type="text" name='hsn[]' id="hsn${roinc}" placeholder='Enter HSN Code' class="form-control" style="background-color: #2f516f; color: white;" /></td>
+            <td><input type="number" name='qty[]'  placeholder='Enter Qty' id="qty${roinc}" class="form-control qty" step=0 min=0 style="background-color: #2f516f; color: white;margin-top: 21px;" />
+                <div class="" style="display: none;"><span></span> <span id="qtyspan${roinc}"class=''></span></div>
+            </td>
+            <td><input type="number" name='price[]' id="unit${roinc}" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0" style="background-color: #2f516f; color: white;" /></td>
+            <td>
+                <input hidden value="{{cmp1.state}}" id="cmpstate">
+              <input type="text"  id="select_tax" placeholder="Tax Rate" class="form-control seltax d-flex">
 
-                                        <select name='tax1[]' id="tax1${roinc}" class="form-control intra_tax d-none">
-                                            <option selected disabled hidden> Select GST</option>
-                                            <option value=28 >28.0% GST(28%)</option>
-                                            <option value=18 >18.0% GST(18%)</option>
-                                            <option value=12  >12.0% GST(12%)</option>
-                                                <option value=5  >05.0% GST(05%)</option>
-                                            <option value=3  >03.0% GST(03%)</option>
-                                                <option value=0  >0.0% GST(0%)</option>
-                                        </select>
-                                        <select name='tax2[]' id="tax2${roinc}" class="form-control inter_tax d-none">
-                                            <option selected disabled hidden > Select IGST</option>
-                                            <option value=28 >28.0% IGST(28%)</option>
-                                            <option value=18 >18.0% IGST(18%)</option>
-                                            <option value=12  >12.0% IGST(12%)</option>
-                                                <option value=5  >05.0% IGST(05%)</option>
-                                            <option value=3  >03.0% IGST(03%)</option>
-                                                <option value=0  >0.0% IGST(0%)</option>
-                                        </select>
-                                    </td>  
-                                    <td>
-                                        <input type="number" name='discount[]' placeholder='Enter Discount' value=0 id="disc${roinc}" class="form-control disc" step=0 min=0>
-                                    </td>
-                            <td><input type="number" name='total[]' id="total${roinc}" placeholder=0 class="form-control total" value=0 step="any" readonly style="background-color: #43596c; color: white;" /></td>
-                            <td style="display: none;"><input type="number" step="any" name='taxamount1' id="taxamount${roinc}" class="form-control taxamount" />
-                                <td>
-                                        <button type="button" id="${roinc}" class="btn  font-weight-bold clone_row fa fa-clone px-2 py-1 my-1" style="background-color:rgb(88, 107, 143);"></button><br>
-                                        <button type="button" id="${roinc}" class="btn btn-danger px-2 mx-1 py-1 remove_row fa fa-close"></button>
-                                    </td>
-                        </tr>`);
+              <select name='tax1[]' id="tax1${roinc}" class="form-control tax intra_tax d-none" onchange="taxchange(this.id)">
+                  <option selected disabled > Select GST</option>
+                  <option value=0>0% GST</option>
+                  <option value=3>3% GST </option>
+                  <option value=5>5% GST </option>
+                  <option value=12>12% GST </option>
+                  <option value=18>18% GST </option>
+                  <option value=28>28% GST</option>
+                  <option value=0>Out of Scope(0%)</option>
+              </select>
+              <select name='tax2[]' id="tax2${roinc}" class="form-control tax inter_tax d-none" onchange="taxchange(this.id)">
+                  <option selected disabled  >Select IGST</option>
+                  <option value=0>0% IGST</option>
+                  <option value=3>3% IGST </option>
+                  <option value=5>5% IGST </option>
+                  <option value=12>12% IGST </option>
+                  <option value=18>18% IGST </option>
+                  <option value=28>28% IGST</option>
+                  <option value=0>Out of Scope(0%)</option>
+              </select>
+              
+            </td>  
+            <td style="display: none;"><input type="number" step="any" name='taxamount${roinc}' id="taxamount${roinc}" class="form-control taxamount" /></td>
 
+            <td>
+                <input type="number" name='discount[]' placeholder='Enter Discount' value=0 id="disc${roinc}" class="form-control disc" step=0 min=0>
+            </td>
+            <td><input type="number" name='total[]' id="total${roinc}" placeholder=0 class="form-control total" value=0 step="any" readonly style="background-color: #2f516f; color: white;" /></td>
+            <td>
+                <button type="button" id="${roinc}" class="btn  font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" style="background-color:#43596c;"></button><br>
+                <button type="button" id="${roinc}" class="btn btn-danger remove_row px-2 py-1 mx-1 fa fa-close" title="Remove Row"> </button>
+            </td>
+          </tr>`
+    
+ 
+        );
+      
+        $('.product').select2();
             
         });
     });
+     
 
 $(document).on('change','#plosu',function()   {
-                $(".seltax").removeClass('d-none');
-                $(".seltax").addClass('d-flex');
-                $(".intra_tax").removeClass('d-flex');
-                $(".intra_tax").addClass('d-none');
-                $(".inter_tax").removeClass('d-flex');
-                $(".inter_tax").addClass('d-none');
+               
                 var bc = document.getElementById("plosu").value;
                 var compstate = document.getElementById("cmpstate").value;
                 if (bc == compstate ) {
-                    document.getElementById('cgst1').style.display = 'flex';
-                    document.getElementById('sgst1').style.display = 'flex';
-                    document.getElementById('igst1').style.display = 'none'; 
+                $(".seltax").removeClass('d-flex');
+                $(".seltax").addClass('d-none');
+                $(".inter_tax").removeClass('d-flex');
+                $(".inter_tax").addClass('d-none');
+                $(".intra_tax").removeClass('d-none');
+                $(".intra_tax").addClass('d-flex');
+                document.getElementById('cgst1').style.display = 'flex';
+                document.getElementById('sgst1').style.display = 'flex';
+                document.getElementById('igst1').style.display = 'none';
+        //         for (var l = 1; l <= numberOfRows; l++){
+        //         val = document.getElementById('tax_percent'+l).value;
+        //         document.getElementById('tax1'+l).value = val
+        // }
+                
 
-                } else {
-                    document.getElementById('cgst1').style.display = 'none';
-                    document.getElementById('sgst1').style.display = 'none';
-                    document.getElementById('igst1').style.display = 'flex';
 
-                }
+            } else if(bc != "{{ cmp1.state }}" ) {
+                $(".seltax").removeClass('d-flex');
+                $(".seltax").addClass('d-none');
+                $(".intra_tax").removeClass('d-flex');
+                $(".intra_tax").addClass('d-none');
+                $(".inter_tax").removeClass('d-none');
+                $(".inter_tax").addClass('d-flex');
+                document.getElementById('cgst1').style.display = 'none';
+                document.getElementById('sgst1').style.display = 'none';
+                document.getElementById('igst1').style.display = 'flex';
+                // for (var l = 1; l <= numberOfRows; l++){
+                // val = document.getElementById('tax_percent'+l).value;
+                // document.getElementById('tax21'+l).value = val
+                // }
+
+
+            }
                     
             });
 
@@ -1894,22 +1910,13 @@ $(document).on('change','#plosu',function()   {
   
   $(document).ready(function () {
     // Initialize Selectize on page load
-    $('.product').selectize({
-        sortField: 'value',
-        
-        render: {
-            item: function (item, escape) {
-                if (item.value === '') {
-                    return '';
-                }
-                return '<div>' + escape(item.text) + '</div>';
-            }
-        }
+    $('.product').select2({
+        // placeholder: 'Select product',
+        // Add additional options as needed
     });
-
     // Function to handle the change event for the '.product' dropdown
     $(document).on('change', '.product',function(){ 
-                
+        
                 var n = $(this).attr("id").slice(7);
                 $.ajax({
                 url: "{% url 'itemdata3' %}",
@@ -1972,11 +1979,19 @@ $(document).on('change','#plosu',function()   {
 
             });
     // Click event for removing a row
-    $(document).on('click', '.remove_row', function () {
+    $(document).on('click','.remove_row',function(){
         var row_id = $(this).attr("id");
-        $('#addr0' + row_id + '').remove();
+        $('#addr0'+row_id+'').remove();
+        var table = document.getElementById('tab_logic');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            cells[0].innerText = i + 1;
+        }
         calc();
     });
+
+        
 });
 $(document).on('click','.clone_row',function(){
         var roinc = $("#items-table-body tr").length;
@@ -2291,20 +2306,26 @@ $(document).on('click','.clone_row',function(){
                 csrfmiddlewaretoken: '{{ csrf_token }}',
 
                 success: function(data) {
-                    var dropdown = $('.product');
-                    dropdown.empty();
-                    dropdown.append(`<option selected hidden>Select Item</option>`);
-                    $.each(data, function(key, value) {
-                    
-                        dropdown.append($('<option></option>').attr('value', key).text(value).val(value));
-                    });
-
-                },
-                error: function(xhr, status, error) {
-                console.error(xhr.responseText);
+                id_list = data.id_list
+                product_list = data.product_list
+                var table = document.getElementById('tab_logic');
+                var rows = table.getElementsByTagName('tbody')[1].getElementsByTagName('tr');
+                for (var i = 1; i <= rows.length; i++) {
+                    var $select = $(document.getElementById('product'+i));
+                    var selectize = $select[0].selectize;
+                    for(let i=0; i<id_list.length;i++){
+                        selectize.addOption({value:id_list[i],text:product_list[i]});
+                    }
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+        
+    }
+
+
 
 
             $(document).on("click",".seltax",function(){
@@ -2335,28 +2356,28 @@ $(document).on('click','.clone_row',function(){
 
             });
 
-            $(document).on('change','#plosu',function()   {
-                $(".seltax").removeClass('d-none');
-                $(".seltax").addClass('d-flex');
-                $(".intra_tax").removeClass('d-flex');
-                $(".intra_tax").addClass('d-none');
-                $(".inter_tax").removeClass('d-flex');
-                $(".inter_tax").addClass('d-none');
-                var bc = document.getElementById("plosu").value;
-                var compstate = document.getElementById("cmpstate").value;
-                if (bc == compstate ) {
-                    document.getElementById('cgst1').style.display = 'flex';
-                    document.getElementById('sgst1').style.display = 'flex';
-                    document.getElementById('igst1').style.display = 'none'; 
+            // $(document).on('change','#plosu',function()   {
+            //     $(".seltax").removeClass('d-none');
+            //     $(".seltax").addClass('d-flex');
+            //     $(".intra_tax").removeClass('d-flex');
+            //     $(".intra_tax").addClass('d-none');
+            //     $(".inter_tax").removeClass('d-flex');
+            //     $(".inter_tax").addClass('d-none');
+            //     var bc = document.getElementById("plosu").value;
+            //     var compstate = document.getElementById("cmpstate").value;
+            //     if (bc == compstate ) {
+            //         document.getElementById('cgst1').style.display = 'flex';
+            //         document.getElementById('sgst1').style.display = 'flex';
+            //         document.getElementById('igst1').style.display = 'none'; 
 
-                } else {
-                    document.getElementById('cgst1').style.display = 'none';
-                    document.getElementById('sgst1').style.display = 'none';
-                    document.getElementById('igst1').style.display = 'flex';
+            //     } else {
+            //         document.getElementById('cgst1').style.display = 'none';
+            //         document.getElementById('sgst1').style.display = 'none';
+            //         document.getElementById('igst1').style.display = 'flex';
 
-                }
+            //     }
                     
-            });
+            // });
                 
             
     

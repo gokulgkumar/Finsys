@@ -142,9 +142,9 @@
                             <thead>
                                 <tr>
                                     <th style="text-align: center; text-transform: uppercase;">Date</th>
-                                    <th style="text-align: center; text-transform: uppercase;">Estimate Number</th>
-                                    <!-- <th style="text-align: center; text-transform: uppercase;">Reference Number</th> -->
-                                    <th style="text-align: center; text-transform: uppercase;">Customer Name</th>
+                                    <th style="text-align: center; text-transform: uppercase;white-space: nowrap;">Estimate Number</th>
+                                    
+                                    <th style="text-align: center; text-transform: uppercase;white-space: nowrap;">Customer Name</th>
                                     <th style="text-align: center; text-transform: uppercase;">Email ID</th>
                                     <th style="text-align: center; text-transform: uppercase;">Amount</th>
                                     <th style="text-align: center; text-transform: uppercase;">Status</th>
@@ -158,59 +158,51 @@
                                 {% if estimate.cid_id == cmp1.cid %}
                                     
                                         <tr  class="table-row " >
-                                            <th style="text-align: center;"><a class="idsr" style="list-style: none; white-space: nowrap;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.estimatedate | date:'d-m-Y' }}</a></th>
+                                            <td style="text-align: center;"><a class="idsr" style="list-style: none; white-space: nowrap;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.estimatedate | date:'d-m-Y' }}</a></td>
                                             <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.estimateno }}</a></td>
-                                            <!-- <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.reference_number }}</a></td> -->
+                                           
                                             <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} ">{{estimate.cust}}</a></td>
                                             <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} ">{{ estimate.email }}</a></td>
                                             <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.estimatetotal }}</a></td>
                                             <td style="text-align: center;"> <a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} "> {{ estimate.status }}</a></td>
-                                            <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} ">
-                                                {% if estimate.converted_invoice_balance %}
-                                                    {{ estimate.converted_invoice_balance }}
-                                                {% elif estimate.converted_recurring_invoice_balance %}
-                                                    {{ estimate.converted_recurring_invoice_balance }}
-                                                {% elif estimate.converted_sales_order_balance %}
-                                                    {{ estimate.converted_sales_order_balance }}
-                                                {% else %}
-                                                    <!-- Handle the case where no conversion balance is available -->
-                                                    N/A
-                                                {% endif %}
+                                            <td style="text-align: center;"><a class="idsr" style="list-style: none;"  href="{% url 'estimate_view' estimate.estimateid %} ">{{estimate.balance}}
+                                                
                                                 </a>
                                             </td>
-                                            {% if estimate.is_converted %}
                                            
-                                <td>
-                                    {% if estimate.converted_inv %}
-                                    <button disabled type="button" class="btn btn-danger btn-sm">Converted to Invoice No.: {{estimate.converted_inv}}
+                                           
+                                <td  style="text-align: center;">
+                                    {% if estimate.is_converted %}
+                                    {% if estimate.convert_invoice %}
+                                    <button disabled type="button" class="btn btn-danger btn-sm">Converted to Invoice No.: {{estimate.convert_invoice}}
                                     </button>
-                                    {% endif %}
-                                    {% if estimate.converted_rec %}
-                                    <button disabled type="button" class="btn btn-primary btn-sm">Converted to Reccuring Invoice No.: {{estimate.converted_rec}}
+                                    {%endif%}
+                                    {% if estimate.convert_reinvoice %}
+                                    <button disabled type="button" class="btn btn-danger btn-sm">Converted to Reccuring Invoice No.:{{estimate.convert_reinvoice}}
                                     </button>
-                                    {% endif %}
-                                    {% if estimate.converted_sales %}
-                                    <button disabled type="button" class="btn btn-success btn-sm">Converted to Sales Order No.: {{estimate.converted_sales}}
+                                    {%endif%}
+                                    {% if estimate.convert_salesorder %} 
+                                  <button disabled type="button" class="btn btn-danger btn-sm">Converted to Sales Order No.: {{estimate.convert_salesorder}}
                                     </button>
-                                    {% endif %}
+                                    {%endif%}
 
-                                </td>
+                            
                                 {% else %}
 
-                                <td>
+                            
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-outline-light dropdown-toggle"
                                             data-toggle="dropdown"> Convert
                                         </button>
                                         <div class="dropdown-menu" style="background-color: black;">
-                                            <a class="dropdown-item" href="{% url 'estimate_convert1' estimate.estimateid 'invoice' %}"
+                                            <a class="dropdown-item" href="{% url 'goconvertestimatetoinvoice' estimate.estimateid  %}"
 
                                                 style="height: 40px; font-size: 15px; color: white; text-align: center;"> Invoice</a>
                                             <a class="dropdown-item"
-                                                href="{% url 'covert_estimate_to_recinvoice' estimate.estimateid 'recurring_invoice' %}"
+                                                href="{% url 'goconvertestimatetoreinvoice' estimate.estimateid  %}"
                                                 style="height: 40px; font-size: 15px; color: white; text-align: center;">Reccuring Invoice</a>
                                                 <a class="dropdown-item"
-                                                href="{% url 'covert_estimate_to_salesorder' estimate.estimateid 'sales_order'  %}"
+                                                href="{% url 'goconvertestimatetosalesorder' estimate.estimateid  %}"
                                                 style="height: 40px; font-size: 15px; color: white; text-align: center; ">Sales Order</a>
                                         
                                             </div>
@@ -247,17 +239,7 @@
                                     <td >{{p.estimatetotal}}</td>
                                     
                                     <td >{{p.status}}</td>
-                                    <td > {% if estimate.converted_invoice_balance %}
-                                        {{ estimate.converted_invoice_balance }}
-                                    {% elif estimate.converted_recurring_invoice_balance %}
-                                        {{ estimate.converted_recurring_invoice_balance }}
-                                    {% elif estimate.converted_sales_order_balance %}
-                                        {{ estimate.converted_sales_order_balance }}
-                                    {% else %}
-                                        <!-- Handle the case where no conversion balance is available -->
-                                        N/A
-                                    {% endif %}
-                                    </a></td>
+                                    <td > {{p.balance}}</td>
                                     
                                 </tr>
                                 {% endfor %}

@@ -126,15 +126,31 @@
 
             </script>
            
-           <script>
-            function printStatement() {
-                var printContent = document.getElementById('whatToPrint').innerHTML;
-                var originalContent = document.body.innerHTML;
-                document.body.innerHTML = printContent;
-                window.print();
-                document.body.innerHTML = originalContent;
-            }
-        </script>
+     
+
+<script>
+    function printStatement(){
+
+        print4 = document.getElementById('whatToPrint')
+        if (print4.style.display !== 'none'){
+                var printContents = document.getElementById("whatToPrint").innerHTML;
+        }else{
+
+            var printContents = document.getElementById("whatToPrint1").innerHTML;
+        }
+
+
+
+        var $printerDiv = $('<div class="printContainer"></div>'); // create the div that will contain the stuff to be printed
+        $printerDiv.html(printContents); // add the content to be printed
+        $('body').append($printerDiv).addClass("printingContent"); // add the div to body, and make the body aware of printing (we apply a set of css styles to the body to hide its contents)
+
+        window.print(); // call print
+        $printerDiv.remove(); // remove the div
+        $('body').removeClass("printingContent");
+    }
+</script>
+
             
            <div class="modal fade" id="shareBillEmail">
             <div class="modal-dialog modal-xl">
@@ -384,6 +400,23 @@
                         width: 100%; /* Set the width to 100% for smaller screens (responsive view) */
                     }
                 }
+        @media print{
+        body{
+            visibility: hidden !important; /* hide everything in body when in print mode*/
+        }
+
+        .printContainer {
+            visibility: visible !important; /* Override the rule above to only show the printables*/
+            position: absolute;
+            z-index: 99999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: large;
+        } 
+    }
+
 
             </style>
             

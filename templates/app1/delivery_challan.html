@@ -106,18 +106,7 @@
                     </div>
                 </div>
 
-                <!-- <div class="btn-group col-md-2">
-                            <button type="button" class="btn btn-outline-info dropdown-toggle fa fa-filter  text-grey"
-                                        data-toggle="dropdown"> filter by
-                                </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{% url 'delivery_challan' %}">All</a>
-                                <a class="dropdown-item" href="{% url 'gochallan1' %}">Draft</a>
-                                <a class="dropdown-item" href="{% url 'gochallan2' %}">Approved</a>
-                            </div>
-                            <a href="{% url 'goadd_dl_challan' %}" class="btn btn-outline-info fa fa-plus" role="button"> &nbsp;New</a>
-                        </div>
-                    </div> -->
+               
 
                 <div class="container-fluid">
                     <table class="table table-responsive-md mt-4 table-hover" id="table">
@@ -147,12 +136,12 @@
                                 <td onclick="window.location='delivery_view/{{ p.id }}';">{{ p.status }}</td>
                                 {% if p.is_converted %}
                                 <td>
-                                    {% if p.converted_inv %}
-                                    <button disabled type="button" class="btn btn-success btn-sm">Converted to Invoice No.: {{p.converted_inv}}
+                                    {% if p.inv_converted %}
+                                    <button disabled type="button" class="btn btn-success btn-sm">Converted to Invoice No.: {{p.inv_converted.invoiceno}}
                                     </button>
                                     {% endif %}
-                                    {% if p.converted_rec %}
-                                    <button disabled type="button" class="btn btn-success btn-sm">Converted to Reccuring Invoice No.: {{p.converted_rec}}
+                                    {% if p.rec_converted %}
+                                    <button disabled type="button" class="btn btn-success btn-sm">Converted to Reccuring Invoice No.: {{p.rec_converted.recinvoiceno}}
                                     </button>
                                     {% endif %}
 
@@ -185,7 +174,6 @@
         </div>
     </div>
 
-    <!-- <a href="javascript:generatePDF()">Dowload PDF</a> -->
 
     <script>
 
@@ -213,21 +201,7 @@
         }
     </script>
 
-    <!-- <script>
-    function generatePDF() {
-        var doc = new jsPDF();
-        doc.fromHTML(document.getElementById("test"), // page element which you want to print as PDF
-        15,
-        15, 
-        {
-            'width': 170
-        },
-        function(a) 
-        {
-            doc.save("HTML2PDF.pdf");
-        });
-        }
-</script> -->
+   
 
     {% endif %}
     {% endblock %}

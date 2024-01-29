@@ -5,31 +5,60 @@
 
 
 
+
+ 
 <style>
-  input {
-    background-color: #2f516f;
-    border: 0;
-    border-radius: 5px;
-    color: white;
-  }
-  #customer{
+    .hide{
+        display: none;
+    }
+    input:read-only {
+        background-color: #41586bff  !important;
+        color: #fff;
+    }
+    .form-control.select2.vendor,
+    .select2-container--default .select2-selection--single {
+        background-color: #41586bff !important;
+        color: white !important;
+    }
+
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: white !important;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        background-color: black !important;
+        color: white !important;
+    }
+
+    .select2-container--default .select2-results__option {
+        color: white;
+        background-color: black;
+
+
+        }
+    .select2-container--default .select2-selection--single{
+        padding:6px;
+        height: 35px!important;
+
+
+
+        font-size: 1.2em;  
         
-        color: white;
-    }
-
-    .selectize-input {
-        height: 5vh;
-        border-color:white;
-        border-radius: 5px;
-        background-color: #2f516f;
-    }
-
-    .option:hover {
-        background-color: #3B71CA;
-        color: white;
     }   
 </style>
-<form action="estcreate2" method="post" class="needs-validation" enctype="multipart/form-data"   onsubmit="return validateForm()" >{% csrf_token %}
+<script>
+    $(':input[readonly]').css({'background-color':'rgba(0,0,0,.4)'});
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+<!-- Include Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" ></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
+
+<form action="estcreate2" method="post" class="needs-validation" enctype="multipart/form-data"   onsubmit="return validateForm()" >
+    {% csrf_token %}
     <div class="page-content">
         <h2 id="hel"></h2>
         <div class="card radius-15">
@@ -62,8 +91,9 @@
                         
                         <label class="col-form-label">Customer</label>
                         <div class="d-flex">
-                            <select name="customer_name" id="customer" class="form-control border-secondary" style="width: 95%; background-color: #2f516f;" placeholder="Select customer">
-                                <option value="NIL" ></option>
+                            <select name="customer_name" id="customer" class=" form-control select2" style="width: 95%; background-color: #43596c;">
+                                <!-- <option value="NIL" ></option> -->
+                                <option selected disabled hidden>Select customer</option>
                                 {% for cust in customers %}
                                 {% if cust.cid_id == cmp1.cid %}
                                         <option  value="{{cust.customerid}} {{ cust.firstname }} {{ cust.lastname }}">{{ cust.title }} {{ cust.firstname }} {{ cust.lastname }}</option>
@@ -74,58 +104,10 @@
                         </div>
                         <label class="col-form-label">GST Type</label>
                         <input type="text" class="form-control" id="gsttype" name="gsttype" value="{{cust.gsttype}}" style="background-color: #43596c;" readonly>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="col-form-label">Email</label>
-                      <input type="text" class="form-control" id="est_email" name="email" placeholder="Email">
-                      
-                        <div id="gstnodiv" style="display: none;" class="mt-2">
-                            <label class="col-form-label">GSTIN</label>
-                            <input type="text" class="form-control" id="gstno" name="gstno" value="{{cust.gstin}}" style="background-color: #43596c;" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="col-form-label">Billing Address</label>
-                      <label for="billingaddress"></label>
-                      <textarea class="form-control" rows="7" id="bname" name="billingaddress"></textarea>
-                    
-
-                    
-                  </div>
-                        
-                    
-                </div>
-                
-                <div class="row mt-3">
-                    
-                    <div class="col-md-3">
-                        <label class="col-form-label">Estimate Date</label>
-                        <input type="date" class="form-control" value="{{ tod }}" name="estimatedate" id="estimatedate"><br>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="col-form-label">Expiration Date</label>
-                        <input type="date" class="form-control" value="" name="expirationdate" id="expirationdate" required><br>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="col-form-label">Payment Term</label>
-                      <div class="d-flex">
-                          <select type="text" class="form-control" id="pay_term" name="pay_term" style="background-color: #43596c; color: white;" required>
-                            <option value="" selected hidden>Select Payment Term</option>
-                            <option value="0">Due On Receipt</option>
-                            <option value="30">NET 30</option>
-                            <option value="60">NET 60</option>
-                            {% for term in terms %}
-                                <option value="{{term.days}}">{{term.term}}</option>
-                            {% endfor %}
-                          </select>
-                          <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newpayment" data-toggle="modal" >+</a>
-                      </div>
-                    </div>
-                    <div class="col-md-3  ">
-                      <label class="col-form-label">Place of supply</label>
+                         <label class="col-form-label">Place of supply</label>
                       <select type="text" class="form-control" id="plosu" name="placosupply" style="background-color: #2f516f; color: white;" onchange="state(this)">
-                        <option value="{{ cust.shipstate }}" selected> {{cust.shipstate}}</option>
-                        <option value="" selected hidden> Select Place of Supply</option>
+                        <option value="{{cust.shipstate}}" selected> {{cust.shipstate}}</option>
+                   
                         <option value="Andaman and Nicobar Islads">Andaman and Nicobar Islads</option>
                         <option value="Andhra Predhesh">Andhra Predhesh</option>
                         <option value="Arunachal Predesh">Arunachal Predesh</option>
@@ -166,6 +148,54 @@
                         <option value="Other Territory">Other Territory</option>
                       </select>
                     </div>
+                    <div class="col-md-4">
+                      <label class="col-form-label">Email</label>
+                      <input type="text" class="form-control" id="est_email" name="email" placeholder="Email">
+                      
+                        <div id="gstnodiv" style="display: none;" class="mt-2">
+                            <label class="col-form-label">GSTIN</label>
+                            <input type="text" class="form-control" id="gstno" name="gstno" value="{{cust.gstin}}" style="background-color: #43596c;" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="col-form-label">Billing Address</label>
+                      <label for="billingaddress"></label>
+                      <textarea class="form-control" rows="7" id="bname" name="billingaddress"></textarea>
+                    
+
+                    
+                  </div>
+                        
+                    
+                </div>
+                
+                <div class="row mt-3">
+                    
+                    <div class="col-md-4">
+                        <label class="col-form-label">Estimate Date</label>
+                        <input type="date" class="form-control" value="{{ tod }}" name="estimatedate" id="estimatedate"><br>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="col-form-label">Expiration Date</label>
+                        <input type="date" class="form-control" value="" name="expirationdate" id="expirationdate" required><br>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="col-form-label">Payment Term</label>
+                      <div class="d-flex">
+                          <select type="text" class="form-control" id="pay_term" name="pay_term" style="background-color: #43596c; color: white;" required>
+                            <option value="" selected hidden>Select Payment Term</option>
+                            <option value="0">Due On Receipt</option>
+                            <option value="30">NET 30</option>
+                            <option value="60">NET 60</option>
+                            
+                            {% for t in terms %}
+                                <option value="{{t.days}}">{{t.term}}</option>
+                            {% endfor %}
+                          </select>
+                          <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newpayment" data-toggle="modal" >+</a>
+                      </div>
+                    </div>
+                    
                 </div>
           
                 <div class="row clearfix">
@@ -188,9 +218,9 @@
                                 <td class="nnum">1</td>
                                 <td style="width: 17%;">
 
-                                    <div class="d-flex">
-                                        <select name='product[]' id="product1" class="form-control product" style="background-color: #112f4a;" placeholder="Select product">
-                                            <option value=" " > select product</option>
+                                    <div class="d-flex ">
+                                        <select name='product[]' id="product1" class="form-control  product select2" style="background-color: #112f4a;" >
+                                            <option value="" > select product</option>
                                 
                                             {% for i in item %}
                                                 {% if i.cid_id == cmp1.cid %}
@@ -211,9 +241,10 @@
                                 </td>
                                 <td style="width:12% ;"><input type="number" name='price[]' id="unit1" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0" style="background-color: #2f516f; color: white;" /></td>
                                 <td style="width:13% ;">
+                                    
                                     <input hidden value="{{cmp1.state}}" id="cmpstate">
                                     <input type="text"  id="select_tax" placeholder="Tax Rate" class="form-control seltax d-flex">
-                                    <select name='tax1[]' id="tax11" class="form-control tax intra_tax d-none" onchange="taxchange(this.id)">
+                                    <select name='tax1[]' id="tax11" class="form-control tax intra_tax d-none " onchange="taxchange(this.id)">
                                         <option selected disabled >Select GST</option>
                                         <option value=0>0% GST</option>
                                         <option value=3>3% GST </option>
@@ -315,7 +346,7 @@
                             <div class="row container-fluid p-2 m-0">
                                 <div class="col-sm-4 mt-2"><label for="a" class="text-center">Adjustment</label></div>
                                 <div class="col-sm-1 mt-2">:</div>
-                                <div class="col-sm-7 mt-2"><input type="number" step="any" name='adj' id="adj" placeholder='0.00' 
+                                <div class="col-sm-7 mt-2"><input type="number" step="any" name='adj' id="adj" placeholder='0.00'  value=0
                                     class="form-control"/>
                                 </div>
                                 <div class="col-sm-4 m-0 p-0"></div>
@@ -400,14 +431,7 @@
                                   <div class="col-6">
                                     <input type="text" value="60" class="form-control" style="background-color: #191c24; color: white;" readonly>
                                   </div>
-                              {% for term in terms %}
-                                <div class="col-6" >
-                                  <input type="text" value="{{term.term}}" class="form-control" placeholder="Terms" style="background-color: #191c24; color: white;" readonly>
-                                </div>
-                                <div class="col-6">
-                                  <input type="text" value="{{term.days}}" class="form-control" placeholder="No of Days" style="background-color: #191c24; color: white;" readonly>
-                                </div>
-                              {% endfor %}
+                              
                               <div class="col-6">
                                 <input type="text" name="terms" class="form-control" placeholder="Terms" style="background-color: #191c24;">
                               </div>
@@ -428,7 +452,7 @@
       </div>
   </div> 
   </div>
-<!-- modal -->
+
 
     <div class="modal fade" id="customercreation">
   <div class="modal-dialog modal-xl">
@@ -1114,615 +1138,150 @@
 
 
 
-<!-- /model -->
-
-
-
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-<script type="text/javascript">
-    $(document).on('change','#ord_no', function() {
-        ord = '{{ord_no}}'
-        ord_value = $('#ord_no').val();
-        if(ord_value != ord){
-            document.getElementById('dangerdiv').style.display = 'block';
-        }else{
-            document.getElementById('dangerdiv').style.display = 'none';
-        }
-        var sale_list = "{{ sale_list}}";
-        salelist = sale_list.split(",");
-        for(let i=0; i<salelist.length; i++){
-            if (ord_value == salelist[i]){
-                alert('Esitmate Number already in use.')
-                document.getElementById('dangerdiv').style.display = 'none';
-                document.getElementById('ord_no').value = ''
-            }
-        }
-    })
-</script>
-
-
-
 <script>
-         
-  // Select the form and the container for the terms rows
-const form = document.getElementById('terms-form');
-const termsContainer = document.getElementById('terms-container');
-
-// Select the button that adds new rows
-const addTermRowBtn = document.querySelector('.add-term-row');
-
-// Add event listener to the button
-addTermRowBtn.addEventListener('click', () => {
-  // Create a new row div
-  const newRow = document.createElement('div');
-  newRow.classList.add('form-row');
-  newRow.id = "newtermrow";
-
-  // Create the first input field for the new row
-  const termsInput = document.createElement('div');
-  termsInput.classList.add('col-6');
-  const termsField = document.createElement('input');
-  termsField.type = 'text';
-  termsField.name = 'terms';
-  termsField.placeholder = 'Terms';
-  termsField.classList.add('form-control');
-  termsField.classList.add('text-white');
-  termsField.style.backgroundColor = "#191c24";
-  termsInput.appendChild(termsField);
-  newRow.appendChild(termsInput);
-
-  // Create the second input field for the new row
-  const daysInput = document.createElement('div');
-  daysInput.classList.add('col-5');
-  const daysField = document.createElement('input');
-  daysField.type = 'text';
-  daysField.name = 'days';
-  daysField.placeholder = 'No of Days';
-  daysField.classList.add('form-control');
-  daysField.classList.add('text-white');
-  daysField.style.backgroundColor = "#191c24";
-  daysInput.appendChild(daysField);
-  newRow.appendChild(daysInput);
-
-  // Create the delete button for the new row
-  const deleteBtn = document.createElement('div');
-  deleteBtn.classList.add('col-1');
-  const deleteBtnEl = document.createElement('button');
-  deleteBtnEl.type = 'button';
-  deleteBtnEl.classList.add('btn', 'btn-outline-secondary', 'delete-term-row', 'mt-1');
-  deleteBtnEl.innerText = '-';
-  deleteBtnEl.style.height = '4vh';
-  deleteBtn.appendChild(deleteBtnEl);
-  newRow.appendChild(deleteBtn);
-
-  // Append the new row to the container
-  termsContainer.appendChild(newRow);
-});
-
-// Add event listener to the form to delete rows
-termsContainer.addEventListener('click', (event) => {
-  // If the target element is a delete button
-  if (event.target.classList.contains('delete-term-row')) {
-    // Find the row to delete
-    const row = event.target.closest('.form-row');
-    // Remove the row
-    row.remove();
-  }
-});
-
-
-
-</script>
-
-
-
-<script>
-    $(document).on("click", "#payment", function() {
-  var array1 = [];
-  var array2 = [];
-  array1.length = 0;
-  array2.length = 0;
-  $("input:text[name=terms]").each(function() {
-    array1.push($(this).val());
+    $(document).ready(function() {
+        var originalValue = $("#ord_no").val(); // Store the original value for comparison
     
-  });
-
-  $("input:text[name=days]").each(function() {
-    array2.push($(this).val());
-  });
- 
-
-  $.ajax({
-    url: "{% url 'payment_term_for_sales' %}",
-    type: 'POST',
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-    data: {
-      terms: JSON.stringify(array1),
-      days: JSON.stringify(array2)
-    },
-    success: function(response) {
-      
-      
-      $('#newpayment').hide();
-      $(".modal-backdrop").remove();
-      data = response.pay_term;
-      const pay = document.getElementById("pay_term");
-      const termsField = document.createElement('option');
-      termsField.innerHTML = data;
-      pay.appendChild(termsField);
-
-    document.getElementById("modalForm").reset();
-    reloadterms()
-      
-  // Iterate through the data and create options
-    },
-  });
-});
-
-function reloadterms(){
-  $.ajax({
-    url: "{% url 'terms_dropdowns' %}",
-    type: "GET",
-    success: function(response) {
-      term_data = response.term_data
-      day_data = response.day_data
-      
-      var term_container = document.getElementById('terms-container');
-      var dropdow = document.getElementById('termdrop');
-      term_container.removeChild(dropdow);
-      
-      new_row = `<div class="form-row" id="termdrop"></div>`
-      $('#terms-container').append(new_row)
-
-      new_row = `      
-        <div class="col-6" >
-        <input type="text" value="Due On Receipt" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>
-
-        <div class="col-6">
-        <input type="text" value="0" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>       
-
-        <div class="col-6" >
-        <input type="text" value="NET 30" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>
-        <div class="col-6">
-        <input type="text" value="30" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>                                
-        
-        <div class="col-6" >
-        <input type="text" value="NET 60" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>
-        <div class="col-6">
-        <input type="text" value="60" class="form-control" style="background-color: #191c24; color: white;" readonly>
-        </div>`
-        $('#termdrop').append(new_row)
-      
-      for(let i=0; i<term_data.length;i++){
-        
-        new_row = `      
-        <div class="col-6">
-          <input type="text" value="${term_data[i]}" class="form-control" style="background-color: #191c24; color: white;" readonly>
-          </div>
-          <div class="col-6">
-            <input type="text" value="${day_data[i]}" class="form-control" style="background-color: #191c24; color: white;" readonly>
-            </div>`
-        $('#termdrop').append(new_row)
-        }
-          
-        new_row = `      
-          <div class="col-6">
-            <input type="text"  class="form-control" style="background-color: #191c24; color: white;" placeholder="Terms" name="terms">
-            </div>
-            <div class="col-6">
-              <input type="text" class="form-control" style="background-color: #191c24; color: white;" placeholder="No of Days" name="days">
-              </div>`
-          $('#termdrop').append(new_row)
-
-
-          let select = document.getElementById("pay_term");
-
-          while (select.options.length > 0) {
-          select.remove(0);
-          }
-
-          var dropdow = $('#pay_term');
-          dropdow.append($('<option value="" selected hidden>Select Payment Term</option>'));
-          dropdow.append($('<option value="0">Due On Receipt</option>'));
-          dropdow.append($('<option value="30">NET 30</option>'));
-          dropdow.append($('<option value="60">NET 60</option>'));
-          
-          for(let i=0; i<term_data.length;i++){
-                      // Create a new option element
-          let newOption = document.createElement("option");
-          newOption.text = term_data[i];
-          newOption.value = day_data[i]; // Set a value for the new option
-
-          // Append the new option to the select field
-          select.appendChild(newOption);
-          }
-          
-     
-    },
-    error: function(xhr, status, error) {
-    console.error(xhr.responseText);
-    }
-  });
-}
-
-</script>
-
-<script>
-    $(document).on('change', '#pay_term', function () {
-        var days = parseInt($('#pay_term').val());
-        order_date =new Date( document.getElementById("estimatedate").value)
-        if (!isNaN(order_date.getTime())) {
-            // Calculate the new date by adding 20 days
-            const endDate = new Date(order_date);
-            endDate.setDate(endDate.getDate() + days);
-            // Format the new date as YYYY-MM-DD
-            const formattedDate = endDate.toISOString().split("T")[0];
-            // Set the result in the second input
-            document.getElementById("expirationdate").value = formattedDate;
-        } else {
-                alert("Please enter a valid date.");
-        }
+        // Event listener for the input field's blur event
+        $("#ord_no").on("blur", function() {
+            var currentEstimateNumber = $(this).val();
+    
+            // Check if the value has been changed
+            if (currentEstimateNumber !== originalValue) {
+                // Display an alert or perform any other action to indicate the change
+                alert("Estimate number changed ");
+    
+                // Update the originalValue
+              
+            }
+        });
     });
-  </script>
-
-
-
+    </script>
+    
 <script>
-  $(document).ready(function() {
-            $("#gsttype").change(function() {
-            var x=$('#gsttype').val();
-            if(x=="unregistered Business") 
-            {
-                $(".gstrow").removeClass('d-block');
-                $(".gstrow").addClass('d-none');
-
-            }
-            else if(x == 'Overseas'){
-                $(".gstrow").removeClass('d-block');
-                $(".gstrow").addClass('d-none');
-            }
-            else if(x == 'Consumer'){
-                $(".gstrow").removeClass('d-block');
-                $(".gstrow").addClass('d-none');
-            }
-            else 
-            {
-                $(".gstrow").removeClass('d-none');
-                $(".gstrow").addClass('d-block');
-            }
-            
+ 
+    $(document).ready(function() {
+        // Initialize Select2 for the customer dropdown
+        $('#customer').select2();
+        // Change event for the customer dropdown
+        $('#customer').on('change', function() {
+            console.log($('#customer').val());
+            select = $('#customer').val();
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'cust_details' %}",
+                data: {
+                    id: select,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function(data) {
+                    console.log(data.email);
+                    // Update other elements based on the AJAX response
+                    document.getElementById('est_email').value = data.email;
+                    document.getElementById('plosu').value = data.shipstate;
+                    document.getElementById('gsttype').value = data.gst_treat;
+                    document.getElementById('bname').value = data.street + '\n' + data.city + '\n' + data.state + '\n' + data.country + '\n' + data.pincode;
+                    if (data.gstno) {
+                        document.getElementById('gstnodiv').style.display = 'block';
+                        document.getElementById('gstno').value = data.gstno;
+                    } else {
+                        document.getElementById('gstnodiv').style.display = 'none';
+                        document.getElementById('gstno').value = '';
+                    }
+                    var compstate = document.getElementById("cmpstate").value;
+                    if (data.shipstate == compstate) {
+                        document.getElementById('cgst1').style.display = 'flex';
+                        document.getElementById('sgst1').style.display = 'flex';
+                        document.getElementById('igst1').style.display = 'none';
+                    } else {
+                        document.getElementById('cgst1').style.display = 'none';
+                        document.getElementById('sgst1').style.display = 'none';
+                        document.getElementById('igst1').style.display = 'flex';
+                    }
+                }
             });
         });
-
-  $(document).ready(function() {
-
-
-    var bc = document.getElementById("plosu").value;
-    var compstate = document.getElementById("cmpstate").value;
-    if (bc == compstate ) {
-        document.getElementById('cgst1').style.display = 'flex';
-        document.getElementById('sgst1').style.display = 'flex';
-        document.getElementById('igst1').style.display = 'none'; 
-
-    } else {
-        document.getElementById('cgst1').style.display = 'none';
-        document.getElementById('sgst1').style.display = 'none';
-        document.getElementById('igst1').style.display = 'flex';
-
-    }
-    
-    
-    });
-
-
-  $(document).ready(function(){
-    $('#add').click(function(){
-      var roinc = $("#items-table-body tr").length;
-      roinc++;
-      $('#items-table-body').append(
-          `
-          <tr id='addr0${roinc}'>
-            <td class = 'nnum'>${roinc}</td>
-            <td style="width: 20%;">
-              <div class="d-flex">
-                <select name='product[]' id="product${roinc}" class="form-control product" style="background-color: #2f516f; color: white;">
-                  <option value=" " selected>Select Item</option>
-                    {% for i in item %}
-                      {% if i.cid_id == cmp1.cid %}
-                        <option value="{{ i.name  }}">{{ i.name  }} </option>
-                      {% endif %}
-                    {% endfor %}
-                </select>
-
-                <a href="#">
-                    <button type="button" class="btn btn-outline-secondary ml-1" 
-                    data-target="#newitem" data-toggle="modal">+</button>
-                </a>
-              </div>
-            </td>
-            <td><input type="text" name='hsn[]' id="hsn${roinc}" placeholder='Enter HSN Code' class="form-control" style="background-color: #2f516f; color: white;" /></td>
-            <td><input type="number" name='qty[]'  placeholder='Enter Qty' id="qty${roinc}" class="form-control qty" step=0 min=0 style="background-color: #2f516f; color: white;margin-top: 21px;" />
-                <div class="" style="display: none;"><span></span> <span id="qtyspan${roinc}"class=''></span></div>
-            </td>
-            <td><input type="number" name='price[]' id="unit${roinc}" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0" style="background-color: #2f516f; color: white;" /></td>
-            <td>
-              <input type="text"  id="select_tax" placeholder="Tax Rate" class="form-control seltax d-flex">
-
-              <select name='tax1[]' id="tax1${roinc}" class="form-control tax intra_tax d-none" onchange="taxchange(this.id)">
-                  <option selected disabled > Select GST</option>
-                  <option value=0>0% GST</option>
-                  <option value=3>3% GST </option>
-                  <option value=5>5% GST </option>
-                  <option value=12>12% GST </option>
-                  <option value=18>18% GST </option>
-                  <option value=28>28% GST</option>
-                  <option value=0>Out of Scope(0%)</option>
-              </select>
-              <select name='tax2[]' id="tax2${roinc}" class="form-control tax inter_tax d-none" onchange="taxchange(this.id)">
-                  <option selected disabled  >Select IGST</option>
-                  <option value=0>0% IGST</option>
-                  <option value=3>3% IGST </option>
-                  <option value=5>5% IGST </option>
-                  <option value=12>12% IGST </option>
-                  <option value=18>18% IGST </option>
-                  <option value=28>28% IGST</option>
-                  <option value=0>Out of Scope(0%)</option>
-              </select>
-              
-            </td>  
-            <td style="display: none;"><input type="number" step="any" name='taxamount${roinc}' id="taxamount${roinc}" class="form-control taxamount" /></td>
-
-            <td>
-                <input type="number" name='discount[]' placeholder='Enter Discount' value=0 id="disc${roinc}" class="form-control disc" step=0 min=0>
-            </td>
-            <td><input type="number" name='total[]' id="total${roinc}" placeholder=0 class="form-control total" value=0 step="any" readonly style="background-color: #2f516f; color: white;" /></td>
-            <td>
-                <button type="button" id="${roinc}" class="btn  font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" style="background-color:#43596c;"></button><br>
-                <button type="button" id="${roinc}" class="btn btn-danger remove_row px-2 py-1 mx-1 fa fa-close" title="Remove Row"> </button>
-            </td>
-          </tr>`
-    
  
-        );
-        
-  });});
-   // calculation---------------------------
-
-   $(document).ready(function () {
-    // Initialize Selectize on page load
-    $('.product').selectize({
-        sortField: 'value',
-        
-        render: {
-            item: function (item, escape) {
-                if (item.value === '') {
-                    return '';
-                }
-                return '<div>' + escape(item.text) + '</div>';
-            }
-        }
+        // Your other JavaScript code here
     });
+   
+</script>
+ 
 
-    // Function to handle the change event for the '.product' dropdown
-    $(document).on('change', '.product',function(){ 
-                
-                var n = $(this).attr("id").slice(7);
-                $.ajax({
-                url: "{% url 'itemdata3' %}",
-                type : 'GET',
+<script>
+
+ $(document).on("click", "#customerSave", function(){
+  
+            
+            $.ajax({
+    
+                type : 'POST',
+                url:"{% url 'customers21' %}",
+
                 data:{
-                    id : $(this).val(),
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                    },
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    title : $('#title').val(),
+                    first_name : $('#firstname').val(),
+                    last_name : $('#lastname').val(),
+                    company_name : $("#company").val(),
+                    location : $("#location").val(),
+                    openbalance : $("#openbalance").val(),
+                    credit_limit : $("#crd_lmt").val(),
+                    email : $("#email").val(),
+                    website :$("#website").val(),
+                    mobile :$("#mobile").val(),
+                    street : $("#street").val(),
+                    city : $("#city").val(),
+                    state : $("#state").val(),
+                    country : $("#country").val(),
+                    pincode : $("#pincode").val(),
+                    shipstreet : $("#shipstreet").val(),
+                    shipcity : $("#shipcity").val(),
+                    shipstate : $("#shipstate").val(),
+                    shipcountry : $("#shipcountry").val(),
+                    shippincode : $("#shippincode").val(),
+                    gsttype :$("#modalgsttype").val(),
+                    gstin :$("#gstin").val(),
+                    panno :$("#panno").val(),
+                },
                 
                 success: function(response) {
-                    data = response.hsn
-                    data2 = response.qty
-                    data3 = response.price
-                    data4 = response.gst
-                    data5 = response.sgst
-
-                    console.log(data)
-                    
-                    document.getElementById('hsn'+n).value = data;
-                    document.getElementById('qtyspan'+n).innerHTML = data2;
-                    document.getElementById('unit'+n).value = data3;
-                    var bc = document.getElementById("plosu").value;
-                    var compstate = document.getElementById("cmpstate").value;
-                    if (bc == compstate ) {
-                        $(".seltax").removeClass('d-flex');
-                        $(".seltax").addClass('d-none');
-                        $(".inter_tax").removeClass('d-flex');
-                        $(".inter_tax").addClass('d-none');
-                        $(".intra_tax").removeClass('d-none');
-                        $(".intra_tax").addClass('d-flex');
-                        if (data4 != ' '){
-                            document.getElementById('tax1'+n).value = data4;
-                            document.getElementById('tax_percent'+n).value = data4;
-                        }else{
-                            document.getElementById('tax1'+n).value = 0;
-                            document.getElementById('tax_percent'+n).value = 0;
-                        }
-                        
-                        
-                        
-                    } else {
-                        $(".seltax").removeClass('d-flex');
-                        $(".seltax").addClass('d-none');
-                        $(".intra_tax").removeClass('d-flex');
-                        $(".intra_tax").addClass('d-none');
-                        $(".inter_tax").removeClass('d-none');
-                        $(".inter_tax").addClass('d-flex');
-                        if(data5 != ' '){
-                            document.getElementById('tax2'+n).value = data5;
-                            document.getElementById('tax_percent'+n).value = data5;
-                        }else{
-                            document.getElementById('tax2'+n).value = 0;
-                            document.getElementById('tax_percent'+n).value = 0;
-                        }
-
-                    }
+                    console.log("success")
+                    document.getElementById("modalCustomer").reset();
+                    reloadCustomer();
                 },
-                });
-                
-
-            });
-    // Click event for removing a row
-    $(document).on('click', '.remove_row', function () {
-        var row_id = $(this).attr("id");
-        $('#addr0' + row_id + '').remove();
-        calc();
-    });
-});
-$(document).on('click','.clone_row',function(){
-        var roinc = $("#items-table-body tr").length;
-        var originalRow = $(this).closest('#items-table-body tr'); 
-        var clonedRow = originalRow.clone();
-
-        clonedRow.attr('id', 'addr0' +(roinc+1));
-
-        clonedRow.find('.nnum').text(roinc+1);
-
-        clonedRow.find('[id]').each(function() {
-            var oldId = $(this).attr('id');
-            var newId = oldId.replace(/\d+/, roinc+1);
-            console.log(newId)
-            $(this).attr('id', newId );
+            });        
         });
 
-        clonedRow.find('.product').each(function() {
-            $(this).val(originalRow.find('.product').val());
-        });
-        clonedRow.find('.intra_tax').each(function() {
-            $(this).val(originalRow.find('.intra_tax').val());
-        });
-        clonedRow.find('.inter_tax').each(function() {
-            $(this).val(originalRow.find('.inter_tax').val());
-        });
-        originalRow.after(clonedRow);
-        
-        calc();
-        
-    });
-    $(document).ready(function(){
 
-            
-            $('#items-table-body').on('keyup change', function () {
-                calc();
-            });
+        function reloadCustomer() {
+           
+            $.ajax({
+                url: "{% url 'cust_dropdown' %}",
+                type: "GET",
+                dataType: "json",
+                data: $(this).serialize(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
 
-            $('#tax').on('keyup change', function () {
-                calc_total();
-            });
-          });
-
-        function calc() {
-            $('#tab_logic tbody tr').each(function () {
-                var html = $(this).html();
-                if (html != '') {
-                    var qty = $(this).find('.qty').val();
-                    
-                    var price = $(this).find('.price').val();
-
-                    var dis = $(this).find('.disc').val();
-                    var bc = $("#plosu").val();
-                    var compstate = $("#cmpstate").val();
-                    if(bc==compstate){
-                        tax = $(this).find('.intra_tax').val();
-                    }
-                    else{
-                        tax = $(this).find('.inter_tax').val();
-                    }
-                    $(this).find('.total').val((parseFloat(qty) *parseFloat(price))-parseFloat(dis));
-                    $(this).find('.taxamount').val(((qty * price)-dis) * (tax / 100));
-                    calc_total();
+                success: function(data) {
+                    var dropdown = $('#customer');
+                    dropdown.empty();
+                dropdown.append(`<option selected>Select Customer</option>`);
+                    $.each(data, function(key, value) {
+                        console.log(value)
+                        dropdown.append($('<option></option>').attr('value', key).text(value[1] + " " +value[2] + " "+ value[3]).val(value[0] + " " +value[2] + " "+ value[3]));
+                    });
+                },
+                error: function(xhr, status, error) {
+                console.error(xhr.responseText);
                 }
             });
         }
 
-        function calc_total() {
-             
-            total = 0;
-            $('.total').each(function () {
-                total += parseFloat($(this).val());
-            });
-            taxamount = 0;
-            $('.taxamount').each(function () {
-                taxamount += parseFloat($(this).val());
-            });
-            $('#sub_total').val(total.toFixed(2));
-            $('#tax_amount').val(taxamount.toFixed(2));
-            ship = parseFloat($("#ship").val());
-            // console.log( ship);
-            adj_val = parseFloat($('#adj').val())
-            gtot = taxamount + total + ship+adj_val;
-            $('#grandtotal').val(gtot.toFixed(2));
-            adv_val = parseFloat($('#advance').val())
-            adv_val = gtot - adv_val
-            $('#balance').val(adv_val.toFixed(2));
+</script>
 
-            test()
-        }
-
-        function test(){
-                     
-            var bc = $("#plosu").val();
-            var compstate = $("#cmpstate").val();
-            d=0
-            if (bc == compstate  ) {
-                gst = taxamount/2
-                $('#cgst').val(parseFloat(gst.toFixed(2)));
-                $('#sgst').val(parseFloat(gst.toFixed(2)));
-                $('#igst').val(parseFloat(d.toFixed(2)));
-            }
-                
-            if (bc != "{{ cmp1.state }}"  ) {
-                $('#igst').val(taxamount.toFixed(2));
-                $('#cgst').val(d.toFixed(2));
-                $('#sgst').val(d.toFixed(2));
-            }
-
-           
-        }
-        function showinnum(divId, element) {
-            if (element.value) {
-                document.getElementById(divId).innerHTML = "EDIT ESTIMATE NO" + element.value;
-            } else {
-                document.getElementById(divId).innerHTML = "EDIT ESTIMATE NO";
-            }
-        }
-
-        $(document).on('keyup',"#ship",function(){
-            var subtot = $('#sub_total').val();
-            var tax = $('#tax_amount').val();
-            var sh = $("#ship").val();
-            var adj = $("#adj").val();
-            var adv = $("#advance").val();
-            $('#grandtotal').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)).toFixed(2));
-            $('#balance').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)-parseFloat(adv)).toFixed(2));
-        });
-
-        $(document).on("change", "#adj", function(){
-            var subtot = $('#sub_total').val();
-            var tax = $('#tax_amount').val();
-            var sh = $("#ship").val();
-            var adj = $("#adj").val();
-            var adv = $("#advance").val();
-            $('#grandtotal').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)).toFixed(2));
-            $('#balance').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)-parseFloat(adv)).toFixed(2));
-        });
-        
- 
- 
-        function poppins() {
+<script>
+     function poppins() {
             var chkbtn = document.getElementById('okay');
             if (chkbtn.checked == true) {
                 document.getElementById('shipstreet').value = document.getElementById('street').value;
@@ -1805,207 +1364,744 @@ $(document).on('click','.clone_row',function(){
                 alert('Please provide a valid Phone Number')
             }
         }
-            // function insertValue() {
-            //     var select = document.getElementById("customer"),
-            //         txtVal = document.getElementById("val").value,
-            //         newOption = document.createElement("OPTION"),
-            //         newOptionval = document.createTextNode(txtVal);
+</script>
 
-            //     newOption.appendChild(newOptionval);
-            //     select.insertBefore(newOption, select.lastChild);
-            // }
-        </script>
-        <script>
-            $('.datepicker').pickadate({
-                selectMonths: true,
-                selectYears: true
-            }),
-                $('.timepicker').pickatime()
-        </script>
-        <script>
-            $(function () {
-                $('#date-time').bootstrapMaterialDatePicker({
-                    format: 'YYYY-MM-DD HH:mm'
-                });
-                $('#date').bootstrapMaterialDatePicker({
-                    time: false
-                });
-                $('#time').bootstrapMaterialDatePicker({
-                    date: false,
-                    format: 'HH:mm'
-                });
-            });
-        </script>
-        <script type="text/javascript">
-            $(document).ready(function () {
 
-                var current_fs, next_fs, previous_fs; //fieldsets
-                var opacity;
 
-                $(".next").click(function () {
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-                    current_fs = $(this).parent();
-                    next_fs = $(this).parent().next();
 
-//Add Class Active
-                    $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
-
-//show the next fieldset
-                    next_fs.show();
-//hide the current fieldset with style
-                    current_fs.animate({opacity: 0}, {
-                        step: function (now) {
-// for making fielset appear animation
-                            opacity = 1 - now;
-
-                            current_fs.css({
-                                'display': 'none',
-                                'position': 'relative'
-                            });
-                            next_fs.css({'opacity': opacity});
-                        },
-                        duration: 600
-                    });
-                });
-
-                $(".previous").click(function () {
-
-                    current_fs = $(this).parent();
-                    previous_fs = $(this).parent().prev();
-
-//Remove class active
-                    $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
-
-//show the previous fieldset
-                    previous_fs.show();
-
-//hide the current fieldset with style
-                    current_fs.animate({opacity: 0}, {
-                        step: function (now) {
-// for making fielset appear animation
-                            opacity = 1 - now;
-
-                            current_fs.css({
-                                'display': 'none',
-                                'position': 'relative'
-                            });
-                            previous_fs.css({'opacity': opacity});
-                        },
-                        duration: 600
-                    });
-                });
-
-                $('.radio-group .radio').click(function () {
-                    $(this).parent().find('.radio').removeClass('selected');
-                    $(this).addClass('selected');
-                });
-
-                
-
-            });
-           
-        </script>
-        <script type="text/javascript">
-            function ShowHideDiv(track) {
-                var inventorytrack = document.getElementById("inventorytrack");
-    
-                inventorytrack.style.display = track.checked ? "flex" : "none";
-    
-            }
+<script>
+         
+    // Select the form and the container for the terms rows
+  const form = document.getElementById('terms-form');
+  const termsContainer = document.getElementById('terms-container');
+  
+  // Select the button that adds new rows
+  const addTermRowBtn = document.querySelector('.add-term-row');
+  
+  // Add event listener to the button
+  addTermRowBtn.addEventListener('click', () => {
+    // Create a new row div
+    const newRow = document.createElement('div');
+    newRow.classList.add('form-row');
+    newRow.id = "newtermrow";
+  
+    // Create the first input field for the new row
+    const termsInput = document.createElement('div');
+    termsInput.classList.add('col-6');
+    const termsField = document.createElement('input');
+    termsField.type = 'text';
+    termsField.name = 'terms';
+    termsField.placeholder = 'Terms';
+    termsField.classList.add('form-control');
+    termsField.classList.add('text-white');
+    termsField.style.backgroundColor = "#191c24";
+    termsInput.appendChild(termsField);
+    newRow.appendChild(termsInput);
+  
+    // Create the second input field for the new row
+    const daysInput = document.createElement('div');
+    daysInput.classList.add('col-5');
+    const daysField = document.createElement('input');
+    daysField.type = 'text';
+    daysField.name = 'days';
+    daysField.placeholder = 'No of Days';
+    daysField.classList.add('form-control');
+    daysField.classList.add('text-white');
+    daysField.style.backgroundColor = "#191c24";
+    daysInput.appendChild(daysField);
+    newRow.appendChild(daysInput);
+  
+    // Create the delete button for the new row
+    const deleteBtn = document.createElement('div');
+    deleteBtn.classList.add('col-1');
+    const deleteBtnEl = document.createElement('button');
+    deleteBtnEl.type = 'button';
+    deleteBtnEl.classList.add('btn', 'btn-outline-secondary', 'delete-term-row', 'mt-1');
+    deleteBtnEl.innerText = '-';
+    deleteBtnEl.style.height = '4vh';
+    deleteBtn.appendChild(deleteBtnEl);
+    newRow.appendChild(deleteBtn);
+  
+    // Append the new row to the container
+    termsContainer.appendChild(newRow);
+  });
+  
+  // Add event listener to the form to delete rows
+  termsContainer.addEventListener('click', (event) => {
+    // If the target element is a delete button
+    if (event.target.classList.contains('delete-term-row')) {
+      // Find the row to delete
+      const row = event.target.closest('.form-row');
+      // Remove the row
+      row.remove();
+    }
+  });
+  
+  
+  
+  </script>
+  
+  
+  
+  <script>
+      $(document).on("click", "#payment", function() {
+    var array1 = [];
+    var array2 = [];
+    array1.length = 0;
+    array2.length = 0;
+    $("input:text[name=terms]").each(function() {
+      array1.push($(this).val());
       
-            function validateForm() {
-                let x = document.forms["myForm"]["fname"].value;
-                if (x == "") {
-                  alert("Name must be filled out");
-                  return false;
-                }
-              }
+    });
+  
+    $("input:text[name=days]").each(function() {
+      array2.push($(this).val());
+    });
+   
+  
+    $.ajax({
+      url: "{% url 'payment_term_for_estimate' %}",
+      type: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      data: {
+        terms: JSON.stringify(array1),
+        days: JSON.stringify(array2) 
+      },
+      success: function(response) {
+        
+        
+        $('#newpayment').hide();
+        $(".modal-backdrop").remove();
+        data = response.pay_term;
+        const pay = document.getElementById("pay_term");
+        const termsField = document.createElement('option');
+        termsField.innerHTML = data;
+        pay.appendChild(termsField);
+  
+      document.getElementById("modalForm").reset();
+      reloadterms()
+        
+    // Iterate through the data and create options
+      },
+    });
+  });
+  
+  function reloadterms(){
+  $.ajax({
+    url: "{% url 'terms_dropdowns' %}",
+    type: "GET",
+    success: function(response) {
+      term_data = response.term_data
+      day_data = response.day_data
+      
+      var term_container = document.getElementById('terms-container');
+      var dropdow = document.getElementById('termdrop');
+      term_container.removeChild(dropdow);
+      
+      new_row = `<div class="form-row" id="termdrop"></div>`
+      $('#terms-container').append(new_row)
+
+      new_row = `      
+        <div class="col-6" >
+        <input type="text" value="Due On Receipt" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>
+
+        <div class="col-6">
+        <input type="text" value="0" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>       
+
+        <div class="col-6" >
+        <input type="text" value="NET 30" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>
+        <div class="col-6">
+        <input type="text" value="30" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>                                
+        
+        <div class="col-6" >
+        <input type="text" value="NET 60" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>
+        <div class="col-6">
+        <input type="text" value="60" class="form-control" style="background-color: #191c24; color: white;" readonly>
+        </div>`
+        $('#termdrop').append(new_row)
+      
+      for(let i=0; i<term_data.length;i++){
+        
+        new_row = `      
+        <div class="col-6">
+          <input type="text" value="${term_data[i]}" class="form-control" style="background-color: #191c24; color: white;" readonly>
+          </div>
+          <div class="col-6">
+            <input type="text" value="${day_data[i]}" class="form-control" style="background-color: #191c24; color: white;" readonly>
+            </div>`
+        $('#termdrop').append(new_row)
+        }
+          
+        new_row = `      
+          <div class="col-6">
+            <input type="text"  class="form-control" style="background-color: #191c24; color: white;" placeholder="Terms" name="terms">
+            </div>
+            <div class="col-6">
+              <input type="text" class="form-control" style="background-color: #191c24; color: white;" placeholder="No of Days" name="days">
+              </div>`
+          $('#termdrop').append(new_row)
 
 
+          let select = document.getElementById("pay_term");
 
+          while (select.options.length > 0) {
+          select.remove(0);
+          }
 
-                 // create customer--------------------------
+          
+          
+          
+          for(let i=0; i<term_data.length;i++){
+                      // Create a new option element
+          let newOption = document.createElement("option");
+          newOption.text = term_data[i];
+          newOption.value = day_data[i]; // Set a value for the new option
 
-                 $(document).on("click", "#customerSave", function(){
+          // Append the new option to the select field
+          select.appendChild(newOption);
+          }
+          
+     
+    },
+    error: function(xhr, status, error) {
+    console.error(xhr.responseText);
+    }
+  });
+}
+
+  </script>
+  <script>
+    $(document).on('change','#estimatedate', function() {
+        var days = parseInt($('#pay_term').val());
+        order_date =new Date( document.getElementById("estimatedate").value)
+        if (!isNaN(order_date.getTime())) {
+            // Calculate the new date by adding 20 days
+            const endDate = new Date(order_date);
+            endDate.setDate(endDate.getDate() + days);
+            // Format the new date as YYYY-MM-DD
+            const formattedDate = endDate.toISOString().split("T")[0];
+            // Set the result in the second input
+            document.getElementById("expirationdate").value = formattedDate;
+        } else {
+                alert("Please enter a valid date.");
+        }
+    })
+</script>
+  
+  <script>
+      $(document).on('change', '#pay_term', function () {
+          var days = parseInt($('#pay_term').val());
+          order_date =new Date( document.getElementById("estimatedate").value)
+          if (!isNaN(order_date.getTime())) {
+              // Calculate the new date by adding 20 days
+              const endDate = new Date(order_date);
+              endDate.setDate(endDate.getDate() + days);
+              // Format the new date as YYYY-MM-DD
+              const formattedDate = endDate.toISOString().split("T")[0];
+              // Set the result in the second input
+              document.getElementById("expirationdate").value = formattedDate;
+          } else {
+                  alert("Please enter a valid date.");
+          }
+      });
+    </script>
+
+     <script>
+
+    $(document).on('change', '#plosu', function() {
+    var bc = $('#plosu').val();
+    var compstate = $('#cmpstate').val();
+
+    // Function to update tax values based on the selected place of supply
+    function updateTaxValues(taxSelector, taxPercentId) {
+        var val = $(taxPercentId).val();
+        $(taxSelector).val(val);
+    }
+
+    if (bc === compstate) {
+        $(".seltax").removeClass('d-flex').addClass('d-none');
+        $(".inter_tax").removeClass('d-flex').addClass('d-none');
+        $(".intra_tax").removeClass('d-none').addClass('d-flex');
+        $('#cgst1, #sgst1').css('display', 'flex');
+        $('#igst1').css('display', 'none');
+
+        // Update tax values for each item in the table
+        $('#items-table-body tr').each(function(index) {
+            updateTaxValues('#tax11' + (index + 1), '#tax_percent' + (index + 1));
+        });
+    } else if (bc !== "{{ cmp1.state }}") {
+        $(".seltax").removeClass('d-flex').addClass('d-none');
+        $(".intra_tax").removeClass('d-flex').addClass('d-none');
+        $(".inter_tax").removeClass('d-none').addClass('d-flex');
+        $('#cgst1, #sgst1').css('display', 'none');
+        $('#igst1').css('display', 'flex');
+
+        // Update tax values for each item in the table
+        $('#items-table-body tr').each(function(index) {
+            updateTaxValues('#tax21' + (index + 1), '#tax_percent' + (index + 1));
+        });
+    }
+});
+    </script>
+ <script>
+
+  $(document).ready(function() {
+            $("#gsttype").change(function() {
+            var x=$('#gsttype').val();
+            if(x=="unregistered Business") 
+            {
+                $(".gstrow").removeClass('d-block');
+                $(".gstrow").addClass('d-none');
+
+            }
+            else if(x == 'Overseas'){
+                $(".gstrow").removeClass('d-block');
+                $(".gstrow").addClass('d-none');
+            }
+            else if(x == 'Consumer'){
+                $(".gstrow").removeClass('d-block');
+                $(".gstrow").addClass('d-none');
+            }
+            else 
+            {
+                $(".gstrow").removeClass('d-none');
+                $(".gstrow").addClass('d-block');
+            }
             
-            $.ajax({
-    
-                type : 'POST',
-                url:"{% url 'customers21' %}",
-
-                data:{
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    title : $('#title').val(),
-                    first_name : $('#firstname').val(),
-                    last_name : $('#lastname').val(),
-                    company_name : $("#company").val(),
-                    location : $("#location").val(),
-                    openbalance : $("#openbalance").val(),
-                    credit_limit : $("#crd_lmt").val(),
-                    email : $("#email").val(),
-                    website :$("#website").val(),
-                    mobile :$("#mobile").val(),
-                    street : $("#street").val(),
-                    city : $("#city").val(),
-                    state : $("#state").val(),
-                    country : $("#country").val(),
-                    pincode : $("#pincode").val(),
-                    shipstreet : $("#shipstreet").val(),
-                    shipcity : $("#shipcity").val(),
-                    shipstate : $("#shipstate").val(),
-                    shipcountry : $("#shipcountry").val(),
-                    shippincode : $("#shippincode").val(),
-                    gsttype :$("#modalgsttype").val(),
-                    gstin :$("#gstin").val(),
-                    panno :$("#panno").val(),
-                },
-                
-                success: function(response) {
-                    console.log("success")
-                    document.getElementById("modalCustomer").reset();
-                    reloadCustomer();
-                },
-            });        
+            });
         });
 
 
-        function reloadCustomer() {
 
-            $.ajax({
-                url: "{% url 'cust_dropdown' %}",
-                type: "GET",
-                dataType: "json",
-                data: $(this).serialize(),
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+ </script>
+ <!-- <script>
 
-                success: function(response) {
-                    id_list = response.id_list
-                    title_list = response.title_list
-                    first_name = response.first_name
-                    last_name = response.last_name
-                    var dropdown = $('#customer');
-                    dropdown.empty();
-                    dropdown.append(`<option value='NIL' selected hidden>Select Customer</option>`);
 
-                    let select = document.getElementById("customer_name");
-                    for(let i=0; i<id_list.length;i++){
-                        // Create a new option element    
-                        let newOption = document.createElement("option");
-                        newOption.text = title_list[i] + ' ' + first_name[i] + ' ' + last_name[i];
-                        newOption.value = id_list[i] + ' ' + first_name[i] + ' ' + last_name[i]; // Set a value for the new option
+$(document).ready(function() {
 
-                        // Append the new option to the select field
-                        select.appendChild(newOption);
+
+var bc = document.getElementById("plosu").value;
+var compstate = document.getElementById("cmpstate").value;
+if (bc == compstate ) {
+    document.getElementById('cgst1').style.display = 'flex';
+    document.getElementById('sgst1').style.display = 'flex';
+    document.getElementById('igst1').style.display = 'none'; 
+
+} else {
+    document.getElementById('cgst1').style.display = 'none';
+    document.getElementById('sgst1').style.display = 'none';
+    document.getElementById('igst1').style.display = 'flex';
+
+}
+
+
+});
+
+
+ </script> -->
+
+<script>
+    $(document).ready(function(){
+    $('#add').click(function(){
+      var roinc = $("#items-table-body tr").length;
+      roinc++;
+      $('#items-table-body').append(
+          `
+          <tr id='addr0${roinc}'>
+            <td class = 'nnum'>${roinc}</td>
+            <td style="width: 20%;">
+              <div class="d-flex">
+                <select name='product[]' id="product${roinc}" class="form-control product select2" style="background-color: #112f4a;" placeholder="Select product">
+                  <option value=" " selected>Select Product</option>
+                    {% for i in item %}
+                      {% if i.cid_id == cmp1.cid %}
+                        <option value="{{ i.name  }}">{{ i.name  }} </option>
+                      {% endif %}
+                    {% endfor %}
+                </select>
+
+                <a href="#">
+                    <button type="button" class="btn btn-outline-secondary ml-1" 
+                    data-target="#newitem" data-toggle="modal">+</button>
+                </a>
+              </div>
+            </td>
+            <td><input type="text" name='hsn[]' id="hsn${roinc}" placeholder='Enter HSN Code' class="form-control" style="background-color: #2f516f; color: white;" /></td>
+            <td><input type="number" name='qty[]'  placeholder='Enter Qty' id="qty${roinc}" class="form-control qty" step=0 min=0 style="background-color: #2f516f; color: white;margin-top: 21px;" />
+                <div class="" style="display: none;"><span></span> <span id="qtyspan${roinc}"class=''></span></div>
+            </td>
+            <td><input type="number" name='price[]' id="unit${roinc}" placeholder='Enter Unit Price' class="form-control price" step="0.00" min="0" style="background-color: #2f516f; color: white;" /></td>
+            <td>
+                <input hidden value="{{cmp1.state}}" id="cmpstate">
+              <input type="text"  id="select_tax" placeholder="Tax Rate" class="form-control seltax d-flex">
+
+              <select name='tax1[]' id="tax1${roinc}" class="form-control tax intra_tax d-none" onchange="taxchange(this.id)">
+                  <option selected disabled > Select GST</option>
+                  <option value=0>0% GST</option>
+                  <option value=3>3% GST </option>
+                  <option value=5>5% GST </option>
+                  <option value=12>12% GST </option>
+                  <option value=18>18% GST </option>
+                  <option value=28>28% GST</option>
+                  <option value=0>Out of Scope(0%)</option>
+              </select>
+              <select name='tax2[]' id="tax2${roinc}" class="form-control tax inter_tax d-none" onchange="taxchange(this.id)">
+                  <option selected disabled  >Select IGST</option>
+                  <option value=0>0% IGST</option>
+                  <option value=3>3% IGST </option>
+                  <option value=5>5% IGST </option>
+                  <option value=12>12% IGST </option>
+                  <option value=18>18% IGST </option>
+                  <option value=28>28% IGST</option>
+                  <option value=0>Out of Scope(0%)</option>
+              </select>
+              
+            </td>  
+            <td style="display: none;"><input type="number" step="any" name='taxamount${roinc}' id="taxamount${roinc}" class="form-control taxamount" /></td>
+
+            <td>
+                <input type="number" name='discount[]' placeholder='Enter Discount' value=0 id="disc${roinc}" class="form-control disc" step=0 min=0>
+            </td>
+            <td><input type="number" name='total[]' id="total${roinc}" placeholder=0 class="form-control total" value=0 step="any" readonly style="background-color: #2f516f; color: white;" /></td>
+            <td>
+                <button type="button" id="${roinc}" class="btn  font-weight-bold clone_row fa fa-clone px-2 my-1 py-1" title="Clone Row" style="background-color:#43596c;"></button><br>
+                <button type="button" id="${roinc}" class="btn btn-danger remove_row px-2 py-1 mx-1 fa fa-close" title="Remove Row"> </button>
+            </td>
+          </tr>`
+    
+ 
+        );
+      
+         $('#product' + roinc).select2();
+    
+  });
+  
+   // calculation---------------------------
+
+   
+    
+    // Function to handle the change event for the '.product' dropdown
+
+    
+    // Click event for removing a row
+    $(document).on('click','.remove_row',function(){
+        var row_id = $(this).attr("id");
+
+        $('#addr0'+row_id+'').remove();
+        reindexRows();
+        calc();
+          
+   
+    function reindexRows() {
+        var table = document.getElementById('tab_logic');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            cells[0].innerText = i + 1;
+        }
+    }
+    });
+
+        
+    $(document).on('click','.clone_row',function(){
+        var roinc = $("#items-table-body tr").length;
+        var originalRow = $(this).closest('#items-table-body tr'); 
+        var clonedRow = originalRow.clone();
+
+        clonedRow.attr('id', 'addr0' +(roinc+1));
+
+        clonedRow.find('.nnum').text(roinc+1);
+
+        clonedRow.find('[id]').each(function() {
+            var oldId = $(this).attr('id');
+            var newId = oldId.replace(/\d+/, roinc+1);
+            $(this).attr('id', newId );
+        });0
+        clonedRow.find('.product').each(function() {
+            $(this).val(originalRow.find('.product').val());
+        });
+        clonedRow.find('.tax').each(function() {
+            $(this).val(originalRow.find('.tax').val());
+        });
+        originalRow.after(clonedRow);
+        var table = document.getElementById('tab_logic');
+        var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            cells[0].innerText = i + 1;
+        }
+        calc();
+    });
+    $(document).ready(function(){
+        $('#items-table-body').on('keyup change', function () {
+            calc();
+        });
+
+        $('#tax').on('keyup change', function () {
+            calc_total();
+        });
+    });
+        
+
+        function calc() {
+            $('#tab_logic tbody tr').each(function () {
+                var html = $(this).html();
+                if (html != '') {
+                    var qty = $(this).find('.qty').val();
+                    
+                    var price = $(this).find('.price').val();
+
+                    var dis = $(this).find('.disc').val();
+                    var bc = $("#plosu").val();
+                    var compstate = $("#cmpstate").val();
+                    if(bc==compstate){
+                        tax = $(this).find('.intra_tax').val();
                     }
-                },
-                error: function(xhr, status, error) {
-                console.error(xhr.responseText);
+                    else{
+                        tax = $(this).find('.inter_tax').val();
+                    }
+                    $(this).find('.total').val((parseFloat(qty) *parseFloat(price))-parseFloat(dis));
+                    $(this).find('.taxamount').val(((qty * price)-dis) * (tax / 100));
+                    calc_total();
                 }
             });
         }
+    });
+        function calc_total() {
+             
+            total = 0;
+            $('.total').each(function () {
+                total += parseFloat($(this).val());
+            });
+            taxamount = 0;
+            $('.taxamount').each(function () {
+                taxamount += parseFloat($(this).val());
+            });
+            $('#sub_total').val(total.toFixed(2));
+            $('#tax_amount').val(taxamount.toFixed(2));
+            ship = parseFloat($("#ship").val());
+            // console.log( ship);
+            adj_val = parseFloat($('#adj').val())
+            gtot = taxamount + total + ship+adj_val;
+            $('#grandtotal').val(gtot.toFixed(2));
+            adv_val = parseFloat($('#advance').val())
+            adv_val = gtot - adv_val
+            $('#balance').val(adv_val.toFixed(2));
 
-        // item modal
-        var checkbox1 = document.getElementById('inclusive');
+            test()
+        }
+
+        function test(){
+                     
+            var bc = $("#plosu").val();
+            var compstate = $("#cmpstate").val();
+            d=0
+            if (bc == compstate  ) {
+                gst = taxamount/2
+                $('#cgst').val(parseFloat(gst.toFixed(2)));
+                $('#sgst').val(parseFloat(gst.toFixed(2)));
+                $('#igst').val(parseFloat(d.toFixed(2)));
+            }
+                
+            if (bc != "{{ cmp1.state }}"  ) {
+                $('#igst').val(taxamount.toFixed(2));
+                $('#cgst').val(d.toFixed(2));
+                $('#sgst').val(d.toFixed(2));
+            }
+
+           
+        }
+        function showinnum(divId, element) {
+            if (element.value) {
+                document.getElementById(divId).innerHTML = "EDIT ESTIMATE NO" + element.value;
+            } else {
+                document.getElementById(divId).innerHTML = "EDIT ESTIMATE NO";
+            }
+        }
+
+        $(document).on('keyup',"#ship",function(){
+            var subtot = $('#sub_total').val();
+            var tax = $('#tax_amount').val();
+            var sh = $("#ship").val();
+            var adj = $("#adj").val();
+            var adv = $("#advance").val();
+            $('#grandtotal').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)).toFixed(2));
+            $('#balance').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)-parseFloat(adv)).toFixed(2));
+        });
+
+        $(document).on("change", "#adj", function(){
+            var subtot = $('#sub_total').val();
+            var tax = $('#tax_amount').val();
+            var sh = $("#ship").val();
+            var adj = $("#adj").val();
+            var adv = $("#advance").val();
+            $('#grandtotal').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)).toFixed(2));
+            $('#balance').val((parseFloat(subtot)+parseFloat(tax)+parseFloat(sh)+parseFloat(adj)-parseFloat(adv)).toFixed(2));
+        });
+ 
+
+    $(document).ready(function(){
+        $('.product').select2({
+        // placeholder: 'Select product',
+        // Add additional options as needed
+    });
+        $(document).on('change', '.product',function(){ 
+      
+      var n = $(this).attr("id").slice(7);
+      $.ajax({
+      url: "{% url 'itemdata3' %}",
+      type : 'GET',
+      data:{
+          id : $(this).val(),
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+      
+      success: function(response) {
+          data = response.hsn
+          data2 = response.qty
+          data3 = response.price
+          data4 = response.gst
+          data5 = response.sgst
+
+          console.log(data)
+          
+          document.getElementById('hsn'+n).value = data;
+          document.getElementById('qtyspan'+n).innerHTML = data2;
+          document.getElementById('unit'+n).value = data3;
+          var bc = document.getElementById("plosu").value;
+          var compstate = document.getElementById("cmpstate").value;
+          if (bc == compstate ) {
+              $(".seltax").removeClass('d-flex');
+              $(".seltax").addClass('d-none');
+              $(".inter_tax").removeClass('d-flex');
+              $(".inter_tax").addClass('d-none');
+              $(".intra_tax").removeClass('d-none');
+              $(".intra_tax").addClass('d-flex');
+              if (data4 != ' '){
+                  document.getElementById('tax1'+n).value = data4;
+                  document.getElementById('tax_percent'+n).value = data4;
+              }else{
+                  document.getElementById('tax1'+n).value = 0;
+                  document.getElementById('tax_percent'+n).value = 0;
+              }
+              
+              
+              
+          } else {
+              $(".seltax").removeClass('d-flex');
+              $(".seltax").addClass('d-none');
+              $(".intra_tax").removeClass('d-flex');
+              $(".intra_tax").addClass('d-none');
+              $(".inter_tax").removeClass('d-none');
+              $(".inter_tax").addClass('d-flex');
+              if(data5 != ' '){
+                  document.getElementById('tax2'+n).value = data5;
+                  document.getElementById('tax_percent'+n).value = data5;
+              }else{
+                  document.getElementById('tax2'+n).value = 0;
+                  document.getElementById('tax_percent'+n).value = 0;
+              }
+
+          }
+      },
+      });
+      
+
+  });
+
+  
+
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var current_fs, next_fs, previous_fs; //fieldsets
+        var opacity;
+
+        $(".next").click(function () {
+
+            current_fs = $(this).parent();
+            next_fs = $(this).parent().next();
+
+//Add Class Active
+            $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+//show the next fieldset
+            next_fs.show();
+//hide the current fieldset with style
+            current_fs.animate({opacity: 0}, {
+                step: function (now) {
+// for making fielset appear animation
+                    opacity = 1 - now;
+
+                    current_fs.css({
+                        'display': 'none',
+                        'position': 'relative'
+                    });
+                    next_fs.css({'opacity': opacity});
+                },
+                duration: 600
+            });
+        });
+
+        $(".previous").click(function () {
+
+            current_fs = $(this).parent();
+            previous_fs = $(this).parent().prev();
+
+//Remove class active
+            $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+//show the previous fieldset
+            previous_fs.show();
+
+//hide the current fieldset with style
+            current_fs.animate({opacity: 0}, {
+                step: function (now) {
+// for making fielset appear animation
+                    opacity = 1 - now;
+
+                    current_fs.css({
+                        'display': 'none',
+                        'position': 'relative'
+                    });
+                    previous_fs.css({'opacity': opacity});
+                },
+                duration: 600
+            });
+        });
+
+        $('.radio-group .radio').click(function () {
+            $(this).parent().find('.radio').removeClass('selected');
+            $(this).addClass('selected');
+        });
+
+        
+
+    });
+   
+</script>
+<script type="text/javascript">
+    function ShowHideDiv(track) {
+        var inventorytrack = document.getElementById("inventorytrack");
+
+        inventorytrack.style.display = track.checked ? "flex" : "none";
+
+    }
+    </script>
+
+<script>
+    var checkbox1 = document.getElementById('inclusive');
         checkbox1.addEventListener('click', function () {
             if (checkbox1.checked) {
                 document.getElementById('taxdiv').style.display = 'block';
@@ -2028,7 +2124,10 @@ $(document).on('click','.clone_row',function(){
 
         });
 
-        $(document).on("click","#itemSave",function(){
+</script>
+
+<script>
+      $(document).on("click","#itemSave",function(){
             var taxref,status1;
  
             if ($('#inclusive').checked) {
@@ -2094,164 +2193,60 @@ $(document).on('click','.clone_row',function(){
             data: $(this).serialize(),
             csrfmiddlewaretoken: '{{ csrf_token }}',
 
-            success: function(data) {
+            success: function (data) {
                 var dropdown = $('.product');
                 console.log(data)
                 dropdown.empty();
                 dropdown.append(`<option selected hidden>Select Item</option>`);
-                $.each(data, function(key, value) {
-                
+                $.each(data, function (key, value) {
+
                     dropdown.append($('<option></option>').attr('value', key).text(value).val(value));
                 });
 
             },
-            error: function(xhr, status, error) {
-            console.error(xhr.responseText);
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
             }
-            });
-            }
+        });
+    }
 
 
 
         
 </script>
+<!-- 
 <script>
 
-
-            $(document).ready(function () {
-                $('#customer').on('change', function() {
-                    console.log($('#customer').val())
-                    $.ajax({
-                        type : 'POST',
-                        
-                        url: "{% url 'cust_details' %}",
-                        data: {
-                            id: $('#customer').val(),
-                            csrfmiddlewaretoken: '{{ csrf_token }}',
-                        },
-                        
-                        success: function(data){
-                            console.log(data.email);
-                            document.getElementById('est_email').value = data.email;
-                            document.getElementById('plosu').value = data.shipstate;
-                            document.getElementById('gsttype').value = data.gst_treat;
-                            document.getElementById('bname').value = data.street + '\n' + data.city + '\n' + data.state + '\n' + data.country  + '\n' + data.pincode ;
-                            if(data.gstno){
-                                document.getElementById('gstnodiv').style.display = 'block';
-                                document.getElementById('gstno').value = data.gstno;
-                            }else{
-                                document.getElementById('gstnodiv').style.display = 'none';
-                                document.getElementById('gstno').value = '';
-                            }
-                            var compstate = document.getElementById("cmpstate").value;
-                            if (data.shipstate == compstate ) {
-                                document.getElementById('cgst1').style.display = 'flex';
-                                document.getElementById('sgst1').style.display = 'flex';
-                                document.getElementById('igst1').style.display = 'none'; 
-
-                            } else {
-                                document.getElementById('cgst1').style.display = 'none';
-                                document.getElementById('sgst1').style.display = 'none';
-                                document.getElementById('igst1').style.display = 'flex';
-
-                            }
-                        }
-                    });
-                });
-            });
-
-        </script>
-        <script>
-
-            $(document).on("click",".seltax",function(){
-                
-                $(".seltax").removeClass('d-flex');
-                $(".seltax").addClass('d-none');
-
-                console.log($("#plosu").val());
-                console.log($("#cmpstate").val());
-
-                if($("#plosu").val() == $("#cmpstate").val()){
-                    console.log("yes");
-                    $(".inter_tax").removeClass('d-flex');
-                    $(".inter_tax").addClass('d-none');
-
-                    $(".intra_tax").removeClass('d-none');
-                    $(".intra_tax").addClass('d-flex');
-                    
-                }
-                else{
-                    console.log("no");
-                    $(".intra_tax").removeClass('d-flex');
-                    $(".intra_tax").addClass('d-none');
-
-                    $(".inter_tax").removeClass('d-none');
-                    $(".inter_tax").addClass('d-flex');
-                }
-
-            });
-
-            $(document).on('change','#plosu',function()   {
-                $(".seltax").removeClass('d-none');
-                $(".seltax").addClass('d-flex');
-                $(".intra_tax").removeClass('d-flex');
-                $(".intra_tax").addClass('d-none');
-                $(".inter_tax").removeClass('d-flex');
-                $(".inter_tax").addClass('d-none');
-                var bc = document.getElementById("plosu").value;
-                var compstate = document.getElementById("cmpstate").value;
-                if (bc == compstate ) {
-                    document.getElementById('cgst1').style.display = 'flex';
-                    document.getElementById('sgst1').style.display = 'flex';
-                    document.getElementById('igst1').style.display = 'none'; 
-
-                } else {
-                    document.getElementById('cgst1').style.display = 'none';
-                    document.getElementById('sgst1').style.display = 'none';
-                    document.getElementById('igst1').style.display = 'flex';
-
-                }
-                    
-            
-                    
-            });
-            </script>
-           
-           <script>
-            $(document).ready(function () {
-                $('#customer').selectize({
-                    sortField: 'value',
-                    items: [''],
-                    render: {
-                        item: function (item, escape) {
-                            if (item.value === '') {
-                                return '';
-                            }
-                            return '<div>' + escape(item.text) + '</div>';
-                        }
-                    }
-                });
-            });
+    $(document).on("click",".seltax",function(){
         
-            // $(document).ready(function () {
-            //     $('.product').selectize({
-            //         sortField: 'value',
-            //         items: [''],
-                      
-                    
-            //         render: {
-            //             item: function (item, escape) {
-            //                 if (item.value === '') {
-            //                     return '';
-            //                 }
-            //                 return '<div>' + escape(item.text) + '</div>';
-            //             }
-            //         }
-            //     });
-            // });
-         </script>
+        $(".seltax").removeClass('d-flex');
+        $(".seltax").addClass('d-none');
 
+        console.log($("#plosu").val());
+        console.log($("#cmpstate").val());
 
+        if($("#plosu").val() == $("#cmpstate").val()){
+            console.log("yes");
+            $(".inter_tax").removeClass('d-flex');
+            $(".inter_tax").addClass('d-none');
+
+            $(".intra_tax").removeClass('d-none');
+            $(".intra_tax").addClass('d-flex');
+            
+        }
+        else{
+            console.log("no");
+            $(".intra_tax").removeClass('d-flex');
+            $(".intra_tax").addClass('d-none');
+
+            $(".inter_tax").removeClass('d-none');
+            $(".inter_tax").addClass('d-flex');
+        }
+
+    });
+    </script> -->
+   
+   
 <script>
     $(document).on('change', '#openbalance',function () {
         openbal = $("#openbalance").val()
@@ -2292,16 +2287,5 @@ $(document).on('click','.clone_row',function(){
     });
 </script>
 
-<script>
-    function validateForm() {
-        var checkbox = document.getElementById("myCheckbox");
 
-        if (checkbox.checked) {
-            return true; // Allow form submission
-        } else {
-            alert("Please check the checkbox before submitting the form.");
-            return false; // Prevent form submission
-        }
-    }
-</script>
 {% endblock %}
