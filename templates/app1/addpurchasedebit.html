@@ -418,24 +418,10 @@ input[name="service-city"] {
                                         
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
-                                            class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0" hidden >
+                                            class="form-control taxs" onchange="taxchange(this)" step="0.00" min="0"  hidden>
                                             <select name='tax[]' id="tax1" class="form-control tax ">
-                                                <option id="ta1" value=0 text={{ cmp1.state }} hidden>Select</option>
-                                                <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
-                                                <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
-                                                <option value=5 text={{ cmp1.state }}>05% GST(05%)</option>
-                                                <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
-                                                <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
-                                                <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
-                                            </select>
-                                            <select name='tax[]' id="tax2" class="form-control tax d-none">
-                                                <option id="ta5" value=0 text=" " hidden>Select</option>
-                                                <option value=0 text=" ">0% IGST(00%)</option>
-                                                <option value=3 text=" ">03.0% IGST(03%)</option>
-                                                <option value=5 text=" ">05.0% IGST(05%)</option>
-                                                <option value=12 text=" ">12.0% IGST(12%)</option>
-                                                <option value=18 text=" ">18.0% IGST(18%)</option>
-                                                <option value=28 text=" ">28.0% IGST(28%)</option>
+
+                                           
                                                
                                           </select>
                                         </td>
@@ -517,43 +503,44 @@ input[name="service-city"] {
                                                    document.getElementById('tax1').value=data7;
 
                                                    document.getElementById('quantitys').value = data6;
-
-
-
-                                                   if (data8 == '{{ cmp1.state }}')
-                                                        {   document.getElementById('tax1').innerHTML=data7 + ' % GST';
-                                                            document.getElementById('tax1').value = data7 ;
-                                                //             document.getElementById('tax1').text = data4 + ' % GST';
-                                                //             document.getElementById('tax1').value=data4
-                                                        }
-                                                //         document.getElementById('tax1').innerHTML  = data5 + ' % IGST';
-                                                //         document.getElementById('tax1').value=data5
-
-
-
-
-                                                //    var place = 'Kerala'
-                                                  
-                                                //    if (data8 == '{{ cmp1.state }}') {
-
-                                                //     // document.getElementById('ta1').style.display = 'flex';
-                                                //     // document.getElementById('tax2').style.display = 'block' ;
-
-
-                                                //     //  document.getElementById('tax1').innerHTML = data4 + ' % GST';
-                                                //     //    document.getElementById('tax1').value = data4 ;
-
-                                                //     $('#tax1').val(data7);
-                                                       
-                                                       
-                                                //    }
-                                                //    else{
-                                                //     // document.getElementById('ta2').style.display = 'block';
-                                                //     // document.getElementById('tax1').style.display = 'flex' ;
-                                                //     document.getElementById('ta5').innerHTML = data4 + ' % IGST';
-                                                //     document.getElementById('tax2').value = data5 ;
-                                                //    }
                                                    
+                                                   var taxOptions = (data8 === 'Kerala') ? 
+
+                                                    `<option value="0" hidden>Select</option>
+                                                        <option value="0">00 % GST(00%)</option>
+                                                        <option value='3'>03 % GST(03%)</option>
+                                                        <option value='5'>05 % GST(05%)</option>
+                                                        <option value="12">12 % GST(12%)</option>
+                                                        <option value='18'>18 % GST(18%)</option>
+                                                        <option value='28'>28 % GST(28%)</option>`:
+                                                    `<option value="0" hidden>Select</option>
+                                                        <option value='0'>00 % IGST(00%)</option>
+                                                        <option value='3'>03 % IGST(03%)</option>
+                                                        <option value='5'>05 % IGST(05%)</option>
+                                                        <option value='12'>12 % IGST(12%)</option>
+                                                        <option value='18'>18 % IGST(18%)</option>
+                                                        <option value='28'>28 % IGST(28%)</option>`;
+
+                                                        console.log('taxOptions',taxOptions)
+
+
+                                                    document.getElementById('tax1').innerHTML =taxOptions
+                                                    var taxis=document.getElementById('tax1')
+
+                                                    document.getElementById('taxs').value  = data7 ;
+
+
+                                                    for(let i=0;i<taxis.children.length;i++){
+
+                                                        if(taxis.children[i].value === data7){
+                                                            taxis.children[i].setAttribute('selected','true') 
+                                                            // taxis.children[i].innerHTML=`<option value="${data7}" selected>${data7}</option>`
+                                                        }
+                                                        console.log(taxis.children[i])
+
+                                                    }
+
+
                                            
                                            },
                                            
@@ -1965,6 +1952,7 @@ input[name="service-city"] {
 
     function test(){
         var bc = document.getElementById("plosu").value
+        console.log('bc',bc)
         d=0
         if (bc == "{{ cmp1.state }}"  ) {
             gst = taxamount/2
@@ -2340,6 +2328,14 @@ console.log('product1')
           });
       });
 
+
+
+
+
+
+
+
+
             $(document).on('click','.remove_row',function(){
                 var row_id = $(this).attr("id");
                 $('#addr0'+row_id+'').remove();
@@ -2347,9 +2343,15 @@ console.log('product1')
 
             $(document).on('change', '.tax', function() {
                 var selectedTaxValue = parseFloat($(this).val());
+
+                console.log('selectedTaxValue',selectedTaxValue)
+
+
                 var inputTaxValue = parseFloat($(this).closest('tr').find('.taxs').val());
+                console.log('inputTaxValue',inputTaxValue)
+
                 var vid = $('#billno').val();
-               
+                console.log('vid',vid)
 
                 // Check if the "billno" field is empty
                 if (vid === "") {
