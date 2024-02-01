@@ -255,12 +255,17 @@
 
 
     async function generatePDF() {
-   
+        // document.getElementById("downloadButton").innerHTML = "Currently downloading, please wait";
+
+        //Downloading
         var downloading = document.getElementById("whatToPrint");
         var doc = new jsPDF('l', 'pt');
 
         await html2canvas(downloading, {
-           
+            //allowTaint: true,
+            //useCORS: true,
+            // width: 600
+
         }).then((canvas) => {
             //Canvas (convert to PNG)
             doc.addImage(canvas.toDataURL("image/png"), 'PNG', 100, 20, 600, 550);
@@ -410,7 +415,11 @@
         </div>
     </div>
 
-   
+    <!-- <form id="form_post" >
+            <label>From</label><input type="date" id="fdate" name="fdate"  > 
+            <label>To</label><input type="date" id="ldate" name="ldate" >
+            <button class="btn" type="submit"> Search</button>
+            </form> -->
     <div class="card radius-15" id="form1" style="display: none;">
         <div class="card-body">
 
@@ -718,8 +727,8 @@
                     <div class="py-5">
                         <div class="row hidden-md-up" style="margin-top: 15px;">
                             <div class="col-md-9" style="margin: auto;" size="A4">
-                                <div class="card" id="printdiv123">
-                                    <div id="whatToPrint1234">
+                                <div class="card" id="printdiv">
+                                    <div id="whatToPrint">
                                         <div class="card-block">
                                             <div class="card-body">
                                                 <div class="container bootdey">
@@ -1207,7 +1216,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="shareBillEmailLabel">Share Customer Transactions Via Email</h5>
+                        <h5 class="modal-title" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     </div>
@@ -1443,16 +1452,16 @@
     $(document).ready(function ($) {
         $(document).on('click', '#pdflink', function (event) {
             event.preventDefault();
-            var element = document.getElementById('whatToPrint1234');
+            var element = document.getElementById('printdiv');
             // element.style.color = 'black';
             // element.style.backgroundColor = 'white';
             var opt =
             {
-                //margin: 1,
+                margin: 1,
                 filename: 'Customer' + '.pdf',
-                //image: { type: 'jpeg', quality: 0.98 },
-                //html2canvas: { scale: 2 },
-                //jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', }
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', }
             };
             html2pdf().set(opt).from(element).save();
         });
@@ -1477,7 +1486,7 @@
 
 <script>
     function printtable() {
-        var printContents = document.getElementById("whatToPrint1234").innerHTML;
+        var printContents = document.getElementById("printdiv").innerHTML;
 
         var $printerDiv = $('<div class="printContainer"></div>'); // create the div that will contain the stuff to be printed
         $printerDiv.html(printContents); // add the content to be printed

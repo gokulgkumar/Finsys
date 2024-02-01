@@ -86,13 +86,13 @@ input[name="service-city"] {
                             <label id="employeeSearch" for="date">Employee</label>
                             <div class="d-flex">
                                 <!-- <input type="text" id="employeeSearch" placeholder="Search Employee"> -->
-                                <select name="employee_id" id="selected" class="form-control select2" data-width="100%" style="background-color: #243e54; color: white;">
+                                <select  name="employee_id" id="selected" class="form-control select2 " data-width="100%"  style="background-color: #243e54; color: white;">
                                     <option selected disabled>Select Employee</option>
+                     
                                     {% for e in employees %}
-                                        <option value="{{ e.employeeid }}" data-employeeid="{{ e.employeeid }}" data-fullname="{{ e.firstname }} {{ e.lastname }}">{{ e.firstname }} {{ e.lastname }}</option>
+                                    <option value="{{e.employeeid}}  {{ e.firstname }} {{ e.lastname }}"> {{ e.firstname }} {{ e.lastname }}</option>
                                     {% endfor %}
                                 </select>
-                                
                                 <a class="btn btn-outline-secondary ml-1" role="button" data-target="#employeecreation"
                                 data-toggle="modal">+</a>
                         </div>

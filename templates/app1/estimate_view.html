@@ -623,13 +623,11 @@ footer p {
                                 <h6>{{ estimate.SGST }}</h6>
                             </div>
                             {%endif%}
-                            {% if estimate.shipping_charge != '0' %}
                             <div class="d-flex justify-content-between mb-4">
                                 <h5 class="">Shipping Charge</h5>
                                 <h6> {{estimate.shipping_charge}}</h6>
                             </div>
-                            {%endif%}
-                            {% if estimate.adjust != '0' %}
+                            {% if estimate.adjust %}
                             <div class="d-flex justify-content-between mb-4">
                                 <h5 class="">Adjustment</h5>
                                 <h6>{{estimate.adjust }}</h6>
@@ -722,11 +720,7 @@ footer p {
                                     
                                         <td class="text-center " style="color:black">{{j.rate}}</td>
                                         <td class="text-center " style="color:black">{{j.quantity}}</td>
-                                        {% if estimate.CGST != '0.00' %}
-                                        <td class="text-center" style="color:black">{{j.tax  }} GST%</td>
-                                        {%else%}
-                                        <td class="text-center" style="color:black">{{ j.tax  }} IGST%</td>
-                                        {%endif%}
+                                        <td class="text-center " style="color:black">{{j.tax}} %</td>
                                         <td class="text-center" style="color:black">{{j.discount}} </td>
                                         <td class="text-center " style="color:black">{{j.total}}</td>
                                     </tr>
@@ -776,13 +770,13 @@ footer p {
                                                 <td style="color:black; font-weight:bold">Tax Amount</td>
                                                 <td style="color:black; font-weight:bold">{{estimate.taxamount}}</td>
                                             </tr>
-                                            {% if estimate.shipping_charge != '0' %}
+                                            {% if estimate.shipping_charge  %}
                                             <tr >
                                                 <td style="color:black; font-weight:bold">Shipping Charge</td>
                                                 <td style="color:black; font-weight:bold">{{estimate.shipping_charge}}</td>
                                             </tr>
                                             {%endif%}
-                                            {% if estimate.adjust != '0' %}
+                                            {% if estimate.adjust  %}
                                                   <tr >
                                                       <td style="color:black; font-weight:bold">Adjustment</td>
                                                     
@@ -879,11 +873,7 @@ footer p {
                                                   <td class="text-center" style="color:black">{{ itm.item}}</td>
                                                   <td class="text-center" style="color:black">{{ itm.quantity }}</td>
                                                   <td class="text-center" style="color:black">{{ itm.rate  }}</td>
-                                                  {% if estimate.CGST != '0.00' %}
-                                                  <td class="text-center" style="color:black">{{ itm.tax  }} GST%</td>
-                                                  {%else%}
-                                                  <td class="text-center" style="color:black">{{ itm.tax  }} IGST%</td>
-                                                  {%endif%}
+                                                  <td class="text-center" style="color:black">{{ itm.tax  }}</td>
                                                   <td class="text-center" style="color:black">{{ itm.discount  }}</td>
                                                   <td class="text-center" style="color:black">{{ itm.total }}</td>
                                               </tr>
@@ -961,14 +951,14 @@ footer p {
                                                     <td style="color: #000;">:</td>
                                                     <td class="text-right" style="color: #000;">{{estimate.taxamount}}</td>
                                                 </tr>
-                                                {% if estimate.shipping_charge != '0' %}
+                                                {% if estimate.shipping_charge  %}
                                                   <tr >
                                                       <td style="color: #000;">Shipping Charge</td>
                                                       <td style="color: #000;">:</td>
                                                       <td class="text-right" style="color: #000;">{{estimate.shipping_charge}}</td>
                                                   </tr>
                                                   {%endif%}
-                                                  {% if estimate.adjust != '0' %}
+                                                  {% if estimate.adjust %}
                                                   <tr >
                                                       <td style="color: #000;">Adjustment</td>
                                                       <td style="color: #000;">:</td>
@@ -1068,11 +1058,7 @@ footer p {
                                                     <td class="text-center" style="color: black;">{{ itm.item}}</td>
                                                     <td class="text-center" style="color: black;">{{ itm.quantity }}</td>
                                                     <td class="text-center" style="color: black;">{{ itm.rate  }}</td>
-                                                    {% if estimate.CGST != '0.00' %}
-                                                    <td class="text-center" style="color:black">{{ itm.tax  }} GST%</td>
-                                                    {%else%}
-                                                    <td class="text-center" style="color:black">{{ itm.tax  }} IGST%</td>
-                                                    {%endif%}
+                                                    <td class="text-center" style="color: black;">{{ itm.tax  }}</td>
                                                     <td class="text-center" style="color: black;">{{ itm.discount  }}</td>
                                                     <td class="text-center" style="color: black;">{{ itm.total }}</td>
                                                 </tr>
@@ -1121,14 +1107,14 @@ footer p {
                                                     <td style="color: #000;">:</td>
                                                     <td class="text-right" style="color: #000;">{{estimate.taxamount}}</td>
                                                 </tr>
-                                                {% if estimate.shipping_charge != '0' %}
+                                                {% if estimate.shipping_charge  %}
                                                 <tr >
                                                     <td style="color: #000;">Shipping Charge</td>
                                                     <td style="color: #000;">:</td>
                                                     <td class="text-right" style="color: #000;">{{estimate.shipping_charge}}</td>
                                                 </tr>
                                                 {%endif%}
-                                                {% if estimate.adjust != '0' %}
+                                                {% if estimate.adjust %}
                                                 <tr >
                                                     <td style="color: #000;">Adjustment</td>
                                                     <td style="color: #000;">:</td>
@@ -1242,16 +1228,9 @@ footer p {
                                         <div class="equal-length-item" style="text-align: center; ">
                                             {{j.rate}}
                                         </div>
-                                        {% if estimate.CGST != '0.00' %}
                                         <div class="equal-length-item" style="text-align: center; ">
-                                            {{j.tax}} GST%
+                                            {{j.tax}}
                                         </div>
-                                        {%else%}
-                                        <div class="equal-length-item" style="text-align: center; ">
-                                        {{j.tax}}&nbsp;IGST%
-                                        </div>
-                                        {%endif%}
-                                        
                                         <div class="equal-length-item" style="text-align: center; ">
                                             {{j.total}}
                                         </div>
@@ -1261,14 +1240,12 @@ footer p {
 
                                 <div><br>
                                     <div class="row ml-1">
-                                    
                                         <div class="col-md-5 text-left" style=" color: black;">
                                             Discount
                                         </div>
                                         <div class="col-md-6 text-right ml-2" style="color: black;">
                                             {{ tot_dis }}
                                         </div>
-                                    
                                     </div>
                                     <div class="row ml-1">
                                         <div class="col-md-5 text-left" style=" color: black;">
@@ -1315,7 +1292,7 @@ footer p {
                                     {% endif %}
                                     
                                 </div>
-                                {% if estimate.shipping_charge  != '0' %}
+                                {% if estimate.shipping_charge  %}
                                 <div class="row ml-1">
                                     <div class="col-md-5 text-left" style=" color: black;">
                                         Shipping charge 
@@ -1325,7 +1302,7 @@ footer p {
                                     </div>
                                 </div>
                                 {%endif%}
-                                {% if estimate.adjust != '0' %}
+                                {% if estimate.adjust  %}
                                     <div class="row ml-1">
                                         <div class="col-md-5 text-left " style=" color: black;">
                                             Adjustment

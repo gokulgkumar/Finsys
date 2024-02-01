@@ -12,132 +12,139 @@
     
 <div class="col-md-7" style="margin: auto;">
     <div  class="card">
-        <div id="panel">
-            <div class="card-block1">
-                <div id="whatToPrint1" class="print-container card-body">
-                    <div class="container bootdey">
-                        <div class="row">
-                            <div class="col-sm-12 col-sm-offset-1" style="padding:20px;">
-                                <div class="widget-box">
-                                    <div class="widget-body">
-                                        <div class="widget-main padding-20">
-                                            <div class="row"  style="padding:20px;" >
-                                                
-                                                <div class="col-sm-12" style="margin-left: 26px;">
-                                                    <table>
-                                                        <tr>
-                                                            <th>
-                                                                     
-                                                          <p style="color: black;" ><strong>{{ cmp1.cname }}</strong> <br>
-                                                            {{cmp1.city}} <br>
-                                                            {{cmp1.pincode}}<br>
-                                                            {{cmp1.state}},India <br>
-                                                            {{cmp1.cemail}}<br>
-                                                            {{cmp1.pincode}}<br>
-                                                        </p>  
-                                                            </th>
-                                                            <th>
-                                                             <span class="ml-5 mr-5"></span>
-                                                            </th>
-                                                            <th>
-                                                                <p style="color: black;" >To,<br><strong>{{vndr.firstname}} {{vndr.lastname}}</strong><br>
-                                                                    {{vndr.street}},{{vndr.city}}<br>
-                                                                    {{vndr.state}},{{vndr.country}}<br>
-                                                                    {{vndr.pincode }}<br>
-                                                                    {{vndr.email}}<br>
-                                                                    {{vndr.phone}}<br>
-                                                                </p>
-                                                            </th>
-                                                        </tr>
-                                                    </table>
-                                                   
-                                                
-                                                </div>
-                                               
-                                            </div>
+      <div id="panel">
+          <div class="card-block1">
+              <div id="whatToPrint1" class="print-container card-body">
+                  <div class="container bootdey">
+                      <div class="row">
+                          <div class="col-sm-12 col-sm-offset-1" style="padding:10px;">
+                              <div class="widget-box">
+                                  <div class="widget-body">
+                                      <div class="widget-main padding-10">
+                                          <div class="row"  style="padding:10px;" >
+                                              <div class="row">
+                                                <table>
+                                                    <tr>
+                                                        <th>
+                                                                 
+                                                      <p ><strong>{{ cmp1.cname }}</strong> <br>
+                                                        {{cmp1.city}} <br>
+                                                        {{cmp1.pincode}}<br>
+                                                        {{cmp1.state}},India <br>
+                                                        {{cmp1.cemail}}<br>
+                                                        {{cmp1.pincode}}<br>
+                                                    </p>  
+                                                        </th>
+                                                        <th>
+                                                            <p >To,<br><strong>{{vndr.firstname}} {{vndr.lastname}}</strong><br>
+                                                                {{vndr.street}},{{vndr.city}}<br>
+                                                                {{vndr.state}},{{vndr.country}}<br>
+                                                                {{vndr.pincode }}<br>
+                                                                {{vndr.email}}<br>
+                                                                {{vndr.phone}}<br>
+                                                            </p>
+                                                        </th>
+                                                    </tr>
+                                                </table>
+                                              </div>
                                             
-                                            <div class="row col-12">                                                                           
-                   
-                                                   <table style="color:black;" class="table">
-                                                        <tr>
-                                                            <th  style="color: black;"class="text-black">Account Summary</th>
-                                                        </tr>
-                                                        {% if vndr.opening_balance_type == "Credit"  %}
-                                                        <tr>
-                                                            <th  style="color: black;">Opening balance</th>
-                                                            <th  style="color: black;">:</th>
-                                                            <th  style="color: black;">- {{vndr.openingbalance}}</th>
-                                                        </tr>
-                                                        {% else %}
-                                                        <tr>
-                                                            <th style="color: black;">Opening balance</th>
-                                                            <th style="color: black;">:</th>
-                                                            <th style="color: black;">{{vndr.openingbalance}}</th>
-                                                        </tr>
-                                                        {% endif %}
-                                                       
-                                                     
-                                                        <tr>
-                                                            <th style="color: black;">Balance Due</th>
-                                                            <th>:</th>
-                                                            <th style="color: black;"> {{total_balance}}</th>
-                                                        </tr>
-                                                    </table>
-                                                </div>
+                                             
+                                          </div>
+                                          
+                                          <div class="row col-12">
+                                             
+                                              <div class="col" >
+                                                  <table class="table ">
+                                                      <tr>
+                                                          <th class="text-black">Account Summary</th>
+                                                      </tr>
+                                                      {% if vndr.opening_balance_type == "Credit"  %}
+                                                      <tr>
+                                                          <th>Opening balance</th>
+                                                          <th>:</th>
+                                                          <th>- {{vndr.openingbalance}}</th>
+                                    
+                                                  
+                                                        
+                                                      </tr>
+                                                      {% else %}
+                                                      <tr>
+                                                          <th>Opening balance</th>
+                                                          <th>:</th>
+                                                          <th>{{vndr.openingbalance}}</th>
                                                 
-                                            </div>
-                                       
-                                        <div class="col-md-12 mb-5">
-                                            <table id="logic" class="table table-bordered table-hover">
-                                                <thead>
-                                                    <tr>
-                                                    <th style="background-color: aqua;color: black;">SL.NO</th>
-                                                    <th style="background-color: aqua;color: black;">Date</th>
-                                                    <th style="background-color: aqua;color: black;">Transactions</th>
-                                                    <th style="background-color: aqua;color: black;">Number</th>
-                                                    <th style="background-color: aqua;color: black;">Amount</th>
-                                                    <th style="background-color: aqua;color: black;">Payments</th>
-                                                    <th style="background-color: aqua;color: black;">Balance</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                   
-                                                    {% for data in combined_data %}
-                                                        <tr>
-                                                            <td style="color: black;">{{forloop.counter}}</td>
-                                                            <td style="color: black;">{{data.Date|date:'d-m-Y'}}</td>
+                                                      </tr>
+                                                      {% endif %}
+                                                     <tr >
+                                                        <th>Balance Due</th>
+                                                    
+                                                        <th>:</th>
+                                                        <th>{{total_balance}}</th>
+                                                     </tr>
+                
+                                                    
+                                                  </table>
+                                                  
+                                              </div>
+                                              
+                                          </div>
+                                      </div>
+                                      <div class="col-md-12">
+                                          <table class="table table-hover " width="100%" >
+                                              <thead >
+                                                  <tr style="background-color:aqua;color: rgb(0, 0, 0);">
+                                                    <th style="background-color: aqua;">SL.NO</th>
+                                                  <th  style="background-color: aqua;">Date</th>
+                                                  <th  style="background-color: aqua;">Transactions</th>
+                                                  <th  style="background-color: aqua;">Number</th>
+                                                  <th  style="background-color: aqua;">Amount</th>
+                                                  <th  style="background-color: aqua;">Payments</th>
+                                                  <th  style="background-color: aqua;">Balance</th>
+                                                  </tr>
+                                              </thead>
+                                              <tbody class="thead-dark">
+                                                  <tr>
+                                                 <td>0</td>
+                                                <td>{{vndr.date}}</td>
+                                                <td>**Opening Balance**</td>
+                                                <td>{{vndr.openingbalance}}</td>
+                                                <td>0</td>
+                                                <td></td>
+                                                <td>{{vndr.openingbalance}}</td>
+                                                  </tr>
+                                                  {% for data in combined_data %}
+                                                      <tr>
+                                                          <td>{{forloop.counter}}</td>
+                                                          <td>{{data.Date|date:'d-m-Y'}}</td>
 
-                                                            <td style="color: black;">{{data.Type}}</td>
-                                                            <td style="color: black;">{{data.Number}}</td>
-                                                            <td style="color: black;">{{data.Total}}</td>
-                                                            <td style="color: black;">{{data.paid}}</td>
-                                                            {% if vndr.opening_balance_type == "Credit"  %}
-                                                            <td style="color: black;">{{data.Balance}} (cr)</td>
-                                                            {% else %}
-                                                            <td style="color: black;">{{data.Balance}} (dbt)</td>
-                                                            {% endif %}                        
-                                                        </tr>
-                                                        {% endfor %}<br>
-                                                    <tr>
-                                                        <th colspan="5" style="color: black;">Balance Due</th>
-                                                        <th style="color: black;">{{total_balance}}</th>
-                                                    </tr>
-                                                </tbody>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div><br>
-                                    </div>
-                                        <div class="col-md-12 tab_logic">
-                                           
-                                        </div>
-                                        <div class="hr hr8 hr-double hr-dotted"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>    
-                </div>
-            </div>
+                                                          <td >{{data.Type}}</th>
+                                                          <td>{{data.Number}}</td>
+                                                          <td>{{data.Total}}</td>
+                                                          <td>{{data.paid}}</td>
+                                                          <td>{{data.Balance}}</td>
+                      
+                                                      </tr>
+                                                      {% endfor %}<br>
+                                                  <tr>
+                                                      <th colspan="5">Balance Due</th>
+                                                      <th >{{total_balance}}</th>
+                                                  </tr>
+                                              </tbody>
+                                              <tbody></tbody>
+                                          </table>
+                                      </div><br>
+                                      <div class="col-md-12 tab_logic">
+                                         
+                                      </div>
+                                      <div class="hr hr8 hr-double hr-dotted"></div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>    
+              </div>
+          </div>
+      </div>
   </div>
 </div>
 </body>

@@ -1434,11 +1434,11 @@ urlpatterns = [
     #estimate
     path('itemdata3',views.itemdata3,name="itemdata3"),
     path('shareEstimateToEmail/<int:id>',views.shareEstimateToEmail, name='shareEstimateToEmail'),
-    
-    path('estimate_convert1/<int:id>/',views.estimate_convert1, name='estimate_convert1'),
+   
+    path('estimate_convert1/<int:id>/<str:conversion_type>/',views.estimate_convert1, name='estimate_convert1'),
 
-    path('covert_estimate_to_recinvoice/<int:id>',views.covert_estimate_to_recinvoice,name='covert_estimate_to_recinvoice'),
-    path('covert_estimate_to_salesorder/<int:id>',views.covert_estimate_to_salesorder,name='covert_estimate_to_salesorder'),
+    path('covert_estimate_to_recinvoice/<int:id>/<str:conversion_type>',views.covert_estimate_to_recinvoice,name='covert_estimate_to_recinvoice'),
+    path('covert_estimate_to_salesorder/<int:id>/<str:conversion_type>',views.covert_estimate_to_salesorder,name='covert_estimate_to_salesorder'),
     #End
     
     #.....mirna...urls...(new)...
@@ -1448,16 +1448,6 @@ urlpatterns = [
     #End
     
     path('loan_check',views.loan_check,name='loan_check'),
-    
-    path('goconvertestimatetoinvoice/<int:id>',views.goconvertestimatetoinvoice,name='goconvertestimatetoinvoice'),
-    path('goconvertestimatetoreinvoice/<int:id>',views.goconvertestimatetoreinvoice,name='goconvertestimatetoreinvoice'),
-    path('goconvertestimatetosalesorder/<int:id>',views.goconvertestimatetosalesorder,name='goconvertestimatetosalesorder'),
-    path('payment_term_for_estimate',views.payment_term_for_estimate,name='payment_term_for_estimate'),
-    
-    path('purchasefilterbyDate',views.purchasefilterbyDate, name='purchasefilterbyDate'), 
-    
-    path('crt_bank_load',views.crt_bank_load,name='crt_bank_load'),
-    path('bankloads/<int:id>',views.bankloads,name='bankloads'),
     
     re_path(r'^create_item4/(?P<pdebit_id>\d+)/$', views.create_item4, name='create_item4'),
  

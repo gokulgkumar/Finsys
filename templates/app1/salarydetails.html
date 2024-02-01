@@ -1,7 +1,7 @@
 {% extends 'app1/base.html' %}
 
 {% block body %}
-{% load static %}
+    {% load static %}
     <style>
         @import url(https://fonts.googleapis.com/css?family=Open+Sans);
         body {
@@ -131,7 +131,7 @@
                                 <td><a href="{% url 'salary_overview' employee_id=salary_detail.employee.employeeid salary_id=salary_detail.id %}">{{ salary_detail.employee.title }} {{ salary_detail.employee.firstname }} {{ salary_detail.employee.lastname }}</a></td>
 
                                 <td>{{ salary_detail.employee.employeeno }}</td>
-                                <td>{{ salary_detail.month_name }}-{{ salary_detail.year }}</td>
+                                <td>{{ salary_detail.month }}-{{ salary_detail.year }}</td>
                                 <td>{{ salary_detail.total_salary}}</td>
                                 <td>
                                     {% if salary_detail.status == 'draft' %}

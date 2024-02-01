@@ -121,6 +121,96 @@ input[name="service-city"] {
 
 
 
+ <script>
+    $('.select2').select2();
+    
+    console.log("select is 'select2'");
+
+    $('#selected').on('input', function() {
+                console.log('hello')
+                
+                select = $('#selected').val();
+                console.log(select,'select')
+                $('#billno').val('');
+                $.ajax({
+                type: "GET",
+                url: "{% url 'getvendordata' %}",
+                data: {
+                    id: select
+                }
+                }).done(function(response) {
+                var json_data = JSON.parse(response);
+                for (key in json_data) {
+
+
+
+                    var gstNumDiv = $('#gstDiv');
+                    var showdiv1 = $('#showdiv1');
+                    
+                    document.getElementById('email').value = json_data[key]['email'];
+                    document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
+                    // document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
+                    var sourceOfSupplyValue = json_data[key]['sourceofsupply']
+                    $('#sourcesupply').text(sourceOfSupplyValue);
+                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    
+
+                    // document.getElementById('gst_num') =json_data[key]['gstin']
+                    // console.log(gst_num,'gst_num')
+
+                    var sourceOfSupplyValueinside= 'Kerala';
+
+                    if (sourceOfSupplyValue == '[KL] Kerala'){
+                        $('#sourcesupply').text(sourceOfSupplyValue);
+                        console.log('Kerala')
+                    }
+
+                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
+                        document.getElementById('cgst1').style.display = 'flex';
+                        document.getElementById('sgst1').style.display = 'flex';
+                        document.getElementById('igst1').style.display = 'none';
+                    } else {
+                        document.getElementById('cgst1').style.display = 'none';
+                        document.getElementById('sgst1').style.display = 'none';
+                        document.getElementById('igst1').style.display = 'flex';
+                    }
+
+
+                    
+            
+                    
+
+                    if (json_data[key]['gsttype'] == 'unregistered Business' || json_data[key]['gsttype'] == 'Overseas' ){
+                        gstNumDiv.hide();
+                        showdiv1.show()  
+
+                    }
+                    else{
+                        gstNumDiv.show();  
+                        document.getElementById('gst_num').value = json_data[key]['gstin'];
+                        showdiv1.hide()  
+                    }
+
+
+                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
+                    
+                    
+                
+                
+                reloadbill(json_data[key]['vendorid']) ;
+
+                console.log('hiy',json_data[key]['vendorid'])
+                }
+                
+                
+                })
+                
+
+            })
+           
+            $('#selected').trigger('change');
+
+</script>   
 
  <!-- <script>
     $(document).ready(function() {
@@ -157,16 +247,40 @@ input[name="service-city"] {
                                     <textarea class="form-control" name="address" rows="5" id="mailaddr"></textarea>
                                 </div>
                                 <div class="col-md-5 mt-3"></div>
+
+
+
+                                
+                                
+
+
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02">GST Treatment</label>
                                     
-                                    <input type="text" class="form-control" name="gst_type" id="gst_type" required>
+                                    <input type="text" class="form-control" name="gst_type" id="gst_type" >
                                 </div>
+
+                              
+                                
                                 <div class="col-md-5 mt-3" id="gstDiv">
+                                  
                                     <label for="validationCustom02">GST Number</label>
+                                    <input type="text" class="form-control" name="gst_num" id="gst_num" >
                                     
-                                    <input type="text" class="form-control" name="gst_num" id="gst_num" required>
-                                </div>
+                            
+                                   
+                                </div> 
+                                
+                                <script>
+
+                                    // var gst_type= document.getElementById('gst_type').value
+                                    //  if 
+     
+                                    //  var b = '{{pdebt.gsttype}}'
+                                    //  var a ='{{pdebt.gstnumber}}'
+                                    //  console.log('a',a)
+                                    //  console.log('b',b)
+                                 </script>
 
                                 <div class="col-md-5 mt-3" id="showdiv1" style="display: none;">
                                 </div>
@@ -180,7 +294,7 @@ input[name="service-city"] {
                                 <div class="col-md-5 mt-3">
                                     <label for="validationCustom02" >Debit Note Number</label><span class="text-danger" id="dangerdiv" style="display: none;"><span class="text-white">(</span> This number is not continous <span class="text-white">)</span></span>
                                    
-                                     <input type="text" class="form-control" name="debit_no" id="deb_no" placeholder="{{deb_no}}" value="{{ pdebt.debit_no }}" >
+                                     <input type="text" class="form-control" name="debit_no" id="deb_no" placeholder="{{deb_no}}" value="{{ pdebt.debit_no }}" readonly>
                                     
                                 </div>
                                 
@@ -335,14 +449,30 @@ input[name="service-city"] {
                                         <td>
                                             
                                             <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'  value="{{pro.price}}"
-                                            class="form-control price" step="0.00" min="0" />
+                                            class="form-control price" step="0.00" min="0"/>
                                         </td>
                                         
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs"  onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
-                                         
+                                                {% if pdebt.supply == cmp1.state %}
+                                                <option value= {{ pro.tax }} text={{ cmp1.state }} hidden>{{pro.tax}} % GST</option>
+                                                <option value=0 text={{ cmp1.state }}>00% GST(00%)</option>
+                                                <option value=3 text={{ cmp1.state }}>03% GST(03%)</option>
+                                                <option value=5 text={{ cmp1.state }}>05% GST(05%)</option>
+                                                <option value=12 text={{ cmp1.state }}>12% GST(12%)</option>
+                                                <option value=18 text={{ cmp1.state }}>18% GST(18%)</option>
+                                                <option value=28 text={{ cmp1.state }}>28% GST(28%)</option>
+                                                {% else %}
+                                                <option  value={{ pro.tax }} text=" " hidden>{{ pro.tax }} % IGST</option>
+                                                <option value=0 text=" ">0.0% IGST(00%)</option>
+                                                <option value=3 text=" ">03.0% IGST(03%)</option>
+                                                <option value=5 text=" ">05.0% IGST(05%)</option>
+                                                <option value=12 text=" ">12.0% IGST(12%)</option>
+                                                <option value=18 text=" ">18.0% IGST(18%)</option>
+                                                <option value=28 text=" ">28.0% IGST(28%)</option>
+                                                {% endif %}
                                           </select>
                                         </td>
                                         <td><input type="number" name='reduce[]' id="reduce" class="form-control reduce" 
@@ -396,8 +526,6 @@ input[name="service-city"] {
                                                    var data4 = response.gst;
                                                    var data5 = response.sgst;
                                                    var data6 = response.quty;
-                                                   var data7 =response.taxs;
-                                                   var data8 = response.placesx
 
                                                    
                                                    var data7 =response.taxs;
@@ -411,69 +539,29 @@ input[name="service-city"] {
                                                    document.getElementById('unit1').value = data3;
                                                    document.getElementById('taxs').value = data7;
                                                    document.getElementById('quantitys').value = data6;
-                                                   
-                                                   
-                                                   console.log(data8,'data8');
 
                                                    console.log(response.error_flag,'response.error_flag')
 
                                                    if (response.error_flag == 1) {
-                                                   
+                                                   console.log('1')
                                                    $('#errorLabel').text("Item is not purchased for this bill number");
                                                }else {
-                                            
+                                                console.log('0')
                                                    $('#errorLabel').text("");
                                                }
                                                   
 
-                                                //    var place = 'Kerala'
+                                                   var place = 'Kerala'
                                                   
-                                                //    if (place == '{{ cmp1.state }}') {
+                                                   if (place == '{{ cmp1.state }}') {
 
-                                                //        document.getElementById('ta1').value = data4;
+                                                       document.getElementById('ta1').value = data4;
                                                        
                                                        
-                                                //    }
-                                                //    else{
-                                                //     document.getElementById('ta5').value = data5;
-                                                //    }
-
-
-                                                   var taxOptions = (data8 === 'Kerala') ? 
-
-                                                    `<option value="0" hidden>Select</option>
-                                                        <option value="0">00 % GST(00%)</option>
-                                                        <option value='3'>03 % GST(03%)</option>
-                                                        <option value='5'>05 % GST(05%)</option>
-                                                        <option value="12">12 % GST(12%)</option>
-                                                        <option value='18'>18 % GST(18%)</option>
-                                                        <option value='28'>28 % GST(28%)</option>`:
-                                                    `<option value="0" hidden>Select</option>
-                                                        <option value='0'>00 % IGST(00%)</option>
-                                                        <option value='3'>03 % IGST(03%)</option>
-                                                        <option value='5'>05 % IGST(05%)</option>
-                                                        <option value='12'>12 % IGST(12%)</option>
-                                                        <option value='18'>18 % IGST(18%)</option>
-                                                        <option value='28'>28 % IGST(28%)</option>`;
-
-                                                        console.log('taxOptions',taxOptions)
-
-
-                                                    document.getElementById('tax1').innerHTML =taxOptions
-                                                    var taxis=document.getElementById('tax1')
-
-                                                    document.getElementById('taxs').value  = data7 ;
-
-
-                                                    for(let i=0;i<taxis.children.length;i++){
-
-                                                        if(taxis.children[i].value === data7){
-                                                            taxis.children[i].setAttribute('selected','true') 
-                                                            // taxis.children[i].innerHTML=`<option value="${data7}" selected>${data7}</option>`
-                                                        }
-                                                        console.log(taxis.children[i])
-
-                                                    }
+                                                   }
+                                                   else{
+                                                    document.getElementById('ta5').value = data5;
+                                                   }
                                                    
                                            
                                            },
@@ -710,10 +798,7 @@ input[name="service-city"] {
                                         </div>
                                         <div class="col-sm-4 m-0 p-0"></div>
                                     </div>
-
-                              
-                               
-                                <div class="row container-fluid p-2 m-0" id="igst1" >
+                                <div class="row container-fluid p-2 m-0" id="igst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">IGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='igst' step="any" id="igst" placeholder=0 
@@ -721,10 +806,7 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                                
-
-                                
-                                <div class="row container-fluid p-2 m-0"  id="cgst1" >
+                                <div class="row container-fluid p-2 m-0" style="display: none;" id="cgst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">CGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='cgst' step="any" id="cgst" placeholder=0 
@@ -732,9 +814,7 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                                
-                                
-                                <div class="row container-fluid p-2 m-0" id="sgst1" >
+                                <div class="row container-fluid p-2 m-0" style="display: none;" id="sgst1">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">SGST</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
                                     <div class="col-sm-7 mt-2"><input type="number" name='sgst' step="any" id="sgst" placeholder=0 
@@ -742,7 +822,6 @@ input[name="service-city"] {
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
                                 </div>
-                               
                                 <div class="row container-fluid p-2 m-0">
                                     <div class="col-sm-4 mt-2"><label for="a" class="text-center">Tax Amount</label></div>
                                     <div class="col-sm-1 mt-2">:</div>
@@ -788,7 +867,7 @@ input[name="service-city"] {
                                 <div class="row container-fluid p-2 m-0">
                                     <div class="col-sm-4 mt-2"><a class="text-center">Adjustments</a></div>
                                     <div class="col-sm-1 mt-2">:</div>
-                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off" value="0" placeholder=0 
+                                    <div class="col-sm-7 mt-2"><input type="number" name='round_off' step="any" id="round_off"  placeholder=0 
                                         class="form-control" value="{{ pdebt.round_off }}"/>
                                     </div>
                                     <div class="col-sm-4 m-0 p-0"></div>
@@ -1625,14 +1704,7 @@ input[name="service-city"] {
                 </div>
             </div>
         </div> 
-    </div> 
-
-
-
-    
-    
-
-
+    </div>   
     
     <div class="modal fade" id="unit">
         <div class="modal-dialog">
@@ -1681,109 +1753,7 @@ input[name="service-city"] {
 <script>
     $('.select2').select2();
 </script> -->
-             
-
-
-
-
-
-<script>
-    $('.select2').select2();
-    
-    console.log("select is 'select2'");
-
-    $('#selected').on('change', function() {
-                console.log('hello')
-                
-                select = $('#selected').val();
-                $('#billno').val('');
-                $.ajax({
-                type: "GET",
-                url: "{% url 'getvendordata' %}",
-                data: {
-                    id: select
-                }
-                }).done(function(response) {
-                var json_data = JSON.parse(response);
-                for (key in json_data) {
-
-                    var gstNumDiv = $('#gstDiv');
-                    var showdiv1 = $('#showdiv1');
-                    document.getElementById('email').value = json_data[key]['email'];
-                    document.getElementById('mailaddr').value = json_data[key]['street'] + '\n' + json_data[key]['city'] + '\n' + json_data[key]['state'] + '\n' + json_data[key]['pincode'] + '\n' + json_data[key]['country'];
-                    // document.getElementById('plosu').value = json_data[key]['sourceofsupply'];
-                    var sourceOfSupplyValue = json_data[key]['sourceofsupply']
-                    $('#sourcesupply').text(sourceOfSupplyValue);
-                    
-                    var sourceOfSupplyValueinside= 'Kerala';
-
-                    if (sourceOfSupplyValue == '[KL] Kerala'){
-                        $('#sourcesupply').text(sourceOfSupplyValue);
-                        
-                    }
-
-                    if (json_data[key]['sourceofsupply'] == '[KL] Kerala') {
-
-                    console.log('True')
-
-
-                    document.getElementById('cgst1').style.display = 'flex';
-                    document.getElementById('sgst1').style.display = 'flex';
-                    document.getElementById('igst1').style.display = 'none';
-                    } else {
-                    console.log('False')
-                    document.getElementById('cgst1').style.display = 'none';
-                    document.getElementById('sgst1').style.display = 'none';
-                    document.getElementById('igst1').style.display = 'flex';
-                    }
-
-
-
-            
-                    
-
-                    if (json_data[key]['gsttype'] === 'unregistered Business' || json_data[key]['gsttype'] === 'Overseas' ){
-                        gstNumDiv.hide();
-                        showdiv1.show()  
-
-                    }
-                    else{
-                        gstNumDiv.show();  
-                        document.getElementById('gst_num').value = json_data[key]['gstin'];
-                        showdiv1.hide()  
-                    }
-
-
-                    document.getElementById('gst_type').value = json_data[key]['gsttype'];
-
-
-
-                    console.log('sourceofsupply',json_data[key]['sourceofsupply'])
-
-                    
-                   
-                    
-                
-                
-                reloadbill(json_data[key]['vendorid']) ;
-
-                console.log('hiy',json_data[key]['vendorid'])
-                }
-                
-                
-                })
-                
-
-            })
-           
-            $('#selected').trigger('change');
-
-</script>   
-
-
-
-
-
+                  
 
 
 
@@ -2128,14 +2098,14 @@ input[name="service-city"] {
     function test(){
         var bc = document.getElementById("plosu").value
         d=0
-        if (bc == "Kerala" || bc == "[KL] Kerala"   ) {
+        if (bc == "{{ cmp1.state }}"  ) {
             gst = taxamount/2
             $('#cgst').val(parseFloat(gst.toFixed(2)));
             $('#sgst').val(parseFloat(gst.toFixed(2)));
             $('#igst').val(parseFloat(d.toFixed(2)));
         }
             
-        if (bc != "Kerala" && bc != "[KL] Kerala"  ) {
+        if (bc != "{{ cmp1.state }}"  ) {
             $('#igst').val(taxamount.toFixed(2));
             $('#cgst').val(d.toFixed(2));
             $('#sgst').val(d.toFixed(2));
@@ -2166,7 +2136,7 @@ input[name="service-city"] {
         if (paidCheckbox.checked) {
             paidInput.value = grandTotalInput.value;
         } else {
-            paidInput.value = "0";
+            paidInput.value = "";
         }
         calculateBalance();
     });

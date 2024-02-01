@@ -132,23 +132,7 @@
             border-radius: 5px;
         }
         
-        @media print{
-        body{
-            visibility: hidden !important; /* hide everything in body when in print mode*/
-        }
-
-        .printContainer {
-            visibility: visible !important; /* Override the rule above to only show the printables*/
-            position: absolute;
-            z-index: 99999;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            font-size: large;
-        } 
-    }
-
+        
     </style>
 
     <div class="page-content">
@@ -184,7 +168,7 @@
                                         <i class="fa fa-share" style="font-size: medium;padding: 10px;">&nbsp;Share</i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="shareDropdown" style="background-color: black;">
-                                        <a class="dropdown-item" style="color: white; cursor: pointer;" href="https://web.whatsapp.com/" target="_blank">WhatsApp</a>
+                                        <a class="dropdown-item" style="color: white; cursor: pointer;" onclick="shareViaWhatsApp()">WhatsApp</a>
                                         <a class="dropdown-item" style="color: white; cursor: pointer;" data-target="#shareBillEmail" data-toggle="modal">Email</a>
                                     </div>
                                 </div>
@@ -622,8 +606,8 @@
                                                                             
                                                                         </div>
                                                                    
-                                                                    <div class="col-md-12 mb-5 w-100">
-                                                                        <table id="logic" class="table table-bordered table-hover" style="width: 100%;">
+                                                                    <div class="col-md-12 mb-5">
+                                                                        <table id="logic" class="table table-bordered table-hover" width="100%">
                                                                             <thead>
                                                                                 <tr>
                                                                                 <th style="background-color: aqua;color: black;">SL.NO</th>
@@ -636,7 +620,15 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                              
+                                                                                <tr>
+                                                                                    <td style="color: black;">0</td>
+                                                                                    <td style="color: black;">{{vndr.date}}</td>
+                                                                                    <td style="color: black;">**Opening Balance**</td>
+                                                                                    <td style="color: black;"></td>
+                                                                                    <td style="color: black;">{{vndr.openingbalance}}</td>
+                                                                                    <td style="color: black;">0</td>
+                                                                                    <td style="color: black;">{{vndr.openingbalance}}</td>
+                                                                                </tr>
                                                                                 {% for data in combined_data %}
                                                                                     <tr>
                                                                                         <td style="color: black;">{{forloop.counter}}</td>
@@ -646,11 +638,8 @@
                                                                                         <td style="color: black;">{{data.Number}}</td>
                                                                                         <td style="color: black;">{{data.Total}}</td>
                                                                                         <td style="color: black;">{{data.paid}}</td>
-                                                                                        {% if vndr.opening_balance_type == "Credit"  %}
-                                                                                        <td style="color: black;">{{data.Balance}} (cr)</td>
-                                                                                        {% else %}
-                                                                                        <td style="color: black;">{{data.Balance}} (dbt)</td>
-                                                                                        {% endif %}
+                                                                                        <td style="color: black;">{{data.Balance}}</td>
+                                                    
                                                                                     </tr>
                                                                                     {% endfor %}<br>
                                                                                 <tr>
@@ -854,7 +843,14 @@
     
                                 </thead>
                                 <tbody>
-                                   
+                                    <tr>
+                                        <th>0</th>
+                                        <th>{{vndr.date}}</th>
+                                        <th>**Opening Balance**</th>
+                                        <td>0</td>
+                                        <th>{{vndr.openingbalance}}</th>
+                                        <th>{{vndr.openingbalance}}</th>
+                                    </tr>
                                    
                                     {% for data in combined_data %}
                                     <tr>
@@ -1001,30 +997,20 @@
         }
     </script>
     <link rel="stylesheet" type="text/css" href="path/to/print-styles.css">
-    <script>
-        function printDiv(){
 
-            print4 = document.getElementById('whatToPrint1')
-            if (print4.style.display !== 'none'){
-                    var printContents = document.getElementById("whatToPrint1").innerHTML;
-            }else{
+     <script>
+        function printDiv() {
+            var printDiv = document.getElementById("whatToPrint1");
+            var originalContents = document.body.innerHTML;
 
-                var printContents = document.getElementById("whatToPrint").innerHTML;
-            }
+            document.body.innerHTML = printDiv.innerHTML;
 
+            window.print();
 
-
-            var $printerDiv = $('<div class="printContainer"></div>'); // create the div that will contain the stuff to be printed
-            $printerDiv.html(printContents); // add the content to be printed
-            $('body').append($printerDiv).addClass("printingContent"); // add the div to body, and make the body aware of printing (we apply a set of css styles to the body to hide its contents)
-
-            window.print(); // call print
-            $printerDiv.remove(); // remove the div
-            $('body').removeClass("printingContent");
+            document.body.innerHTML = originalContents;
         }
     </script>
-   
-      <style>
+  <style>
     @media print {
         /* Add these styles to override any fading or visibility issues */
         #whatToPrint1 {
@@ -1244,7 +1230,7 @@
 <script>
     function generatePDF() {
         var element = document.getElementById('panel');
-        console.log('done')
+
         html2pdf(element);
     }
 </script>

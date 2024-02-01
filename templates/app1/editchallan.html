@@ -253,6 +253,7 @@
             console.log(RowCount);
             var newRow = $(`
             <tr>  
+                <td>${RowCount}</td>   
 
                 <td style="width: 18%;" class='text-right'>
                     <div class='form-group mt-3 d-flex align-items-center'>
@@ -708,6 +709,7 @@
                                 onchange="calc()">
                                 <thead>
                                     <tr>
+                                        <th>no</th>
                                         <th>Product
                                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a
                                                 href="#" class=" btn-outline-secondary" data-bs-target="#newitem"
@@ -726,6 +728,7 @@
                                     {% with counter=forloop.counter %}
 
                                     <tr>
+                                        <td>{{ counter }}</td>
 
                                         <td style="width: 18%;" class="text-right">
                                             <div class='form-group mt-3 d-flex align-items-center'>

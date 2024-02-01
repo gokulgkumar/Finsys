@@ -46,9 +46,13 @@ body{
   font-size: 20px;
 }
 
+/*Resize the wrap to see the search bar change!*/
 .wrap{
   width: 40%;
- 
+  /* position: absolute;
+  top: 50%;
+  left: 50%; */
+  /* transform: translate(-50%, -50%); */
 }
 .table-row{
         cursor:pointer;
@@ -85,8 +89,9 @@ body{
                             <a class="dropdown-item" onclick="sortTableName()"
                                 style="height: 40px; font-size: 15px; color: white; text-align: center;" >Customer</a>
                             <a class="dropdown-item" onclick="sortTableAmount()"
-                                style="height: 40px; font-size: 15px; color: white; text-align: center;" >Balance</a>
-                           
+                                style="height: 40px; font-size: 15px; color: white; text-align: center;" >Amount</a>
+                            <!-- <a class="dropdown-item" href="{% url 'gocustomers_desc' %}"
+                                style="height: 40px; font-size: 15px; color: white; text-align: center;" >Customer <icon class=" fas fa-arrow-up"></icon></a> -->
                         </div> 
                     </div>
                 </div>

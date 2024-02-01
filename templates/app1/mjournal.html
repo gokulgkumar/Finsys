@@ -173,7 +173,7 @@
                                           <td>{{ a.total_deb }}</td>
                                         <td>
                                             {% if a.status == 'Publish' %}
-                                                Saved
+                                                Published
                                             {% else %}
                                                 Draft
                                             {% endif %}
@@ -207,17 +207,19 @@
 
         <script>
 
-$(document).ready(function() {
-        var $rows = $('#table tbody tr');
-        $('#search').keyup(function() {
-            var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+            $(document).ready(function() {
+                var $rows = $('.table tbody tr');
+                $('#search').keyup(function() {
+                    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+                    $rows.show().filter(function() {
+                        console.log($rows.show())
 
-            $rows.hide().filter(function() {
-                var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
-                return text.includes(val);
-            }).show();
-        });
-    });
+                        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+                        console.log(text)
+                        return !~text.indexOf(val);
+                    }).hide();
+                });
+            });
     
             function ExportToExcel(type, fn, dl) {
                 var elt = document.getElementById('table');
