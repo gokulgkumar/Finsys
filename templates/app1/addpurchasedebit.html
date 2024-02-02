@@ -111,6 +111,7 @@ input[name="service-city"] {
                 console.log('hello')
                 
                 select = $('#selected').val();
+                console.log('select',select)
                 
                 $('#billno').val('');
                 $.ajax({
@@ -131,7 +132,7 @@ input[name="service-city"] {
                     var sourceOfSupplyValue = json_data[key]['sourceofsupply']
                     $('#sourcesupply').text(sourceOfSupplyValue);
                     console.log('sourceOfSupplyValue',sourceOfSupplyValue)
-                    $('.select2').val(sourceOfSupplyValue).trigger('change.select2');
+                   
                     // var sourceOfSupplyValueinside= 'Kerala';
 
                     if (sourceOfSupplyValue == '[KL] Kerala' || sourceOfSupplyValue == 'Kerala'){
