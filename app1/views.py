@@ -55641,3 +55641,113 @@ def vendor_statement(request,id):
 # -------------------------
 
 
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
+
+                    
+
+        context = {'vndr': vndr,'total_balance':total_balance,'cmp1': cmp1,'pbill':pbill,'tod':tod,'re':re,'combined_data':combined_data,
+                    'pymnt':pymnt,'pbl':pbl,'paymnt':paymnt,'pordr':pordr,'expnc':expnc,'pdeb':pdeb,'tot6':total_balance,'tot1':tot1,'tot2':tot2,'combined_data':combined_data,
+                    'frd1':frd1,'tod1':tod1,'sdate':fromdate,'edate':todate
+
+                }
+
+    return render(request,'app1/vendor_statement.html',context)
