@@ -132,7 +132,23 @@
             border-radius: 5px;
         }
         
-        
+        @media print{
+        body{
+            visibility: hidden !important; /* hide everything in body when in print mode*/
+        }
+
+        .printContainer {
+            visibility: visible !important; /* Override the rule above to only show the printables*/
+            position: absolute;
+            z-index: 99999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: large;
+        } 
+    }
+
     </style>
 
     <div class="page-content">
@@ -145,11 +161,11 @@
                     <div class="collapse navbar-collapse tab" id="navbarSupportedContent">
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item">
-                                <a class="nav-link btn " role="button" href="{% url 'viewvendor' vndr.vendorid  %}"  style="color: white;"><i class="fa fa-info-circle" style="font-size: large;">&nbsp;Overview</i><span class="sr-only">(current)</span></a>
+                                <a class="nav-link btn " role="button" onclick="Details()" style="color: white;"><i class="fa fa-info-circle" style="font-size: large;">&nbsp;Overview</i><span class="sr-only">(current)</span></a>
                             </li>
                             
                             <li class="nav-item">
-                                <a class="nav-link btn " role="button" href="{% url 'viewvendor' vndr.vendorid  %}" style="color: white;"><i class="fa fa-stack-exchange" style="font-size: large;">&nbsp;Transactions</i></a>
+                                <a class="nav-link btn " role="button" onclick="transaction()" style="color: white;"><i class="fa fa-stack-exchange" style="font-size: large;">&nbsp;Transactions</i></a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link btn " role="button" onclick="Statment()" style="color: white;"><i class="fa fa-tasks" style="font-size: large;">&nbsp;Statement</i></a>
@@ -168,7 +184,7 @@
                                         <i class="fa fa-share" style="font-size: medium;padding: 10px;">&nbsp;Share</i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="shareDropdown" style="background-color: black;">
-                                        <a class="dropdown-item" style="color: white; cursor: pointer;" onclick="shareViaWhatsApp()" href="https://web.whatsapp.com/">WhatsApp</a>
+                                        <a class="dropdown-item" style="color: white; cursor: pointer;" href="https://web.whatsapp.com/" target="_blank">WhatsApp</a>
                                         <a class="dropdown-item" style="color: white; cursor: pointer;" data-target="#shareBillEmail" data-toggle="modal">Email</a>
                                     </div>
                                 </div>
@@ -480,8 +496,9 @@
                 </div>
 
                 
-                
-                <div id="statment" >
+            <div id="whatToPrint11">
+
+                <div id="statment">
                     <div class="container-fluid" >
                         <div class="py-5">
                             <div>
@@ -533,7 +550,7 @@
                                   <div  class="card">
                                     <div id="panel">
                                         <div class="card-block1">
-                                            <div id="whatToPrint1" class="print-container card-body">
+                                            <div id="whatToPrint12" class="print-container card-body">
                                                 <div class="container bootdey">
                                                     <div class="row">
                                                         <div class="col-sm-12 col-sm-offset-1" style="padding:20px;">
@@ -606,8 +623,8 @@
                                                                             
                                                                         </div>
                                                                    
-                                                                    <div class="col-md-12 mb-5">
-                                                                        <table id="logic" class="table table-bordered table-hover" width="100%">
+                                                                    <div class="col-md-12 mb-5 w-100">
+                                                                        <table id="logic" class="table table-bordered table-hover" style="width: 100%;">
                                                                             <thead>
                                                                                 <tr>
                                                                                 <th style="background-color: aqua;color: black;">SL.NO</th>
@@ -620,15 +637,7 @@
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                <tr>
-                                                                                    <td style="color: black;">0</td>
-                                                                                    <td style="color: black;">{{vndr.date}}</td>
-                                                                                    <td style="color: black;">**Opening Balance**</td>
-                                                                                    <td style="color: black;"></td>
-                                                                                    <td style="color: black;">{{vndr.openingbalance}}</td>
-                                                                                    <td style="color: black;">0</td>
-                                                                                    <td style="color: black;">{{vndr.openingbalance}}</td>
-                                                                                </tr>
+                                                                              
                                                                                 {% for data in combined_data %}
                                                                                     <tr>
                                                                                         <td style="color: black;">{{forloop.counter}}</td>
@@ -638,8 +647,11 @@
                                                                                         <td style="color: black;">{{data.Number}}</td>
                                                                                         <td style="color: black;">{{data.Total}}</td>
                                                                                         <td style="color: black;">{{data.paid}}</td>
-                                                                                        <td style="color: black;">{{data.Balance}}</td>
-                                                    
+                                                                                        {% if vndr.opening_balance_type == "Credit"  %}
+                                                                                        <td style="color: black;">{{data.Balance}} (cr)</td>
+                                                                                        {% else %}
+                                                                                        <td style="color: black;">{{data.Balance}} (dbt)</td>
+                                                                                        {% endif %}
                                                                                     </tr>
                                                                                     {% endfor %}<br>
                                                                                 <tr>
@@ -843,14 +855,7 @@
     
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <th>0</th>
-                                        <th>{{vndr.date}}</th>
-                                        <th>**Opening Balance**</th>
-                                        <td>0</td>
-                                        <th>{{vndr.openingbalance}}</th>
-                                        <th>{{vndr.openingbalance}}</th>
-                                    </tr>
+                                   
                                    
                                     {% for data in combined_data %}
                                     <tr>
@@ -997,20 +1002,26 @@
         }
     </script>
     <link rel="stylesheet" type="text/css" href="path/to/print-styles.css">
+    <script>
+        function printDiv(){
 
-     <script>
-        function printDiv() {
-            var printDiv = document.getElementById("whatToPrint1");
-            var originalContents = document.body.innerHTML;
+        
+            var printContents = document.getElementById("whatToPrint12").innerHTML;
+        
 
-            document.body.innerHTML = printDiv.innerHTML;
 
-            window.print();
 
-            document.body.innerHTML = originalContents;
+            var $printerDiv = $('<div class="printContainer"></div>'); // create the div that will contain the stuff to be printed
+            $printerDiv.html(printContents); // add the content to be printed
+            $('body').append($printerDiv).addClass("printingContent"); // add the div to body, and make the body aware of printing (we apply a set of css styles to the body to hide its contents)
+
+            window.print(); // call print
+            $printerDiv.remove(); // remove the div
+            $('body').removeClass("printingContent");
         }
     </script>
-  <style>
+   
+      <style>
     @media print {
         /* Add these styles to override any fading or visibility issues */
         #whatToPrint1 {
@@ -1230,7 +1241,7 @@
 <script>
     function generatePDF() {
         var element = document.getElementById('panel');
-
+        console.log('done')
         html2pdf(element);
     }
 </script>
@@ -1250,7 +1261,7 @@
             <form action="{% url 'VendorStatement_mail' vndr.vendorid %}" method="post" class="needs-validation"
               id="share_to_email_form" autocomplete="off">
               {% csrf_token %}
-              <input name="FromD" class="inputdate form-control"  id="date1"  type="date" hidden  >
+              <input name="FromD" class="inputdate form-control"  id="date1"  type="date"  hidden >
               <input name="ToD" class="inputdate form-control"  id="date2" type="date" hidden >
               <div class="form-group">
                 

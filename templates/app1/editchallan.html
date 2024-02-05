@@ -253,7 +253,6 @@
             console.log(RowCount);
             var newRow = $(`
             <tr>  
-                <td>${RowCount}</td>   
 
                 <td style="width: 18%;" class='text-right'>
                     <div class='form-group mt-3 d-flex align-items-center'>
@@ -709,7 +708,6 @@
                                 onchange="calc()">
                                 <thead>
                                     <tr>
-                                        <th>no</th>
                                         <th>Product
                                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a
                                                 href="#" class=" btn-outline-secondary" data-bs-target="#newitem"
@@ -728,7 +726,6 @@
                                     {% with counter=forloop.counter %}
 
                                     <tr>
-                                        <td>{{ counter }}</td>
 
                                         <td style="width: 18%;" class="text-right">
                                             <div class='form-group mt-3 d-flex align-items-center'>
@@ -795,7 +792,7 @@
                                                 onclick="state(this)" onselect="calc()">
                                                 <optgroup label="GST" style="background-color: black;"
                                                     class="text-center">
-                                                    <option value="{{k.tax}}" selected hidden>GST {{k.tax}}%</option>
+                                                    <!--<option value="{{k.tax}}" selected hidden>GST {{k.tax}}%</option>-->
                                                     <option value="0">GST 0%</option>
                                                     <option value="3">GST 3%</option>
                                                     <option value="5">GST 5%</option>
@@ -805,7 +802,7 @@
                                                 </optgroup>
                                                 <optgroup label="IGST" style="background-color: black;"
                                                     class="text-center">
-                                                    <option value="{{k.tax}}" selected hidden>IGST {{k.tax}}%</option>
+                                                    <!--<option value="{{k.tax}}" selected hidden>IGST {{k.tax}}%</option>-->
                                                     <option value="0">IGST 0%</option>
                                                     <option value="3">IGST 3%</option>
                                                     <option value="5">IGST 5%</option>
@@ -893,6 +890,7 @@
                                                         var dis = qty * rate;
                                                         var amount = dis - discount;
                                                         var taxamount = (amount) * (tax / 100);
+                                                        console.log(taxamount);
 
                                                         // update the tax amount and total amount input fields for this row
                                                         $(this).find('.taxamount').val(taxamount.toFixed(2));
@@ -2360,7 +2358,15 @@
         var result = vale.substring(index + 1);
         var c_state = "{{cmp1.state}}";
 
+        var gst = oxy_gst;
+        var igst = oxy_igst;
+
+
+
         var taxElement = $('#tax' + rowIndex);
+        tax_value = $('#tax' + rowIndex).val();
+        var labelElement = $('#ml' + rowIndex);
+
 
         if (result === c_state) {
             taxElement.find('optgroup[label="GST"]').show();
@@ -2370,8 +2376,12 @@
             var gstOptions = gstOptgroup.find('option');
 
             for (var j = 0; j < gstOptions.length; j++) {
-                select.selectedIndex = gstOptions[0].index; // Set selectedIndex to the index of the matched option
-                break;
+                if (gstOptions[j].value === gst) {
+                    select.selectedIndex = gstOptions[j].index; // Set selectedIndex to the index of the matched option
+                    console.log(gstOptions[j]);
+
+                    break;
+                }
             }
             document.getElementById('tr_cgst').style = ('display: flex');
             document.getElementById('tr_sgst').style = ('display: flex');
@@ -2382,9 +2392,13 @@
             var select = document.getElementById(`tax${rowIndex}`);
             var igstOptgroup = taxElement.find('optgroup[label="IGST"]');
             var igstOptions = igstOptgroup.find('option');
+
             for (var j = 0; j < igstOptions.length; j++) {
-                select.selectedIndex = igstOptions[0].index; // Set selectedIndex to the index of the matched option
-                break;
+                if (igstOptions[j].value === igst) {
+                    select.selectedIndex = igstOptions[j].index;
+                    console.log(igstOptions[j]);
+                    break;
+                }
             }
             document.getElementById('tr_cgst').style = ('display: none');
             document.getElementById('tr_sgst').style = ('display: none');
@@ -2394,18 +2408,75 @@
         }
     }
 
+    function itemfunctionss(id_str) {
+        id = id_str;
+        var select = $(`#item${id}`).val();
+        $.ajax({
+            type: "GET",
+            url: "{% url 'getitems2' %}",
+            data: {
+                id: select
+            },
+            success: function (response) {
+                data = response.hsn
+                data1 = response.desp
+                data2 = response.qty
+                data3 = response.price
+                data4 = response.gst
+                data5 = response.sgst
+                data6 = response.name
+                data7 = response.itemid
+
+                oxy_gst = data4
+                oxy_igst = data5
+                for (var m = 1; m <= id; m++) {
+                    // Generate table row
+                    // ...
+
+                    // Call toggleDateInput function for each row
+                    //itemfunctionss(m);
+                    toggleDateInputss(m);
+                }
+                console.log(oxy_gst);
+                console.log(oxy_igst);
+
+
+
+
+                //document.getElementById(`hsn${id}`).value = data;
+                //document.getElementById(`rate${id}`).value = data3;
+                //document.getElementById(`desc${id}`).value = data1;
+                //document.getElementById(`itemsearchInput${id}`).value = data6;
+                //document.getElementById(`item${id}`).value = data7;
+                //document.getElementById(`taxamount${id}`).value = 0.00;
+                //document.getElementById(`amount${id}`).value = 0.00;
+            }
+        });
+    }
+
+
     var tbl = document.querySelectorAll('#item_table tbody tr');
     var tbl_len = tbl.length;
     console.log(tbl_len);
 
+
     for (var m = 1; m <= tbl_len; m++) {
-        console.log(m);
         // Generate table row
         // ...
 
         // Call toggleDateInput function for each row
-        toggleDateInputss(m);
+        itemfunctionss(m);
+        //toggleDateInputss(m);
     }
+
+    var checkboxs = document.getElementById("plosu");
+    checkboxs.addEventListener('change', function () {
+
+        for (var m = 1; m <= tbl_len; m++) {
+            itemfunctionss(m);
+            //toggleDateInputss(m);
+        }
+    });
 
 
 

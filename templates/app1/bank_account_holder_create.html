@@ -7,27 +7,11 @@
 {% block body %}
 
 <style>
-    /* Apply styles to all input fields */
     input {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-        font-size: large;
-        background-color: rgba(79, 99, 117, 0.7);
-        border: 1px solid grey;
-        border-radius: 4px;
-        color: white;
-    }
-
-    /* Style specific input fields by targeting their type or class */
-    input[type="text"] {
-        border: 1px solid  grey;
-        border-radius: 4px;
-        background-color:rgba(79, 99, 117, 0.7);
-        color: white;
-        font-size: 16px;
-       
+      background-color: #2f516f;
+      border: 0;
+      border-radius: 5px;
+      color: white;
     }
 
     select {
@@ -41,107 +25,141 @@
         background-color:rgba(79, 99, 117, 0.7);
         font-size: 16px;
     }
+    .larger-card {
+       width: 100%; 
+       margin-right: 20%;
+       
+    }
+
+    .custom-modal-dialog {
+        max-width: 900px; /* You can adjust the width as needed */
+    }
 
     /* Add more styles as needed */
 </style>
 
-<div class="container">
+
     <form method="post" action="{% url 'bank_account_holder' %}" class="form-style" enctype="multipart/form-data">
         {% csrf_token %}
         
-       <div class="row" >
-            <div class="col-md-6">
-                <h2>Bank Account Holder Form</h2>
-                <br>
-                    <div class="form-group row">
-                        <label for="name" class="col-sm-4 col-form-label">Name</label>
-                        <input type="text" class="col-sm-8  form-control" name="name" id="name" value="{{account.name}}"><br>
-                        <label for="alias" class="col-sm-4 col-form-label">Alias</label>
-                        <input type="text" class="col-sm-8 form-control" name="alias" id="alias"><br>
-                        <label for="phone_number" class="col-sm-4 col-form-label">Phone Number</label>
-                        <input type="text" class="col-sm-8 form-control"name="phone_number" id="phone_number"><br>
-                        <label class="col-sm-4 col-form-label" for="email">Email</label>
-                        <input type="text" class="col-sm-8 form-control" name="email" id="email"><br>
-                        <label class="col-sm-4 col-form-label" for="account_type">Account Type</label>
-                           <select name="account_type" id="account_type" class="col-sm-8 form-control">
-                            <option value="">Select Account Type</option>
-                             <option value="Bank Account">Bank Account</option>
-                             <option value="Credit card">Credit card</option>
-
-                           </select>
-                            
-                       
-                    </div>
-              
+        <div class="page-content" >
+            <!--breadcrumb-->
+            <div class="card radius-15 larger-card" >
+              <div class="card-body">
+                <div class="card-title">
+                  <center>
+                    <h3 class="mb-0" id="invnumb"> New Bank Account Holder </h3>
+                  </center>
+                </div>
+                <hr />
+              </div>
             </div>
-            <div class="col-md-6">
-                <h2>Bank Account Form</h2><br>
-               
-                    <div class="form-group row">
-                        <label class="col-sm-4 col-form-label" for="accountName" hidden>Account Name</label>
-                        <input type="text" class="col-sm-8  form-control" name="accountName" id="accountName" hidden><br>
-                        <label class="col-sm-4 col-form-label" for="bankName">Bank name</label>
-                        <select name="bank_name" id="bank_name" class="col-sm-8">
-                           <option value=""> select banks</option>
-                            {% for i in bank %}
-                            <option data-acc-number="{{ i.account_number }}" data-ifsc-code="{{ i.ifsccode }}" value="{{i.bankname}}">{{i.bankname}}</option>
-                           {%endfor%}
-                        </select><br>
-                        <label class="col-sm-4 col-form-label" for="accountNumber">Account Number</label>
-                        <input type="text" class="col-sm-8 form-control" name="accountNumber" id="accountNumber" value=""><br>
+            <div class="card radius-15">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-1 "></div> 
+                        <div class="col-md-4 ">
+                            <div class="d-flex">
+                            <label for="name" class="col-form-label">Name</label>
+                            </div>
+                             <input type="text" class=" form-control" name="name" id="name" value="{{account.name}}" required>
+                             <label for="alias" class="col-form-label  mt-2">Alias</label>
+                             <input type="text" class=" form-control" name="alias" id="alias">
+                             <label for="phone_number" class="col-form-label mt-3">Phone Number</label>
+                            <input type="text" class="form-control"name="phone_number" id="phone_number" required>
 
-                        <label class="col-sm-4 col-form-label" for="ifscCode">IFSC code</label>
-                        <input type="text" class="col-sm-8 form-control" name="ifscCode" id="ifscCode" value=""><br>
+                            <label class=" col-form-label" for="email">Email</label>
+                            <input type="text" class=" form-control" name="email" id="email" required><br>
+                            <label class=" col-form-label" for="account_type">Account Type</label>
+                            <select name="account_type" id="account_type" class=" form-control"required>
+                                <option value="">Select Account Type</option>
+                                <option value="Bank Account">Bank Account</option>
+                                <option value="Credit card">Credit card</option>
 
-                        <label class="col-sm-4 col-form-label" for="swiftCode">Swift Code</label>
-                        <input type="text" class="col-sm-8 form-control" name="swiftCode" id="swiftCode"><br>
-                        <label class="col-sm-4 col-form-label">Branch Name</label>
-                        <input type="text" class="col-sm-8 form-control" name="branch_name" id="branch_name"><br>
-                        
-                           
-                            
+                            </select>
+                              
                         </div>
-                    </div>
-               
-            </div>
-      
- <br>
-        <div class="row">
-            <div class="col-md-6">
-                <h2>Bank Configuration Form</h2>
-                <br>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label"for="accountName" style="white-space: nowrap;"> Select cheque book range</label>
-                    <select name="set_cheque_book_range" id="set_cheque_book_range" class="col-sm-8">
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select><br>
-                    
-                        <label class="col-sm-4 col-form-label" for="accountName"style="white-space: nowrap;">Enable cheque printing</label>
-                        <select name="enable_cheque_printing" id="enable_cheque_printing" class="col-sm-8">
+                        <div class="col-md-1">
+
+                        </div>
+                        <div class="col-md-4" style="margin-left: 10%">
+                            <label class="col-form-label" for="bankName">Bank name</label>
+                            <div class="input-group">
+                                <select name="bank_name" id="bank_name" class="form-control bank" required>
+                                    <option value="">select banks</option>
+                                    <!-- Loop through bank data and generate options -->
+                                    {% for i in bank %}
+                                    <option value="{{ i.bankname }}">{{ i.bankname }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="input-group-append">
+                                    <a class="btn btn-outline-secondary" role="button" data-target="#bankModal" data-toggle="modal">+</a>
+                                </div>
+                            </div>
+                        
+                            <label class="col-form-label" for="accountNumber">Account Number</label>
+                            <input type="text" class="form-control mt-2" name="accountNumber" id="accountNumber" value="" required>
+                        
+                            <label class="col-form-label" for="ifscCode">IFSC code</label>
+                            <input type="text" class="form-control mt-2" name="ifscCode" id="ifscCode" value="" required>
+                        
+                            <label class="col-form-label" for="swiftCode">Swift Code</label>
+                            <input type="text" class="form-control mt-2" name="swiftCode" id="swiftCode">
+                        
+                            <label class="col-form-label">Branch Name</label>
+                            <input type="text" class="form-control mt-2" name="branch_name" id="branch_name" required>
+                        </div>
+                        </div> <br>
+
+                    <div class="row">
+                        <div class="col-md-1"></div>
+
+                        <div class="col-md-4 ">
+                            <label class=" col-form-label"for="accountName" style="white-space: nowrap;"> Select cheque book range</label>
+                            <select name="set_cheque_book_range" id="set_cheque_book_range" class="form-control mt-2">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+
+                            <label class="col-form-label" for="accountName"style="white-space: nowrap;">Enable cheque printing</label>
+                        <select name="enable_cheque_printing" id="enable_cheque_printing" class="form-control mt-2">
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                        </select><br>
-                      
-                            <label class="col-sm-4 col-form-label">Set cheque printing configuration</label>
-                            <select name="set_cheque_printing_configuration" id="set_cheque_printing_configuration" class="col-sm-8">
+                        </select>
+
+                        <label class="col-form-label">Set cheque printing configuration</label>
+                            <select name="set_cheque_printing_configuration" id="set_cheque_printing_configuration" class="form-control mt-2">
                                 <option value="Yes">Yes</option>
                             <option value="No">No</option>
                             </select>
-            </div>
-            </div>
-            <div class="col-md-6">
-                <h2>Mailing Address Form</h2>
-             <br>
-                    <div class="form-group row">
-                        <label class="col-sm-4 col-form-label" for="mailingName">Mailing Name</label>
-                        <input type="text" class="col-sm-8  form-control" name="mailingName" id="mailingName"><br>
-                        <label class="col-sm-4 col-form-label" for="address">Address</label>
-                        <textarea class="col-sm-8 mb-2 form-control " id="address" name="address" ></textarea><br>
+                            <label class=" col-form-label" for="pan_it_number">Pan it number</label>
+                            <input type="text" class=" form-control mt-2" name="pan_it_number" id="pan_it_number" required><br>
+                            
+                            <label class="col-form-label" for="registration_type">Registration Type</label>
+                            <select name="registration_type" id="registration_type" class="form-control mt-2" onchange="toggleGstinUn()" required>
+                                <option value="">Select Registration Type</option>
+                                <option value="Regular">Regular</option>
+                                <option value="Composition">Composition</option>
+                                <option value="Consumer">Consumer</option>
+                                <option value="Unregistered">Unregistered</option>
+                            </select>
+                            <label class=" col-form-label" for="gstin_un" id="gstin_un_label" style="display:none;">GSTin un</label>
+                            <input type="text" class=" form-control mt-2" name="gstin_un" id="gstin_un" style="display:none;" >
+    
+                            <label class=" col-form-label" for="date">Date</label>
+                            <input type="date" class=" form-control mt-2" name="date" id="date" required><br>
+
+                       </div>
+                      <div class="col-md-1"></div>
+                       <div class="col-md-4" style="margin-left: 10%;">
+                        <label class=" col-form-label" for="mailingName">Mailing Name</label>
+                        <input type="text" class=" form-control mt-2" name="mailingName" id="mailingName" required>
+                        <label class=" col-form-label" for="address">Address</label>
+                        <textarea class=" form-control mt-2 " id="address" name="address" required ></textarea>
                    
                    
-                        <label class="col-sm-4 col-form-label"for="mailingCountry">Country</label>
-                        <select name="country" id="country" class="col-sm-8 mt-2"><br>
+                        <label class=" col-form-label"for="mailingCountry">Country</label>
+                        <select name="country" id="country" class="form-control mt-2" required>
                             <option value="">Select Country</option>
                             <option value="Afghanistan">Afghanistan</option>
                             <option value="Aland Islands">Aland Islands</option>
@@ -396,151 +414,333 @@
                             <option value="Yemen">Yemen</option>
                             <option value="Zambia">Zambia</option>
                             <option value="Zimbabwe">Zimbabwe</option>
-                        </select><br>
+                        </select>
                       
-                            <label class="col-sm-4 col-form-label" for="mailingState">State</label>
-                            <select id="state" name="state" class="col-sm-8">
+                            <label class=" col-form-label" for="mailingState">State</label>
+                            <select id="state" name="state" class="form-control mt-2" required>
                                 <option value="">Select State</option>
             
-                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-<option value="Andhra Pradesh">Andhra Pradesh</option>
-<option value="Arunachal Pradesh">Arunachal Pradesh</option>
-<option value="Assam">Assam</option>
-<option value="Bihar">Bihar</option>
-<option value="Chandigarh">Chandigarh</option>
-<option value="Chhattisgarh">Chhattisgarh</option>
-<option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
-<option value="Daman and Diu">Daman and Diu</option>
-<option value="Delhi">Delhi</option>
-<option value="Goa">Goa</option>
-<option value="Gujarat">Gujarat</option>
-<option value="Haryana">Haryana</option>
-<option value="Himachal Pradesh">Himachal Pradesh</option>
-<option value="Jammu and Kashmir">Jammu and Kashmir</option>
-<option value="Jharkhand">Jharkhand</option>
-<option value="Karnataka">Karnataka</option>
-<option value="Kerala">Kerala</option>
-<option value="Lakshadweep">Lakshadweep</option>
-<option value="Madhya Pradesh">Madhya Pradesh</option>
-<option value="Maharashtra">Maharashtra</option>
-<option value="Manipur">Manipur</option>
-<option value="Meghalaya">Meghalaya</option>
-<option value="Mizoram">Mizoram</option>
-<option value="Nagaland">Nagaland</option>
-<option value="Orissa">Orissa</option>
-<option value="Pondicherry">Pondicherry</option>
-<option value="Punjab">Punjab</option>
-<option value="Rajasthan">Rajasthan</option>
-<option value="Sikkim">Sikkim</option>
-<option value="Tamil Nadu">Tamil Nadu</option>
-<option value="Tripura">Tripura</option>
-<option value="Uttaranchal">Uttaranchal</option>
-<option value="Uttar Pradesh">Uttar Pradesh</option>
-<option value="West Bengal">West Bengal</option>
-                                
+                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chandigarh">Chandigarh</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                        <option value="Daman and Diu">Daman and Diu</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Lakshadweep">Lakshadweep</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Orissa">Orissa</option>
+                        <option value="Pondicherry">Pondicherry</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttaranchal">Uttaranchal</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="West Bengal">West Bengal</option>
+                                                
                             </select>
-                        <label class="col-sm-4 col-form-label" for="mailingPin">pin</label>
-                        <input type="text" class="col-sm-8 form-control" id="pin" name="pin"><br>
-                            
-                        </div>
-                    </div>
-               
-            </div> 
-       
-        <div class="row">
-            <div class="col-md-6">
-                <h2>Tax Registration Form</h2> 
-                <br>
-                    <div class="form-group row">
-                        <label class="col-sm-4 col-form-label" for="pan_it_number">Pan it number</label>
-                        <input type="text" class="col-sm-8  form-control" name="pan_it_number" id="pan_it_number"><br>
+                        <label class="col-form-label" for="mailingPin">pin</label>
+                        <input type="text" class=" form-control mt-2" id="pin" name="pin" required><br>
                         
-                        <label class="col-sm-4 col-form-label" for="registration_type">Registration Type</label>
-                        <select name="registration_type" id="registration_type" class="col-sm-8" onchange="toggleGstinUn()">
-                            <option value="">Select Registration Type</option>
-                            <option value="Regular">Regular</option>
-                            <option value="Composition">Composition</option>
-                            <option value="Consumer">Consumer</option>
-                            <option value="Unregistered">Unregistered</option>
-                        </select><br>
-                
-                        <label class="col-sm-4 col-form-label" for="gstin_un" id="gstin_un_label" style="display:none;">GSTin un</label>
-                        <input type="text" class="col-sm-8 form-control" name="gstin_un" id="gstin_un" style="display:none;"><br>
+                            <label class="col-form-label" for="amount">Amount</label>
+                            <div class="d-flex">
+                            <input class="form-control col-md-8" type="text" name="Opening" id="amount" required>
+                            <select name="termof" id="termof" class="form-control col-md-4" >
+                                <option value="CREDIT">CREDIT</option>
+                                <option value="DEBIT">DEBIT</option>
+                            </select>
+                        </div>
+                    
+                        
+                       </div>
+
+                    </div> <br><br>
+
+                    <div class="row">
+                        
+                        <div class="col-md-1" style="margin-left:5% ;">
+
+                            <input type="checkbox" class="form-check-input" id="termsCheckbox" name="terms" required>
+                         <label class="form-check-label" for="termsCheckbox" style="margin-left: 60%; white-space: nowrap;;">Agree to terms and conditions</label>
+                        </div>
+
+                        
+                        <div class="col-md-4" style="margin-left:70% ;">
+                            <input type="submit" value="Save" class="btn btn-outline-info text-grey rounded-pill btn-lg" style="width: 200px; height: 50px; font-size: 20px;">
+
+                        </div>
+                        
+
+
                     </div>
-                </div>
-                
-            <!-- Opening Balance Form -->
-            <div class="col-md-6">
-                <h2>Opening Balance Form</h2> <br>
                
-                    <div class="form-group row">
-                        <label class="col-sm-4 col-form-label" for="date">Date</label>
-                        <input type="date" class="col-sm-8  form-control" name="date" id="date"><br>
-                        <label class="col-sm-4 col-form-label" for="amount" >Amount</label>  
-                        <input class="col-sm-5" type="text" name="Opening" id="amount" >
-                        <select class="col-sm-3" name="termof" id="">
-                        <option  value="CREDIT">CREDIT</option>
-                         <option value="DEBIT">DEBIT</option>
-        
-                       </select>
-        </div> 
+             
+             
+             
+             
+             
+             
+             
+                </div>
+             </div>
 
-    </div>
-        <!-- Submit button -->
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="col-md-6 form-check">
-                <input type="checkbox" class="form-check-input" id="termsCheckbox" name="terms" required>
-                <label class="form-check-label" for="termsCheckbox" style="margin-left: 60%; white-space: nowrap;;">Agree to terms and conditions</label>
+
+
+<!-- Add this modal code at the end of your HTML document, right before the closing </body> tag -->
+
+<!-- Modal -->
+<!-- Modal -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
-            <div class="col-md-6" style="text-align: center; margin-left:120% ;">
-                <div class="col-md-12 text-center">
-                    <input type="submit" value="Save" class="btn btn-outline-info text-grey rounded-pill btn-lg" style="width: 200px; height: 50px; font-size: 20px;">
+            
+    </form> 
+    <div class="modal fade" id="bankModal" role="dialog" aria-labelledby="bankModalLabel" aria-hidden="true">
+        <div class="modal-dialog custom-modal-dialog" role="document" >
+            <div class="modal-content">
+                <div class="modal-header"  style="background-color: #2f516f;">
+                    <h5 class="modal-title" id="bankModalLabel">Create Bank Account</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"  style="background-color: #2f516f;">
+                    <!-- Your form goes here -->
+                    <form action="" method="POST" autocomplete="off" id="bankForm"> 
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-5 p-2">
+                                <label for="bname">BANK NAME</label>
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5 p-2">
+                                <label for="acc_num">ACCOUNT NUMBER</label>
+                            </div>
+                        </div>
+    
+                        <div class="row">
+                            <div class="col-md-5 p-2">
+                                <input class="form-control" type="text" name="bname" id="bname">
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5 p-2">
+                                <input class="form-control" type="number" name="acc_num" id="acc_num">
+                            </div>
+                        </div>
+    
+                        <div class="row">
+                            <div class="col-md-5 p-2">
+                                <label for="ifsc">BANK IFSC CODE</label>
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5 p-2">
+                                <label for="branch">BRANCH NAME</label>
+                            </div>
+                        </div>
+    
+                        <div class="row">
+                            <div class="col-md-5 p-2">
+                                <input class="form-control" type="text" name="ifsc" id="ifsc">
+                            </div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-5 p-2">
+                                <input class="form-control" type="text" name="branch" id="branch">
+                            </div>
+                        </div>
+    
+                        
+
+                        <div class="row">
+                            <div class="col-md-5 p-2">
+                                <label for="Opening">OPENING BALANCE</label> 
+                            </div>
+                            <div class="col-md-2"></div>
+                        
+                            <div class="col-md-5 p-2">
+                                <label for="date">DATE</label>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="row">
+                            <div class="col-md-5 form-inline p-2">
+                               
+                                <input class="form-control" type="text" name="Opening" id="Opening" ><br>
+                                <select class="form-control" name="termof" id="termof">
+                                    <option  value="CREDIT">CREDIT</option>
+                                    <option value="DEBIT">DEBIT</option>
+                                
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                               
+                            </div>
+                        
+                            <div class="col-md-5 p-2">
+                                <input class="form-control" type="date" name="dates" id="dates" >
+                        
+                            </div>
+                        </div>
+                        
+                        
+                                    
+                        <!-- Add more rows for additional form fields if needed -->
+    
+                        <!-- Close and Save buttons within the modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-outline-info" id="bankSave"  data-dismiss="modal">Save Bank Account</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            
-            
-            
         </div>
+    </div>
+   
+    
+    <script>
+        function toggleGstinUn() {
+            var registrationType = document.getElementById("registration_type").value;
+            var gstinUnLabel = document.getElementById("gstin_un_label");
+            var gstinUnInput = document.getElementById("gstin_un");
+    
+            if (registrationType === "Regular" || registrationType === "Composition") {
+                gstinUnLabel.style.display = "block";
+                gstinUnInput.style.display = "block";
+            } else {
+                gstinUnLabel.style.display = "none";
+                gstinUnInput.style.display = "none";
+            }
+        }
+    </script>
+
+    <script>
+
+    // Your existing JavaScript code
+  
+    $(document).on("click", "#bankSave", function () {
         
-
-    </form> 
-</div>
-
-
-
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var accNameSelect = document.getElementById("bank_name");
-        var accNumberInput = document.getElementById("accountNumber");
-        var accIfscInput = document.getElementById("ifscCode");
-
-        accNameSelect.addEventListener("change", function () {
-            var selectedOption = accNameSelect.options[accNameSelect.selectedIndex];
-            var accNumber = selectedOption.getAttribute("data-acc-number");
-            var accifsc = selectedOption.getAttribute("data-ifsc-code");
-
-            // Update the account number input field
-            accNumberInput.value = accNumber;
-            accIfscInput.value = accifsc;
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'crt_bank_load' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                bankname: $("#bname").val(),
+                ifsccode: $("#ifsc").val(),
+                branchname: $("#branch").val(),
+                account_number: $("#acc_num").val(),
+                openingbalance: $("#Opening").val(),
+                dates: $("#dates").val(),
+                term: $("#termof").val(),
+                
+                
+            },
+            
+            success: function (response) {
+              
+                
+                console.log("success")
+                document.getElementById("bankForm").reset();
+                reloadbank();
+            },
+            
+            
         });
     });
-</script>
-
-<script>
-    function toggleGstinUn() {
-        var registrationType = document.getElementById("registration_type").value;
-        var gstinUnLabel = document.getElementById("gstin_un_label");
-        var gstinUnInput = document.getElementById("gstin_un");
-
-        if (registrationType === "Regular" || registrationType === "Composition") {
-            gstinUnLabel.style.display = "block";
-            gstinUnInput.style.display = "block";
-        } else {
-            gstinUnLabel.style.display = "none";
-            gstinUnInput.style.display = "none";
+  
+        function reloadbank() {
+    $.ajax({
+        url: "{% url 'bank_dropdown' %}",
+        type: "GET",
+        dataType: "json",
+        data: {},
+        success: function (data) {
+            var dropdown = $('#bank_name');  // Replace 'yourDropdownId' with your actual dropdown ID
+            console.log(data);
+            dropdown.empty();
+            dropdown.append(`<option value="">select banks</option>`);
+            $.each(data, function (key, value) {
+                dropdown.append($('<option></option>').attr('value', key).text(value).val(value));
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+        },
+        complete: function () {
+            // The complete callback is called after success or error
+            // Now you can trigger any additional actions if needed
+            console.log("Reloaded bank dropdown");
         }
+    });
+}
+   
+    </script>
+
+ 
+    <script>
+
+    // Replace this with your actual URL for the bankdatas view
+    var bankdatasUrl = "{% url 'bankdatas' %}";
+
+    // Function to update IFSC code and Account Number
+    function updateBankDetails() {
+        var selectedBank = $("#bank_name option:selected").val();
+
+        // Make an AJAX request to the Django view
+        $.ajax({
+            type: 'GET',
+            url: bankdatasUrl,
+            data: {'id': selectedBank},
+            dataType: 'json',
+            success: function(response) {
+                // Update the corresponding fields with the received data
+                $("#ifscCode").val(response.ifsc);
+                $("#accountNumber").val(response.acc_num);
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
     }
+
+    // Event listener for changes in bank name dropdown
+    $("#bank_name").change(function() {
+        updateBankDetails();
+    });
+
+   
 </script>
+ 
+       
 {% endblock %}

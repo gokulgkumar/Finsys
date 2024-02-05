@@ -12,6 +12,8 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+
+
 <style>
     #ui-datepicker-div {
         width: 20rem;
@@ -95,11 +97,11 @@
                 <div class=" left">
                     <div class="px-2">
                         <label style="text-align:left ">From</label><br>
-                        <input name="FromDate" class="inputdate form-control" id="in1" type="date">
+                        <input name="FromDate" class="inputdate form-control" id="fdate" type="date">
                     </div>
                     <div class="px-2">
                         <label style="text-align:left ">To</label><br>
-                        <input name="ToDate" class="inputdate form-control" id="in2" type="date">
+                        <input name="ToDate" class="inputdate form-control" id="edate" type="date">
                     </div>
 
                 </div>
@@ -110,18 +112,18 @@
                     <a class="btn btn-outline-info text-grey" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                         role="button"><i class="fa fa-filter"></i> Filter By
                     </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" onclick="filterTable('All')">All</a>
-                        <a class="dropdown-item" onclick="filterTable('With')">with GSTIN</a>
-                        <a class="dropdown-item" onclick="filterTable('Without')">without GSTIN</a>
+                    <div class="dropdown-menu" id="filterDropdown" >
+                        <li data-filter="0"><a class="dropdown-item">All</a></li>
+                            <li data-filter="1"><a class="dropdown-item">With GSTIN</a></li>
+                            <li data-filter="2"><a class="dropdown-item">Without GSTIN</a></li>
                     </div>
                 </div>
                 
                 <div class="right">
                     <li  class=" dropdown-toggle btn btn-outline-info  text-grey p-1"data-toggle="dropdown"> &nbsp;<i class="fa fa-share-alt" aria-hidden="true" ></i>&nbsp;Share&nbsp;&nbsp;</li>
                     <ul class="dropdown-menu" style="background-color: black;">
-                        <li style="margin-left: 50px;" > {% post_to_whatsapp object_or_url "WhatsApp" %}</li>
-                        <li style="margin-left: 50px;"><a href="#shareBillEmail" data-bs-toggle="modal" >Email</a></l>
+                        <li style="margin-left: 50px;" > <a href="javascript:void(0);" onclick="shareOnWhatsApp()">WhatsApp</a></li>
+                        <li style="margin-left: 50px;"><a href="#shareBillEmail" data-bs-toggle="modal" >GMAIL</a></l>
                         
                     </ul>
                     <button class="btn btn_pdf btn-outline-info  text-grey"><i class="fa fa-file-pdf-o">&nbsp;</i>pdf</button>
@@ -136,271 +138,8 @@
 
 
 
-    <script>
-
-     
-
-        function filterTable(filterValue) {
-            const table = document.getElementById('myTable');
-            const rows = table.getElementsByTagName('tr');
-            if (filterValue === 'All') {
-                for (let i = 2; i < rows.length; i++) {
-                const row = rows[i];
-                row.style.display = 'table-row';
-                }
-            }
-            else{
-            for (let i = 2; i < rows.length; i++) {
-                const row = rows[i];
-                const cells = row.getElementsByTagName('td');
-                const gstinCell = cells[0];
-                if ((filterValue === 'With' && gstinCell.textContent !== '') || (filterValue === 'Without' && gstinCell.textContent === '')) {
-                    row.style.display = 'table-row';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        }
-        }
-    </script>
-
-    <script>
     
-    $(document).ready(function ($) {
-        $(document).on('click', '.btn_print', function (event) {
-            event.preventDefault();
-    
-            // Clone the pdf-card and style it for printing
-            const pdfCardClone = $('#pdf-card').clone();
-            pdfCardClone.css('color', 'black');
-            pdfCardClone.css('backgroundColor', 'white');
-    
-            // Create a new window for printing
-            const printWindow = window.open('', '');
-    
-            // Add styles for printing
-            const printStyle = `
-                @media print {
-                    table {
-        width: auto; /* Set the desired width for the table */
-        overflow-x: auto;
-    }
 
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        width: auto; /* Allow the columns to adjust their width */
-    }
-    body {
-        margin: 0; /* Remove default page margin */
-        padding: 0; /* Remove default body padding */
-    }
-}
-                }
-            `;
-    
-            // Create a style element and set its content
-            const styleElement = document.createElement('style');
-            styleElement.type = 'text/css';
-            styleElement.appendChild(document.createTextNode(printStyle));
-            printWindow.document.head.appendChild(styleElement);
-    
-            // Append the cloned 'pdf-card' div to the new window
-            printWindow.document.body.appendChild(pdfCardClone[0]);
-    
-            // Add company name and date
-            const companyName = '{{cmp1.cname}}';
-            const fromDate = $('#in1').val(); 
-            const toDate = $('#in2').val();
-
-    
-            const headerDiv = document.createElement('div');
-            headerDiv.style.textAlign = 'center';
-            headerDiv.style.marginBottom = '20px';
-            headerDiv.innerHTML = `<p> ${companyName}</p><h1>GSTR2 REPORT</h1><p>From: ${fromDate} To:  ${toDate}</p>`;
-    
-            printWindow.document.body.insertBefore(headerDiv, pdfCardClone[0]);
-            
-            // Trigger the print dialog for the new window
-            printWindow.print();
-    
-            // Close the new window after printing
-            printWindow.close();
-        });
-    });
- 
-    $(document).ready(function ($) {        
-        $(document).on('click', '.btn_pdf', function (event) {
-            console.log('print1');
-            event.preventDefault();
-            var element = document.getElementById('pdf-card');
-            
-            element.style.color = 'white';
-            element.style.backgroundColor = '#243e54';
-            var companyName = "{{cmp1.cname}}";
-           var fromDate = document.getElementById('in1').value;
-           var toDate = document.getElementById('in2').value;
-
-        element = `
-        <div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px; color: black;">
-                ${companyName}
-            </div>
-            <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: black;">
-               GSTR2 REPORT
-            </div>
-            <div style="text-align: center; font-size: 12px; color: black;">
-               ${fromDate} &nbsp; ${toDate}
-            </div>
-        
-            <div class="card radius-15 print-only" id="pdf-card">
-           <div class="card-body">
-            <div class="container-fluid">
-                <table class="table table-responsive-md mt-4 table-hover table-bordered "
-                     id="myTable"  style="color:black;border: 1px solid black; width:100%;">
-                    <thead style="color:black;border: 1px solid black;">
-                        <tr style="color:black;border: 1px solid black;">
-                            <th colspan="5" style="text-align: center;color:black;border: 1px solid black;">Invoice Details</th>
-
-                            </th>
-                            <th colspan="5" style="text-align: center;color:black;border: 1px solid black;">Tax Rate</th>
-                            <th colspan="5" style="text-align: center;color:black;border: 1px solid black;">Cess Rate</th>
-                            <th colspan="5" style="text-align: center;color:black;border: 1px solid black;">Taxable Value</th>
-                            <th colspan="4" style="text-align: center;color:black;border: 1px solid black;">Amount</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Place of Supply</th>
-                            
-                            
-                        </th>
-                        </tr>
-                        <tr style="text-align: center;color:black;border: 1px solid black;">
-                            <th style="text-align: center;color:black;border: 1px solid black;">GSTIN/UIN</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Party Name </th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">No.</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Date</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Value</th>
-                            <th colspan="5" style="text-align: center;color:black;border: 1px solid black;" ></th>
-                            <th colspan="5"style="text-align: center;color:black;border: 1px solid black;"></th>
-                            <th colspan="5"style="text-align: center;color:black;border: 1px solid black;" ></th>
-                           
-                            <th style="text-align: center;color:black;border: 1px solid black;">Integrated Tax</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Central Tax</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">State/UT Tax</th>
-                            <th style="text-align: center;color:black;border: 1px solid black;">Cess</th>
-                            <th colspan="4" ></th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in bill %}
-                        <tr class="text-center" style="text-align: center;white-space: nowrap;color:black;border: 1px solid black;">
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.gstin}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.vendor_name}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.bill_no}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.date}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.round_off}}</td>
-                        
-                            {% for b in pbill %}
-                            {% if b.bill_id == i.billid %}
-                            <td style="text-align: center;color:black;border: 1px solid black;"colspan="5"  >{{b.tax}}</td>
-                            {%endif%}
-                            {%endfor%}
-                  
-                            <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ i.tax_amount}}</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" >{{i.igst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.sgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.cgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">0</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;"  >{{ i.sourceofsupply}}</td>
-
-                            
-                        </tr>
-                        {% endfor %}
-
-
-                        {% for trans in pdebt %}
-                     
-                        <tr class="text-center" data-href="" style="text-align: center;color:black;border: 1px solid black;">
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{trans.gstin}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{ trans.vendor }}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{  trans.debit_no }}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{ trans.debitdate }}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{ trans.round_off }}</td>
-                          
-                            {% for d in pdebt1 %}
-                            {% if d.pdebit_id == trans.pdebitid %}
-                            <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >{{d.tax}}</td>
-                           {%endif%}
-                           {%endfor%}
-                        
-                            <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ trans.taxamount}}</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" >{{trans.igst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{trans.sgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{trans.cgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">0</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;" >{{ trans.supply}}</td>
-                            
-
-                        </tr>
-                     
-                        {% endfor%}
-
-                        {% for i in rbill %}
-                        <tr class="text-center" style="text-align: center;color:black;border: 1px solid black;">
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.gstin}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.vendor_name}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.billno}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.start_date}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.adjustment}}</td>
-                            {% for r in ritem %}
-                            {% if r.bill_id == i.rbillid %}
-                            <td style="text-align: center;color:black;border: 1px solid black;"colspan="5" >{{r.tax}}</td>
-                            {%endif%}
-                            {%endfor%}
-                           
-                            <td style="text-align: center;color:black;border: 1px solid black;" colspan="5" >0</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" colspan="5">{{ i.tax_amount}}</td>
-                            <td  style="text-align: center;color:black;border: 1px solid black;" >{{i.igst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.sgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{i.cgst}}</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">0</td>
-                            <td style="text-align: center;color:black;border: 1px solid black;">{{ i.place_supply}}</td>
-
-                            
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-               
-        `;
-
-            var opt =
-            {
-                margin: 1,
-                filename: 'GSTR2_Report' + '.pdf',
-                image: { type: 'png', quality: 1.0 },
-                html2canvas: { scale: 3, useCORS: true, backgroundColor: null },
-                jsPDF: { unit: 'in', format: 'a3', orientation: 'LandScape' }
-            };
-            html2pdf().set(opt).from(element).save();
-        });
-
-    });
-
-</script>
-     <script type="text/javascript">function ExportToExcel(type, fn, dl) {
-        var elt = document.getElementById('myTable');
-        var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
-        return dl ?
-            XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-            XLSX.writeFile(wb, fn || ('GSTR_Report.' + (type || 'xlsx')));
-    }
-</script> 
-    <br>
-    <br>
 
 
 
@@ -409,7 +148,7 @@
             <div class="container-fluid">
 
                 <table class="table table-responsive-md mt-4 table-hover table-bordered "
-                    style="background-color: rgba(0, 0, 0, 0.2);" id="myTable">
+                    style="background-color: rgb(0, 0, 0,0.2);" id="myTable">
                     <thead>
                         <tr>
                             <th colspan="5" style="text-align: center;">Invoice Details</th>
@@ -438,6 +177,7 @@
                             <th style="text-align: center;">Central Tax</th>
                             <th style="text-align: center;">State/UT Tax</th>
                             <th style="text-align: center;">Cess</th>
+                            <th style="text-align: center;"></th>
                           
                           
                             
@@ -446,7 +186,7 @@
                     <tbody>
                         {% for i in bill %}
                         <tr class="text-center">
-                            <td style="text-align: center;">{{i.gstin}}</td>
+                            <td style="text-align: center;">{{i.vendor_gstin}}</td>
                             <td style="text-align: center;white-space: nowrap;">{{i.vendor_name}}</td>
                             <td style="text-align: center;white-space: nowrap;">{{i.bill_no}}</td>
                             <td style="text-align: center;white-space: nowrap;">{{i.date}}</td>
@@ -472,7 +212,7 @@
                         {% for trans in pdebt %}
                      
                         <tr class="text-center" data-href="" style="text-align: center;">
-                            <td style="text-align: center;">{{trans.gstin}}</td>
+                            <td style="text-align: center;">{{trans.gstnumber}}</td>
                             <td style="text-align: center;white-space: nowrap;">{{ trans.vendor }}</td>
                             <td style="text-align: center;white-space: nowrap;">{{  trans.debit_no }}</td>
                             <td style="text-align: center;white-space: nowrap;">{{ trans.debitdate }}</td>
@@ -504,7 +244,7 @@
                             <td style="text-align: center;white-space: nowrap;">{{i.adjustment}}</td>
                             {% for r in ritem %}
                             {% if r.bill_id == i.rbillid %}
-                            <td style="text-align: center;white-space: nowrap;"colspan="5" >{{r.tax}}</td>
+                            <td style="text-align: center;white-space: nowrap;" colspan="5" >{{r.tax}}</td>
                             {%endif%}
                             {%endfor%}
                             <td style="text-align: center;white-space: nowrap;" colspan="5" >0</td>
@@ -537,6 +277,9 @@
           <form action="{% url 'shareGstrToEmail'  %}" method="post" class="needs-validation" id="share_to_email_form">
             {% csrf_token %}
             <div class="form-group">
+                <input type="date" name="fdate" id="emailfdate" hidden>
+                  <input type="date" name="edate" id="emailedate" hidden><br>
+                    <input type="text" id="filtervalueid" value="" name="filterValue" hidden >
                 <label for="emailIds">Email IDs</label>
                 <textarea class="form-control" name="email_ids" id="emailIds" rows="3" placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
             </div>
@@ -608,10 +351,56 @@
 
 
 <script>
+    document.getElementById('fdate').addEventListener('change', updateMinDate);
+    function updateMinDate() {
+        var selectedDate = document.getElementById('edate').value;
+        document.getElementById('edate').min = selectedDate;
+    }
+</script>
+<script>
+     function shareOnWhatsApp() {
+      var url = window.location.href;
+      var text = url;
+      text = encodeURIComponent(text);
+      var whatsappUrl = "whatsapp://send?text=" + text;
+      window.location.href = whatsappUrl;
+    }
+
+</script>
+<script>
+    function filterTableByDate() {
+      const fromDate = new Date(document.getElementById('fdate').value);
+      const toDate = new Date(document.getElementById('edate').value);
+      const tableRows = document.querySelectorAll('#myTable tbody tr');
+  
+      tableRows.forEach(row => {
+          const dateCell = new Date(row.cells[3].innerText);
+  
+          // Extract date portions for comparison
+          const cellDate = new Date(dateCell.getFullYear(), dateCell.getMonth(), dateCell.getDate());
+          const fromDateTime = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+          const toDateTime = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+  
+          if ((!fromDate || cellDate >= fromDateTime) && (!toDate || cellDate <= toDateTime)) {
+              row.style.display = '';
+          } else {
+              row.style.display = 'none';
+          }
+      });
+  }
+  
+  // Listen for changes in date inputs
+  document.getElementById('fdate').addEventListener('change', filterTableByDate);
+  document.getElementById('edate').addEventListener('change', filterTableByDate);
+  
+  </script>
+  
+
+<script>
     var fromDate;
-    $('#in1').on('change', function () {
+    $('#fdate').on('change', function () {
         fromDate = $(this).val();
-        $('#in2').prop('min', function () {
+        $('#edate').prop('min', function () {
             return fromDate
         })
         var tdate = new Date(fromDate)
@@ -619,9 +408,9 @@
         document.getElementById("d1").innerHTML = tdate.toLocaleDateString(undefined, options);
     })
     var toDate;
-    $('#in2').on('change', function () {
+    $('#edate').on('change', function () {
         toDate = $(this).val();
-        $('#in1').prop('max', function () {
+        $('#fdate').prop('max', function () {
             return toDate
         })
         var tdate = new Date(toDate)
@@ -629,6 +418,200 @@
         document.getElementById("d2").innerHTML = "  To  " + tdate.toLocaleDateString(undefined, options);
     })
 
+
+</script>
+
+<script>
+    $(document).ready(function () {
+      $('#fdate, #edate').change(function () {
+        $('#emailfdate').val($('#fdate').val());
+        $('#emailedate').val($('#edate').val());
+        updatePurchaseData();
+       
+      });
+  
+      function updatePurchaseData() {
+        var fdate = $('#fdate').val();
+        var edate = $('#edate').val();
+        // Check if both fdate and edate are present before making the AJAX request
+        if (fdate && edate) {
+          $.ajax({
+            url: "{% url 'purchasefilterbyDate' %}",
+            data: { fdate: fdate, edate: edate },
+            type: 'GET',
+            success: function (data) {
+               
+                var dataArray = data.data_list;  // Access the array within the 'data_list' property
+                // Handle the response from Django if needed
+                console.log('data received', dataArray);
+                displayDataInTable(dataArray);
+            },
+            error: function (error) {
+              console.error(error);
+            }
+          });
+        } else {
+          // Handle the case where either fdate or edate is not present (optional)
+          console.log('Both fdate and edate must be present');
+        }
+      }
+    });
+      // Function to display data in the HTML table
+      
+      
+  
+  
+    
+</script>
+
+
+<script>
+    
+    $(document).ready(function ($) {
+        $(document).on('click', '.btn_print', function (event) {
+            event.preventDefault();
+    
+            // Clone the pdf-card and style it for printing
+            const pdfCardClone = $('#pdf-card').clone();
+            pdfCardClone.css('color', 'black');
+            pdfCardClone.css('backgroundColor', 'white');
+    
+            // Create a new window for printing
+            const printWindow = window.open('', '');
+    
+            // Add styles for printing
+            const printStyle = `
+                @media print {
+                    table {
+        width: auto; /* Set the desired width for the table */
+        overflow-x: auto;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        width: auto; /* Allow the columns to adjust their width */
+    }
+    body {
+        margin: 0; /* Remove default page margin */
+        padding: 0; /* Remove default body padding */
+    }
+}
+                }
+            `;
+    
+            // Create a style element and set its content
+            const styleElement = document.createElement('style');
+            styleElement.type = 'text/css';
+            styleElement.appendChild(document.createTextNode(printStyle));
+            printWindow.document.head.appendChild(styleElement);
+    
+            // Append the cloned 'pdf-card' div to the new window
+            printWindow.document.body.appendChild(pdfCardClone[0]);
+    
+            // Add company name and date
+            const companyName = '{{cmp1.cname}}';
+            const fromDate = $('#fdate').val(); 
+            const toDate = $('#edate').val();
+
+    
+            const headerDiv = document.createElement('div');
+            headerDiv.style.textAlign = 'center';
+            headerDiv.style.marginBottom = '20px';
+            headerDiv.innerHTML = `<p> ${companyName}</p><h1>GSTR2 REPORT</h1><p>From: ${fromDate} To:  ${toDate}</p>`;
+    
+            printWindow.document.body.insertBefore(headerDiv, pdfCardClone[0]);
+            
+            // Trigger the print dialog for the new window
+            printWindow.print();
+    
+            // Close the new window after printing
+            printWindow.close();
+        });
+    });
+ 
+    
+
+</script> 
+<script>
+    $(document).ready(function ($) {        
+    $(document).on('click', '.btn_pdf', function (event) {
+        event.preventDefault();
+        
+        // Add company name, from date, and to date
+        var companyName = "{{cmp1.cname}}";
+        var fromDate = document.getElementById('fdate').value;
+        var toDate = document.getElementById('edate').value;
+
+        var element = document.getElementById('pdf-card');
+        
+        element.style.color = 'white';
+        element.style.backgroundColor = '#243e54';
+
+        // Include element content in pdfcont
+        var pdfcont = `
+            <div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px; color: black;">
+                ${companyName}
+            </div>
+            <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: black;">
+                GSTR2 REPORT
+            </div>
+            <div style="text-align: center; font-size: 12px; color: black;">
+                ${fromDate} &nbsp; ${toDate}
+            </div>
+            <div class="card radius-15 print-only" id="pdf-card" style="background-color:#2f516f">
+                <div class="card-body">
+                    <!-- ... (rest of your existing code) ... -->
+                    ${element.innerHTML}
+                </div>
+            </div>
+        `;
+        
+        var opt = {
+            margin: 1,
+            filename: 'GSTR2_Report' + '.pdf',
+            image: { type: 'png', quality: 1.0 },
+            html2canvas: { scale: 3, useCORS: true, backgroundColor: null },
+            jsPDF: { unit: 'in', format: 'a3', orientation: 'LandScape' }
+        };
+        
+        // Generate PDF using html2pdf
+        html2pdf().set(opt).from(pdfcont).save();
+    });
+});
+</script>
+<script>
+function filterTable() {
+    var filterValue = $("#filtervalueid").val();
+
+    // Show all rows initially
+
+    // Filter based on the selected criteria
+    if (filterValue === "1") {
+        // Hide rows where the first column has no value
+        $("#myTable tbody tr:has(td:eq(0):empty)").hide();
+    } else if (filterValue === "2") {
+        // Show rows where the first column has no value
+        $("#myTable tbody tr:has(td:eq(0):empty)").show();
+        // Hide rows where the first column has a value
+        $("#myTable tbody tr:has(td:eq(0):not(:empty))").hide();
+    } else if (filterValue === "0") {
+        // Show all rows when filterValue is "0"
+        $("#myTable tbody tr").show();
+    }
+}
+
+// Attach the filterTable function to the change event of the filter dropdown
+$(document).ready(function () {
+    $("#filterDropdown li").click(function () {
+        // Update the filter value
+        var selectedFilter = $(this).data("filter");
+        $("#filtervalueid").val(selectedFilter);
+
+        // Filter the table
+        filterTable();
+    });
+});
 
 </script>
 {% endif %}

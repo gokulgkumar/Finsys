@@ -62,7 +62,6 @@
             RowCount++;
             var newRow = $(`
             <tr id='row${RowCount}' >  
-                <td>${RowCount}</td>              
                <td style="width: 18%;" class='text-right'>
                     <div class='form-group mt-3 d-flex align-items-center'>
                         <input type="text" id='itemsearchInput${RowCount}' placeholder="Search..."
@@ -245,7 +244,7 @@
 
                     var dropdown = $(`.itm${x}`);
                     console.log(data)
-                   
+
                     $.each(data, function (key, value) {
                         if (dropdown.find('option[value="' + key + '"]').length === 0) {
                             // If it doesn't exist, create a new option element
@@ -361,14 +360,14 @@
 
 
                         <div class="col-md-5 mt-3">
-                            <label class="text-gray-light">Bill To:</label>
+                            <label class="text-gray-light" id="bbbb">Bill To:</label>
                             <textarea class="form-control" name="bname" id="bname" rows="5" type="text"
                                 style="background-color: #2f516f; color: white;"></textarea>
 
                             <!-- <div class="col-md-5 mt-3 mr-4"> -->
                             <label class="col-form-label mt-4" ;>Place of supply</label>
                             <select type="text" class="form-control " id="plosu" name="placosupply"
-                                style="background-color: #2f516f; color: white;" onchange="toggleDateInput()">
+                                style="background-color: #2f516f; color: white;" onchange="toggleDateInput()" onclick="calc()">
                                 <option value="" hidden> Select Place Of Supply</option>
                                 <option value="[AN]-Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
                                 <option value="[AD]-Andhra Pradhesh">[AD] Andhra Pradhesh</option>
@@ -482,8 +481,7 @@
                             </div>
                         </div>
                         <div class="col-md-5 mt-3">
-                            <!-- <label class="col-form-label">Refrence number</label> -->
-                            <!-- <input type="text"  id="ref" class="form-control" name="ref" value="{{ref}}" readonly style="background-color: #2f516f; color: white;" onselect="calc()"> -->
+
                         </div>
                         <div class="col-md-3 mt-3"></div>
                         <div class="col-md-3 mt-3"></div>
@@ -545,7 +543,6 @@
                                 onchange="calc()">
                                 <thead>
                                     <tr>
-                                        <th>no</th>
                                         <th>Product
                                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a
                                                 href="#" class=" btn-outline-secondary" data-bs-target="#newitem"
@@ -562,7 +559,6 @@
                                 <tbody>
 
                                     <tr id='row1'>
-                                        <td>1</td>
                                         <td style="width: 18%;" class="text-right">
                                             <div class='form-group mt-3 d-flex align-items-center'>
                                                 <!--<select class='form-control border-0 mt-1 text-black text-center itm'
@@ -893,7 +889,7 @@
                                                     var pos = vale.substring(index + 1);
                                                     var state = "{{cmp1.state}}";
 
-                                                    if (pos == state) {
+                                                    if (pos === state) {
 
                                                         gst = taxamount / 2;
                                                         $('#cgst').val(parseFloat(gst.toFixed(2)));
@@ -2365,7 +2361,7 @@
     }
 
 
-   
+
 </script>
 
 
@@ -2483,7 +2479,6 @@
                     for (var i = 0; i < selectElement.options.length; i++) {
                         if (selectElement.options[i].value === place) {
 
-                            // Set the selected attribute of the desired option to true
                             selectElement.selectedIndex = i;
                             break; // Exit the loop once the option is selected
                         }
@@ -2500,8 +2495,15 @@
                         $('#gstin_inp1').val(" " + json_data[key]['gstin']);
                     }
 
+                    if (json_data[key]['company'] === "" && json_data[key]['street'] === "" || json_data[key]['city'] === "") {
+                        $("#bname").addClass('d-none');
+                        $("#bbbb").addClass('d-none');
 
-                    document.getElementById('bname').value = json_data[key]['company'] + ',\n' + json_data[key]['street'] + ',\n' + json_data[key]['city'] + ',\n' + json_data[key]['state'] + ',\n' + json_data[key]['pincode'];
+                    } else {
+                        $("#bname").removeClass('d-none');
+                        $("#bbbb").removeClass('d-none');
+                        document.getElementById('bname').value = json_data[key]['company'] + ',\n' + json_data[key]['street'] + ',\n' + json_data[key]['city'] + ',\n' + json_data[key]['state'] + ',\n' + json_data[key]['pincode'];
+                    }
                     document.getElementById('searchInput').value = json_data[key]['firstname'] + ' ' + json_data[key]['lastname'];
                     document.getElementById('customerid').value = json_data[key]['customerid'];
 

@@ -1,0 +1,259 @@
+<div id="overviewdiv">
+    <div id="details">
+
+
+
+        <!-- DETAILS DIV ADJUSTMENT -->
+
+        <div class="row   " style="margin-left: -20px; margin-right: 1px;">
+            <div class="col-lg-6" style="background-color: #243e54; border-top-left-radius: 2vh; border-bottom-left-radius: 2vh;">
+                <div class="p-5 ">
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-4 mt-3">
+                            <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Company Details</h5>
+                        </div>
+                        <div class="col-md-4 mt-3"></div>
+                        <div class="col-md-4 mt-3"></div>
+
+                        <div class="col-md-2 mt-3">
+                            <h6 class="mb-0">Company</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.cname}}</p>
+                        </div>
+                        <div class="col-md-2 mt-3 vl">
+                            <h6 class="mb-0">Email</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.cemail }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-2 mt-3">
+                            <h6 class="mb-0">Mobile</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.phone }}</p>
+                        </div>
+                        <div class="col-md-2 mt-3 vl">
+                            <h6 class="mb-0">Address</h6>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <p class="mb-0 text-right">{{ cmp1.caddress }} <br>
+                                <!-- {{cmp1.city}},
+                                {{cmp1.state}}
+                                {{cmp1.pincode}}</p> -->
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-4 mt-3">
+                            <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Item Details</h5>
+                        </div>
+                        {% for p in pdeb %}
+                        <div class="col-md-4 mt-3"></div>
+                        <div class="col-md-4 mt-3"></div>
+
+                        <div class="col-md-3 mt-3">
+                            <h6 class="mb-0">Name</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ p.items }}</p>
+                        </div>
+
+                        <div class="col-md-3 mt-3 vl">
+                            <h6 class="mb-0">HSN Code</h6>
+                        </div>
+
+                        
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ p.hsn }}</p>
+                        </div>
+                        
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-3 mt-3">
+                            <h6 class="mb-0">Price</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ p.price }}</p>
+                        </div>
+
+                        <div class="col-md-3 mt-3 vl">
+                            <h6 class="mb-0">Quantity</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{  p.quantity }} </p>
+                        </div>
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-start align-items-center">
+                        <div class="col-md-3 mt-3"> 
+                            <h6 class="mb-0">Tax Amount</h6>
+                        </div>
+                        <div class="col-md-3 mt-3 vr">
+                            <p class="mb-0 text-right">{{ p.tax }}% </p>
+                        </div>
+                        <div class="col-md-5 mt-3 vl">
+                            <h6 class="mb-0">&nbsp;Discount</h6>
+                        </div>
+                        <div class="col-md-1 mt-3 ">
+                            <p class="mb-0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{p.discount}}% </p>
+                        </div>
+
+                    </div>
+                    <div class="row mb-4 d-flex justify-content-start align-items-center">
+                        <div class="col-md-3 mt-3"> 
+                            <h6 class="mb-0">Total</h6>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <p class="mb-0 text-right">{{ p.total }}</p>
+                        </div>
+                        
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        <div class="col-md-12 mt-3">
+                            <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Vendor Details</h5>
+
+                            
+                                <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                    <div class="col-md-3 mt-3">
+                                        <h6 class="mb-0">Vendor</h6>
+                                    </div>
+                                    <div class="col-md-3 mt-3">
+                                        <p class="mb-0 text-right">{{pdebt.vendor|capfirst}}</p>
+                                    </div>
+    
+                                    <div class="col-md-3 mt-3 vl">
+                                        <h6 class="mb-0">Vendor Email</h6>
+                                    </div>
+                                    <div class="col-md-3 mt-3">
+                                        <p class="mb-0 text-right">{{pdebt.email}}</p>
+                                    </div>
+                                    
+                                </div>
+                                <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                    <div class="col-md-3 mt-3">
+                                        <h6 class="mb-0">Address</h6>
+                                    </div>
+                                    <div class="col-md-3 mt-3">
+                                        <p class="mb-0 text-right">{{ pdebt.address }}</p>
+                                    </div>
+                                    <div class="col-md-3 mt-3 vl">
+                                        <h6 class="mb-0">Place of supply</h6>
+                                    </div>
+                                    <div class="col-md-3 mt-3">
+                                        <p class="mb-0 text-right">{{pdebt.supply }}</p>
+                                    </div>
+                                </div>
+                            
+
+                                <div class="row mb-4 d-flex justify-content-between align-items-center">
+               
+
+                                    <div class="col-md-3 mt-3 ">
+                                        <h6 class="mb-0">Debit Number</h6>
+                                    </div> 
+                                    <div class="col-md-3 mt-3 ">
+                                        <p class="mb-0 text-right">{{ pdebt.debit_no }}</p>
+                                    </div>
+                                   
+                                    <div class="col-md-3 mt-3 vl">
+                                        <h6 class="mb-0">Debit Date</h6>
+                                    </div>                       
+                                    <div class="col-md-3 mt-3">
+                                        <p class="mb-0 text-right" >{{ pdebt.debitdate | date:'d-m-Y' }}</p>
+                                    </div>
+                                
+                                </div>
+                        
+                                <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                    <div class="col-md-3 mt-3">
+                                        <h6 class="mb-0">Payment Methods</h6>
+                                    </div>
+                                    <div class="col-md-2 mt-3"style="margin-left: -70px!important;">
+                                        <p class="mb-0 text-right">{{ pdebt.payment_type}}</p>
+                                    </div>
+                                   <div class="col-md-2 mt-3 ">
+                                         <!-- <h6 class="mb-0" style="white-space: nowrap;">Place of supply</h6> -->
+                                    </div> 
+                                  <div >
+                                         <!-- <p class="mb-0">{{pdebt.supply }}</p>  -->
+                                    </div> 
+                                    
+                                    <div class="col-md-2 mt-3 vl" style="margin-left: -500px!important;">
+                                        <h6 class="mb-0 ">Status</h6>
+                                    </div>
+                                    <div class="col-md-2 mt-3">
+                                        <p class="mb-0" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{pdebt.status }}</p>
+                                    </div>
+                                </div>
+
+
+                                <hr class="my-4" style="width: 50%;">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 " style="background-color: rgba(22,37,50,255); border-top-right-radius:2vh; border-bottom-right-radius: 2vh;">
+                <div class="p-3">
+                    <!-- <h3 class="fw-bold mb-3 mt-2 pt-1"></h3> -->
+                    <div class="d-flex justify-content-between mb-4">
+                        <h3 class="">Debit Note</h3>
+                        
+                    </div>
+                    <hr class="my-4" style="background-color: #fff;">
+                    <table style="width: 100%;">
+                        <tr >
+                            <td style="font-size: 20px;">Grand Total</td>
+                            <td style="font-size: 18px;">{{ pdebt.grandtotal }}</td>
+                         
+                        </tr>
+                     
+                        <tr>
+                            <td style="font-size: 20px;">Paid Amount</td>
+                            <td style="font-size: 18px;">{{ pdebt.paid_amount }}</td>
+                        </tr>
+                      
+                        <tr>
+                            <td style="font-size: 20px;">Balance</td>
+                            <td style="font-size: 18px;">{{ pdebt.balance_amount }}</td>
+                        </tr>
+                        <tr class="sgst-section">
+                            <td style="font-size: 20px;">SGST</td>
+                            <td style="font-size: 18px;">{{ pdebt.sgst }}</td>
+                        </tr>
+                        <tr class="cgst-section">
+                            <td style="font-size: 20px;">CGST</td>
+                            <td style="font-size: 18px;">{{ pdebt.cgst }}</td>
+                        </tr>
+                        <tr class="igst-section">
+                            <td style="font-size: 20px;">IGST</td>
+                            <td style="font-size: 18px;">{{ pdebt.igst }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 20px;">Tax Amount</td>
+                            <td style="font-size: 18px;">{{ pdebt.taxamount }}</td>
+                        </tr>
+                        <tr class="adjust-section">
+                            <td style="font-size: 20px;">Adjustment</td>
+                            <td style="font-size: 18px;">{{ pdebt.round_off }}</td>
+                        </tr>
+                        <tr class="ship-section">
+                            <td style="font-size: 20px;">Shipping Charge</td>
+                            <td style="font-size: 18px;">{{ pdebt.ship_charge }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 20px;">Status</td>
+                            <td style="font-size: 18px;">{{ pdebt.status }}</td>
+                        </tr>
+                    </table>
+                    <hr class="my-4" style="background-color: #fff;">
+                    </div><br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -59,7 +59,7 @@
                                                 <input type="text" class="form-control"   id="jno" name="mj_no" value="{{ a.mj_no }}" required> </div>
                                             <div class="col-md-3">
                                                 <label class="col-form-label">Reference no  </label>
-                                                <input type="text" class="form-control"  id="ref_no" name="ref_no" value="{{ a.ref_no }}">
+                                                <input type="text" class="form-control"  id="ref_no" name="ref_no" value="{{ a.ref_no }}" readonly>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -147,7 +147,7 @@
                                                         </td> -->
 
                                                         <td>
-                                                            <input name="account" list="account" class="form-control" id="pin" required value="{{ a.account }}">
+                                                            <input name="account" list="account" class="form-control" id="pin"  value="{{ a.account }}">
                                                             <datalist id="account">
                                                               {% for a in acc %}
                                                                 <option value="{{ a.name }}">{{ a.name }}</option>
@@ -296,16 +296,16 @@
                                     </div>
                                     <div class="row mt-5 mb-5">
                                         <div class="col-md-4">
-                                            <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light">
+                                            <!-- <a href="{% url 'gomjoural' %}"class="btn btn-outline-info rounded-pill w-25 text-light">
                                             BACK
-                                            </a>
+                                            </a> -->
                                         </div>
 
                                         <div class="" style="margin-bottom: 20rem;">
-                                            <button type="submit" name="draft" class="btn btn-outline-info rounded-pill w-10 text-light " 
-                                                >Save as Draft</button>&nbsp;&nbsp;
+                                            <!-- <button type="submit" name="draft" class="btn btn-outline-info rounded-pill w-10 text-light " 
+                                                >Save as Draft</button>&nbsp;&nbsp; -->
                                             <button type="submit" name="save" class="btn btn-outline-info rounded-pill w-10 text-light" 
-                                                >Save And Send</button>
+                                                >Save</button>
                                         
                                         </div>
 
@@ -420,41 +420,50 @@
             $('#date').val(new Date().toJSON().slice(0,10));
         </script>
 
-        <script>
-            var item_row_counter = 1
+<script>
+    $(document).ready(function() {
+        var item_row_counter = 1;
 
-            function add_item_row() {
-                old_item_row_count = item_row_counter
-                item_row_counter++;
+        // Function to update row numbering
+        function updateRowNumbers() {
+            var rowCount = 1;
+            $("#items-table-body tr").each(function() {
+                $(this).find("td:first").text(rowCount);
+                rowCount++;
+            });
+            item_row_counter = rowCount - 1;
+        }
 
-                $('#items-table-body >tr:last').clone(true).insertAfter('#items-table-body >tr:last');
-                $('#items-table-body >tr:last input').val('');
+        // Add new item row
+        function add_item_row() {
+            var lastRow = $('#items-table-body > tr:last');
+            var newRow = lastRow.clone(true);
+            newRow.find('input').val(''); // Clear all inputs in the cloned row
+            newRow.insertAfter(lastRow);
+            updateRowNumbers();
+        }
 
-                $('#items-table-body >tr:last td')[0].innerHTML = item_row_counter
-                update_amounts($('#items-table-body input[name=jcredit2]:last'));
-            }
+        // Bind the add row function to the "Add Row" button
+        $("#addrow").off('click').on('click', function(e) {
+            e.preventDefault();
+            add_item_row();
+        });
 
-            function setup_rows() {
-                $("#addrow").click(function(event) {
-                event.preventDefault();
-                add_item_row();
-                });
-
-                for (var i = 0; i <= 4; i++) {
-                    add_item_row();
+        // Delete selected row and update numbering
+        $(".delete-row").click(function() {
+            $("table tbody").find('input[name="record"]').each(function() {
+                if ($(this).is(":checked")) {
+                    $(this).closest("tr").remove();
                 }
-            }
+            });
+            updateRowNumbers();
+        });
 
-            $(document).ready(function(){
-                $(".delete-row").click(function(){
-                    $("table tbody").find('input[name="record"]').each(function(){
-            	        if($(this).is(":checked")){
-                            $(this).parents("tr").remove();
-                        }
-                    });
-                });
-            });   
-        </script>
+        // Initial row numbering
+        updateRowNumbers();
+    });
+</script>
+
 
         <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
         <script>
