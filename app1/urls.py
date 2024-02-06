@@ -1214,7 +1214,10 @@ urlpatterns = [
     path('edit_transaction/<int:id>',views.edit_transaction,name='edit_transaction'),
     
     path('itemdatadebit',views.itemdatadebit,name='itemdatadebit'),
-    
+
+    path('itemdatadebit2',views.itemdatadebit2,name='itemdatadebit2'),
+
+
     path('create_bank',views.create_bank,name='create_bank'),
     path('e_bank/<int:id>',views.e_bank,name='e_bank'),
     path('edit_bank_trans/<int:id>',views.edit_bank_trans,name='edit_bank_trans'),

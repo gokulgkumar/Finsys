@@ -297,11 +297,12 @@ input[name="service-city"] {
                                     <tbody id="items-table-body">
                                     {% for pro in pdebt1 %}
                                     <tr id='addr0'>
+                                       <!-- {{ pro.id}} -->
                                         <td>1</td>
                                         <td style="width: 20%;">
                                             <div class="d-flex">
 
-                                                <select name='items[]' id="product" class="form-control select2">
+                                                <select name='items[]' id="product{{pro.id}}" class="form-control select2" onchange="selectchange(this,`{{pro.id}}`)">
                                                    
                                                     {% for i in item %}
                                                     {% if i.name == pro.items %}
@@ -327,7 +328,7 @@ input[name="service-city"] {
                                             <div id="errorLabel" style="color: red;"></div>
                                         </td>
                                         <td>
-                                            <input type="text" name='hsn[]' id="hsn1" placeholder='HSN' value="{{pro.hsn}}"
+                                            <input type="text" name='hsn[]' id="hsn1{{pro.id}}" placeholder='HSN' value="{{pro.hsn}}"
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
@@ -342,11 +343,32 @@ input[name="service-city"] {
                                             <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'  value="{{pro.price}}"
                                             class="form-control price" step="0.00" min="0" />
                                         </td>
+
+
                                         
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs"  onchange="taxchange(this)" step="0.00" min="0" hidden >
                                             <select name='tax[]' id="tax1" class="form-control tax">
+
+                                                {% if pdebt.supply == '[KL] Kerala' %}
+                                                <option value="{{ pro.tax }}" >{{ pro.tax }}% GST</option>
+                                                        <option value="0">00 % GST(00%)</option>
+                                                        <option value='3'>03 % GST(03%)</option>
+                                                        <option value='5'>05 % GST(05%)</option>
+                                                        <option value="12">12 % GST(12%)</option>
+                                                        <option value='18'>18 % GST(18%)</option>
+                                                        <option value='28'>28 % GST(28%)</option>
+                                                {% else %}
+                                                <option value="{{ pro.tax }}" >{{ pro.tax }} % IGST</option>
+                                                        <option value='0'>00 % IGST(00%)</option>
+                                                        <option value='3'>03 % IGST(03%)</option>
+                                                        <option value='5'>05 % IGST(05%)</option>
+                                                        <option value='12'>12 % IGST(12%)</option>
+                                                        <option value='18'>18 % IGST(18%)</option>
+                                                        <option value='28'>28 % IGST(28%)</option>
+                                                {% endif %}
+                                                
                                          
                                           </select>
                                         </td>
@@ -373,18 +395,30 @@ input[name="service-city"] {
 
                                     $('.select2').select2();
                                     console.log('hi')
+                                  
+
+
+
+                                    
                                    
-                                    $(document).on('change', '#product', function () {
+                                  function selectchange(i,j) {
+
+
+                                    console.log(j,'selected')
+
+
+                                    
                                    
                                        
-                                       var select = $('#product').val();
+                                       var select = i.value;
+
                                        var vid = $('#billno').val();
 
                                        console.log(select,'select is')
                                       
                                        $.ajax({
                                            type: "GET",
-                                           url: "{% url 'itemdatadebit' %}",
+                                           url: "{% url 'itemdatadebit2' %}",
                                            data: {
                                                id: select,
                                                vid: vid
@@ -408,7 +442,7 @@ input[name="service-city"] {
                                                    var data7 =response.taxs;
                                                    
                                               
-                                                   document.getElementById('hsn1').value = data;
+                                                   document.getElementById(`hsn1${j}`).value = data;
                                    
                                        
                                    
@@ -484,9 +518,11 @@ input[name="service-city"] {
                                            },
                                            
                                        });
-                                   });
+                                   };
 
+                                   
 
+                                
 
 
                                 //              $(document).on('change', '#product', function () {
@@ -2343,6 +2379,10 @@ function qtychange2(incval,roinc) {
                                     
                                     
                                     <select name='items[]' id="product${roinc}" class="form-control select2 change" >
+
+                                        
+
+                                        
                                                     <option selected>Choose..</option>
                                                     {% for i in item %}
                                                         <option value="{{ i.name }}" data-tokens="{{ i.name }}">

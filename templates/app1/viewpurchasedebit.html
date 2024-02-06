@@ -577,163 +577,11 @@ aria-hidden="true">
                                 </div>
                             </div>
                             <hr class="my-4">
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                                <div class="col-md-4 mt-3">
-                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Billing Details</h5>
-                                </div>
-                                <div class="col-md-4 mt-3"></div>
-                                <div class="col-md-4 mt-3"></div>
 
-                                <div class="col-md-2 mt-3">
-                                    <h6 class="mb-0">Bill No</h6>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{ rbill.billno }}</p>
-                                </div>
-                                <div class="col-md-3 mt-3 vl">
-                                    <h6 class="mb-0">Payment Terms</h6>
-                                </div>
-                                <!-- <div class="col-md-3 mt-3">
-                                    <p class="mb-0">NET {{ rbill.payment_terms }}</p>
-                                </div> -->
-                                <div class="col-md-3 mt-3">
-                                    {% if rbill.payment_terms == "0" %}
-                                        <p class="mb-0">Due on Receipt</p>
-                                    {% else %}
-                                        <p class="mb-0">NET {{ rbill.payment_terms }}</p>
-                                    {% endif %}
-                                </div>
-                                
-                            </div>
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                                <div class="col-md-2 mt-3">
-                                    <h6 class="mb-0">Purchase Order</h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0">{{ rbill.purchase_order }}</p>
-                                </div>
-                                <div class="col-md-2 mt-3 vl">
-                                    <h6 class="mb-0"></h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0"></p>
-                                </div>
-                                <div class="col-md-2 mt-3 vl">
-                                    <h6 class="mb-0"></h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0"></p>
-                                </div>
-                            </div>
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                                <div class="col-md-2 mt-3">
-                                    <h6 class="mb-0">Repeat Every</h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0">{{ rbill.repeat_every }}</p>
-                                </div>
-                                <div class="col-md-2 mt-3 vl">
-                                    <h6 class="mb-0">Start Date</h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0">{{ rbill.start_date }}</p>
-                                </div>
-                                <div class="col-md-2 mt-3 vl">
-                                    <h6 class="mb-0">End date</h6>
-                                </div>
-                                <div class="col-md-2 mt-3">
-                                    <p class="mb-0">{{ rbill.end_date }}</p>
-                                </div>
-                            </div>
-                            <hr>
-                         
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                                <div class="col-md-4 mt-3">
-                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Other Details</h5>
-                                </div>
-                                <div class="col-md-4 mt-3"></div>
-                                <div class="col-md-4 mt-3"></div>
 
-                                <div class="col-md-2 mt-3">
-                                    <h6 class="mb-0">Vendor</h6>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <p class="mb-0">{{rbill.vendor_name}}</p>
-                                </div>
-                                <div class="col-md-2 mt-3 vl">
-                                    <h6 class="mb-0">Customer</h6>
-                                </div>
-                                <div class="col-md-4 mt-3 ">
-                                    <p class="mb-0">{{ rbill.customer_name }}</p>
-                                </div>
-                               
-                            </div>
-                                <div class="row mb-4 d-flex justify-content-between align-items-center">
-                        
-                                <div class="col-md-3 mt-3 ">
-                                    <h6 class="mb-0">Vendor Email</h6>
-                                </div>
-                               
-                                <div class="col-md-3 mt-3">
-                                    <p class="mb-0">{{vendor_email}}</p>
-                                </div>
-                                <div class="col-md-3 mt-3 vl">
-                                    <h6 class="mb-0">Customer Email</h6>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <p class="mb-0">{{customer_email}}</p>
-                                </div>
-                            </div>
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                               
-                
-                               
-                               
-                                <div class="col-md-3 mt-3 ">
-                                    <h6 class="mb-0">Vendor GST Treatment</h6>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <p class="mb-0">{{vendor_gsttype}}</p>
-                                </div>
-
-                                <div class="col-md-3 mt-3 vl">
-                                    <h6 class="mb-0">Customer GST Treatment</h6>
-                                </div>
-                                <div class="col-md-3 mt-3 ">
-                                    <p class="mb-0">{{ customer_gsttype }}</p>
-                                </div>
-                               
-                            </div>
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                           
-                     
-                                {% if vendor_gstin %}
-                                <div class="col-md-3 mt-3 ">
-                                    <h6 class="mb-0">Vendor GSTIN</h6>
-                                </div>
-                                <div class="col-md-3 mt-3">
-                                    <p class="mb-0">{{vendor_gstin}}</p>
-                                </div>
-                                {%else%}
-                                <div class="col-md-3 mt-3 "></div>
-                                <div class="col-md-3 mt-3 "></div>
-                                {%endif%}
-                                {% if customer_gstin %}
-                                
-                                <div class="col-md-3 mt-3 vl">
-                                    <h6 class="mb-0">Customer GSTIN</h6>
-                                </div>
-                                <div class="col-md-3 mt-3 ">
-                                    <p class="mb-0">{{ customer_gstin }}</p>
-                                </div>
-                                {%else%}
-                                <div class="col-md-3 mt-3 "></div>
-                                <div class="col-md-3 mt-3 "></div>
-                                {%endif%}
-                            </div>
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-12 mt-3">
-                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Product Details</h5>
+                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Item Details</h5>
 
                                     {% for p in pdeb %}
                                         <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -784,67 +632,227 @@ aria-hidden="true">
                                     {% endfor %}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 bg-grey" style="background-color: rgba(0, 0, 0, 0.4);">
-                        <div class="p-5">
-                          
-                            <h3 class="fw-bold mb-5 mt-2 pt-1">BILL</h3>
-                            <hr class="my-4">
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Grand Total</h5>
-                                <h6>{{ rbill.grand_total }}</h6>
+
+
+
+
+
+
+
+                            <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-4 mt-3">
+                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Billing Details</h5>
+                                </div>
+                                <div class="col-md-4 mt-3"></div>
+                                <div class="col-md-4 mt-3"></div>
+
+                                <div class="col-md-2 mt-3">
+                                    <h6 class="mb-0">Bill No</h6>
+                                </div>
+                                <div class="col-md-4 mt-3">
+                                    <p class="mb-0">{{ rbill.billno }}</p>
+                                </div>
+                                <div class="col-md-3 mt-3 vl">
+                                    <h6 class="mb-0">Payment Terms</h6>
+                                </div>
+                                 <div class="col-md-3 mt-3">
+                                    <p class="mb-0">NET {{ rbill.payment_terms }}</p>
+                                </div> 
+                                <div class="col-md-3 mt-3">
+                                    {% if rbill.payment_terms == "0" %}
+                                        <p class="mb-0">Due on Receipt</p>
+                                    {% else %}
+                                        <p class="mb-0">NET {{ rbill.payment_terms }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                            </div> -->
+                            <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-2 mt-3">
+                                    <h6 class="mb-0">Purchase Order</h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0">{{ rbill.purchase_order }}</p>
+                                </div>
+                                <div class="col-md-2 mt-3 vl">
+                                    <h6 class="mb-0"></h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0"></p>
+                                </div>
+                                <div class="col-md-2 mt-3 vl">
+                                    <h6 class="mb-0"></h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0"></p>
+                                </div>
+                            </div> -->
+                            <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-2 mt-3">
+                                    <h6 class="mb-0">Repeat Every</h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0">{{ rbill.repeat_every }}</p>
+                                </div>
+                                <div class="col-md-2 mt-3 vl">
+                                    <h6 class="mb-0">Start Date</h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0">{{ rbill.start_date }}</p>
+                                </div>
+                                <div class="col-md-2 mt-3 vl">
+                                    <h6 class="mb-0">End date</h6>
+                                </div>
+                                <div class="col-md-2 mt-3">
+                                    <p class="mb-0">{{ rbill.end_date }}</p>
+                                </div>
+                            </div> -->
+                            
+                         
+                            <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-4 mt-3">
+                                    <h5 style="border-bottom: 1px solid rgba(128, 128, 128, 0.6); width: fit-content;">Vendor Details</h5>
+                                </div>
+                                <div class="col-md-4 mt-3"></div>
+                                <div class="col-md-4 mt-3"></div>
+
+                                <div class="col-md-2 mt-3">
+                                    <h6 class="mb-0">Vendor</h6>
+                                </div>
+                                <div class="col-md-4 mt-3">
+                                    <p class="mb-0 text-right">{{pdebt.vendor|capfirst}}</p>
+                                </div>
+                                <div class="col-md-2 mt-3 vl">
+                                    <h6 class="mb-0">Vendor Email</h6>
+                                </div>
+                                <div class="col-md-4 mt-3 ">
+                                    <p class="mb-0 text-right">{{pdebt.email}}</p>
+                                </div>
+                               
                             </div>
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Paid Amount</h5>
-                                <h6>{{ rbill.paid_amount }}</h6>
+                                <div class="row mb-4 d-flex justify-content-between align-items-center">
+                        
+                                <div class="col-md-3 mt-3 ">
+                                    <h6 class="mb-0">Address</h6>
+                                </div>
+                               
+                                <div class="col-md-3 mt-3">
+                                    <p class="mb-0 text-right">{{ pdebt.address }}</p>
+                                </div>
+                                <div class="col-md-3 mt-3 vl">
+                                    <h6 class="mb-0">Place of Supply</h6>
+                                </div>
+                                <div class="col-md-3 mt-3">
+                                    <p class="mb-0 text-right">{{pdebt.supply }}</p>
+                                </div>
                             </div>
+                            <div class="row mb-4 d-flex justify-content-between align-items-center">
+                               
+                
+                               
+                               
+                                <div class="col-md-3 mt-3 ">
+                                    <h6 class="mb-0">Debit Number</h6>
+                                </div>
+                                <div class="col-md-3 mt-3">
+                                    <p class="mb-0 text-right">{{ pdebt.debit_no }}</p>
+                                </div>
+
+                                <div class="col-md-3 mt-3 vl">
+                                    <h6 class="mb-0">Debit Date</h6>
+                                </div>
+                                <div class="col-md-3 mt-3 ">
+                                    <p class="mb-0 text-right">{{ pdebt.debitdate | date:'d-m-Y' }}</p>
+                                </div>
+                               
+                            </div>
+                            <div class="row mb-4 d-flex justify-content-between align-items-center">
                            
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Balance</h5>
-                                <h6>{{ rbill.balance }}</h6>
+                     
+                                {% if vendor_gstin %}
+                                <div class="col-md-3 mt-3 ">
+                                    <h6 class="mb-0">Vendor GSTIN</h6>
+                                </div>
+                                <div class="col-md-3 mt-3">
+                                    <p class="mb-0">{{vendor_gstin}}</p>
+                                </div>
+                                {%else%}
+                                <div class="col-md-3 mt-3 "></div>
+                                <div class="col-md-3 mt-3 "></div>
+                                {%endif%}
+                                {% if customer_gstin %}
+                                
+                                <div class="col-md-3 mt-3 vl">
+                                    <h6 class="mb-0">Customer GSTIN</h6>
+                                </div>
+                                <div class="col-md-3 mt-3 ">
+                                    <p class="mb-0">{{ customer_gstin }}</p>
+                                </div>
+                                {%else%}
+                                <div class="col-md-3 mt-3 "></div>
+                                <div class="col-md-3 mt-3 "></div>
+                                {%endif%}
                             </div>
-                            {%if rbill.igst%}
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">IGST</h5>
-                                <h6>{{ rbill.igst }}</h6>
-                            </div>
-                            {%endif%}
-                            {%if rbill.cgst%}
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">CGST</h5>
-                                <h6>{{ rbill.cgst }}</h6>
-                            </div>
-                            {%endif%}
-                            {%if rbill.sgst%}
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">SGST</h5>
-                                <h6>{{ rbill.sgst }}</h6>
-                            </div>
-                            {%endif%}
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Tax Amount</h5>
-                                <h6>{{rbill.tax_amount }}</h6>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Adjustment</h5>
-                                <h6>{{rbill.adjustment }}</h6>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Shipping Charge</h5>
-                                <h6>{{ rbill.shipping_charge}}</h6>
-                            </div>
-                            <div class="d-flex justify-content-between mb-4">
-                                <h5 class="">Status</h5>
-                                <h6>{{ rbill.status }}</h6>
-                            </div>
-                            <hr class="my-4">
-                            
+
                             
                         </div>
                     </div>
+                    <div class="col-md-4 " style="background-color: rgba(22,37,50,255); border-top-right-radius:2vh; border-bottom-right-radius: 2vh;">
+                        <div class="p-3">
+                            <!-- <h3 class="fw-bold mb-3 mt-2 pt-1"></h3> -->
+                            <div class="d-flex justify-content-between mb-4">
+                                <h3 class="">Debit Note</h3>
+                                
+                            </div>
+                            <hr class="my-4" style="background-color: #fff;">
+                            <table style="width: 100%;">
+                                <tr >
+                                    <td style="font-size: 20px;">Grand Total</td>
+                                    <td style="font-size: 18px;">{{ pdebt.grandtotal }}</td>
+                                 
+                                </tr>
+                             
+                                <tr>
+                                    <td style="font-size: 20px;">Paid Amount</td>
+                                    <td style="font-size: 18px;">{{ pdebt.paid_amount }}</td>
+                                </tr>
+                              
+                                <tr>
+                                    <td style="font-size: 20px;">Balance</td>
+                                    <td style="font-size: 18px;">{{ pdebt.balance_amount }}</td>
+                                </tr>
+                                <tr class="sgst-section">
+                                    <td style="font-size: 20px;">SGST</td>
+                                    <td style="font-size: 18px;">{{ pdebt.sgst }}</td>
+                                </tr>
+                                <tr class="cgst-section">
+                                    <td style="font-size: 20px;">CGST</td>
+                                    <td style="font-size: 18px;">{{ pdebt.cgst }}</td>
+                                </tr>
+                                <tr class="igst-section">
+                                    <td style="font-size: 20px;">IGST</td>
+                                    <td style="font-size: 18px;">{{ pdebt.igst }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 20px;">Tax Amount</td>
+                                    <td style="font-size: 18px;">{{ pdebt.taxamount }}</td>
+                                </tr>
+                                <tr class="adjust-section">
+                                    <td style="font-size: 20px;">Adjustment</td>
+                                    <td style="font-size: 18px;">{{ pdebt.round_off }}</td>
+                                </tr>
+                                <tr class="ship-section">
+                                    <td style="font-size: 20px;">Shipping Charge</td>
+                                    <td style="font-size: 18px;">{{ pdebt.ship_charge }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 20px;">Status</td>
+                                    <td style="font-size: 18px;">{{ pdebt.status }}</td>
+                                </tr>
+                            </table>
+                            <hr class="my-4" style="background-color: #fff;">
+                            </div><br>
+                        </div>
                 </div>
             </div>
 

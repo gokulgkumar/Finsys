@@ -38308,7 +38308,10 @@ def goeditpurchasedebit(request,id):
         print(vendor_name)
         acc1 = accounts1.objects.filter(cid=cmp1,acctype='Cost of Goods Sold')
         acc2 = accounts1.objects.filter(cid=cmp1,acctype='Sales')
+
         pdebt1 = purchasedebit1.objects.all().filter(pdebit=id)
+        
+        # pdebt1 = pdebt2.first()
         item = itemtable.objects.filter(cid=cmp1).all()
         vndr = vendor.objects.filter(cid=cmp1)
         banks=bankings_G.objects.filter(cid=cmp1)
@@ -50868,6 +50871,162 @@ def itemdatadebit(request):
         })
 
     return redirect('/')
+
+
+
+
+     
+def itemdatadebit2(request):
+    if 'uid' in request.session:
+        if request.session.has_key('uid'):
+            uid = request.session['uid']
+        else:
+            return redirect('/')
+
+        cmp1 = company.objects.get(id=uid)  
+        print(cmp1.state)
+        
+        id = request.GET.get('id')
+        print(id,'id')
+        vid_param = request.GET.get('vid')
+       
+        print(vid_param,'bill')
+
+       
+        quty = 0
+        error_flag = 0
+        taxs=0
+        placesx=0
+
+        item2 = itemtable.objects.filter(cid=cmp1)
+
+        for i in item2:
+           print(i.name,'items name')
+        print(item2,'items2') 
+
+
+
+
+        if not vid_param:
+            item = itemtable.objects.get(name=id, cid=cmp1)
+            
+            print(item,'items')
+            
+            hsn = item.hsn
+            qty = item.stock
+            price = item.purchase_cost
+            gst = item.intra_st
+            sgst = item.inter_st
+            places = cmp1.state
+
+            return JsonResponse({
+                "status": "not",
+                'hsn': hsn,
+                'qty': qty,
+                'places': places,
+                'price': price,
+                'gst': gst,
+                'sgst': sgst, 
+                })
+
+            return redirect('/')
+        else:
+
+            
+            
+            
+
+            try:
+                # Try to get the purchasebill object with the specified bill_no 
+                pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
+                print(pbill, 'pbill')
+
+                # Try to get the purchasebill_item object with the specified conditions
+                try:
+                    
+                    # pbill = purchasebill.objects.get(bill_no=vid_param, cid=cmp1)
+                    pb = purchasebill_item.objects.filter(bill_id=pbill.billid, items=id)
+                    print('pb is', pb)
+                    for i in pb:
+
+                        placesx=i.bill.sourceofsupply
+                        # placesx=pbill.sourceofsupply
+                        quty = i.quantity
+                        taxs = i.tax
+                        print(placesx,'placesx is')
+                    error_flag = 0
+                except ObjectDoesNotExist:
+                    error_flag = 1
+
+            except ObjectDoesNotExist:
+                # If purchasebill object is not found, try to get the recurring_bill object
+                try:
+                    rebill = recurring_bill.objects.get(billno=vid_param, cid=cmp1)
+                    print('rebill',rebill)
+                    re = recurringbill_item.objects.filter(bill=rebill, item=id)
+                    print(re,'re')
+
+                    if re.exists():
+                        # re = re_items.first()
+                        for i in re:
+                        # print('re', re)
+                            placesx=i.bill.source_supply
+                            quty = i.qty
+                            taxs = i.tax
+                        error_flag = 0
+                        print(placesx,'placesx2')
+
+                        # fe = re_items[1:]
+                        # for i in fe:
+                        #     print ('yosi',i.qty)
+
+
+                    else:
+                        error_flag = 1
+                        print('err1')
+
+
+                except ObjectDoesNotExist:
+                    error_flag = 1
+                    print('err2')
+
+            # Handle the error_flag accordingly
+
+            
+        print(error_flag,'err')
+
+        toda = date.today()
+        tod = toda.strftime("%Y-%m-%d")
+        
+        item = itemtable.objects.get(name=id, cid=cmp1)
+        print(item)
+
+        hsn = item.hsn
+        qty = item.stock
+        price = item.purchase_cost
+        gst = item.intra_st
+        sgst = item.inter_st
+        places = cmp1.state
+       
+
+        return JsonResponse({
+            "status": "not",
+            'hsn': hsn,
+            'qty': qty,
+            'places': places,
+            'price': price,
+            'gst': gst,
+            'sgst': sgst,
+            "quty": quty,
+            "taxs":taxs,
+            "placesx":placesx,
+            "error_flag": error_flag
+        })
+
+    return redirect('/')
+
+
+
 
 def create_item4(request,pdebit_id):
     if 'uid' in request.session:
