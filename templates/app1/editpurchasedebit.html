@@ -298,7 +298,8 @@ input[name="service-city"] {
                                     {% for pro in pdebt1 %}
                                     <tr id='addr0'>
                                        <!-- {{ pro.id}} -->
-                                        <td>1</td>
+                                       <td id="forcounter" data-counter="{{ forloop.counter }}">{{ forloop.counter }}</td>
+
                                         <td style="width: 20%;">
                                             <div class="d-flex">
 
@@ -325,22 +326,22 @@ input[name="service-city"] {
 
                                                 <a class="btn btn-outline-secondary ml-1" role="button" data-target="#newitem" data-toggle="modal">+</a> 
                                             </div>
-                                            <div id="errorLabel" style="color: red;"></div>
+                                            <div id="errorLabel{{pro.id}}" style="color: red;"></div>
                                         </td>
                                         <td>
                                             <input type="text" name='hsn[]' id="hsn1{{pro.id}}" placeholder='HSN' value="{{pro.hsn}}"
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
-                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' id="quantitys" class="form-control quty"   hidden>
+                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' value="{{pro.quantity}}" id="quantitys{{pro.id}}" class="form-control quty"   >
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
-                                            <input type="number" name='quantity[]' value="{{pro.quantity}}" oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1" class="form-control qty" step=0 min=0 >
-                                                    <div><span>Available Qty :</span> <span id="qtyspan"class='text-muted'></span></div>
+                                            <input type="number" name='quantity[]' value="{{pro.quantity}}"  oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1{{pro.id}}" class="form-control qty" step=0 min=0 >
+                                                    <div><span>Available Qty :</span> <span id="qtyspan{{pro.id}}"class='text-muted'></span></div>
                                         </td> 
                                         
                                         <td>
                                             
-                                            <input type="text" name='price[]' id="unit1" placeholder='Enter Unit Price'  value="{{pro.price}}"
+                                            <input type="text" name='price[]' id="unit1{{pro.id}}" placeholder='Enter Unit Price'  value="{{pro.price}}"
                                             class="form-control price" step="0.00" min="0" />
                                         </td>
 
@@ -349,10 +350,10 @@ input[name="service-city"] {
                                         <td>
                                             <input type="text" name='taxs' id="taxs" placeholder='Enter Unit Price'
                                             class="form-control taxs"  onchange="taxchange(this)" step="0.00" min="0" hidden >
-                                            <select name='tax[]' id="tax1" class="form-control tax">
+                                            <select name='tax[]' id="tax1{{pro.id}}" class="form-control tax">
 
                                                 {% if pdebt.supply == '[KL] Kerala' %}
-                                                <option value="{{ pro.tax }}" >{{ pro.tax }}% GST</option>
+                                                <option value="{{ pro.tax }}" >{{ pro.tax }} % GST</option>
                                                         <option value="0">00 % GST(00%)</option>
                                                         <option value='3'>03 % GST(03%)</option>
                                                         <option value='5'>05 % GST(05%)</option>
@@ -382,6 +383,7 @@ input[name="service-city"] {
                                         <td style="display: none;">
                                             <input type="text" name='taxamount1' id="taxamount1" class="form-control taxamount"/>
                                         </td>
+                                        <td><button type="button" data-id="{{pro.id}}" class="btn btn-danger remove_row">-</button></td>
                                     </tr>
                                     {% endfor %}
                                     </tbody>
@@ -389,10 +391,11 @@ input[name="service-city"] {
                                         <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="addrow" onclick="add_item_row()">+</a></td>
                                     </tr>
                                 </table>
+                                
 
-                                <script>
 
-
+                               
+<script>
                                     $('.select2').select2();
                                     console.log('hi')
                                   
@@ -446,22 +449,24 @@ input[name="service-city"] {
                                    
                                        
                                    
-                                                   document.getElementById('qtyspan').innerHTML = data2 ;
-                                                   document.getElementById('unit1').value = data3;
-                                                   document.getElementById('taxs').value = data7;
-                                                   document.getElementById('quantitys').value = data6;
-                                                   
-                                                   
+                                                   document.getElementById(`qtyspan${j}`).innerHTML = data2 ;
+                                                   document.getElementById(`unit1${j}`).value = data3;
+                                                //    document.getElementById(`taxs${j}`).value = data7;
+                                                   document.getElementById(`quantitys${j}`).value = data6;
+                                                   document.getElementById(`qty1${j}`).value = data6;
+
+                                                   console.log(document.getElementById(`qty1${j}`).value,'qty1');
+                                                   console.log(data6,'data6');
                                                    console.log(data8,'data8');
 
                                                    console.log(response.error_flag,'response.error_flag')
 
                                                    if (response.error_flag == 1) {
                                                    
-                                                   $('#errorLabel').text("Item is not purchased for this bill number");
+                                                   $(`#errorLabel${j}`).text("Item is not purchased for this bill number");
                                                }else {
                                             
-                                                   $('#errorLabel').text("");
+                                                   $(`#errorLabel${j}`).text("");
                                                }
                                                   
 
@@ -2347,7 +2352,8 @@ function qtychange2(incval,roinc) {
 //             function initializeSelect2(element) {
 //     $(element).select2();
 // }
-            var roinc = 0
+            var roinc = document.getElementById('forcounter').dataset.counter;
+            console.log('roinc',roinc)
             $('#addrow').click(function(){
                 roinc++
                 var placeOfSupply = $('#plosu').val();
@@ -2565,7 +2571,10 @@ console.log('product1')
             });
 
 
+      
             var place = document.getElementById('plosu').value;
+
+            console.log('place in console',place)
         //     $('.select2').select2();
         //     document.addEventListener('DOMContentLoaded', function () {
             
@@ -3873,6 +3882,7 @@ var initialAvailableQuantity = 0;
 
 function qtychange1(inputElement) {
     var enteredQuantity = parseFloat(inputElement.value) || 0;
+    
 
     if (initialAvailableQuantity === 0) {
        
@@ -4071,9 +4081,19 @@ document.getElementById('qty3').addEventListener('change', function(event) {
 
 <script type="text/javascript">
     $(document).on('input','.qty', function() {
+
+        // qty = document.getElementsByClassName('quty').value;
         qty = document.getElementById('quantitys').value;
+        // var qty = parseInt(this.value);
         qty = parseInt(qty);
         quantity_value = parseInt($('.qty').val());
+        // var 
+
+        
+
+        console.log('qty is in cons',qty)
+        console.log('quantity_value is in cons',quantity_value)
+
 
         if(quantity_value > qty){
             alert('Entered quantity greater than your bill')
