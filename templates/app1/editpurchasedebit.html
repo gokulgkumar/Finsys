@@ -296,7 +296,7 @@ input[name="service-city"] {
                                     </thead>
                                     <tbody id="items-table-body">
                                     {% for pro in pdebt1 %}
-                                    <tr id='addr0'>
+                                    <tr id='addr0{{ pro.id}}'>
                                        <!-- {{ pro.id}} -->
                                        <td id="forcounter" data-counter="{{ forloop.counter }}">{{ forloop.counter }}</td>
 
@@ -333,7 +333,7 @@ input[name="service-city"] {
                                             class="form-control hsn"/>
                                         </td>
                                         <td>
-                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' value="{{pro.quantity}}" id="quantitys{{pro.id}}" class="form-control quty"   >
+                                            <input type="number" name='quantitys'   style='margin-top:21px' placeholder='Enter Qty' value="{{pro.quantity}}" id="quantitys{{pro.id}}" class="form-control quty"  hidden >
                                             <input type="number" name='anotherQuantityInput'   style='margin-top:21px' placeholder='Enter Qty' id="anotherQuantityInput" value="0" class="form-control quty" hidden >
                                             <input type="number" name='quantity[]' value="{{pro.quantity}}"  oninput="qtychange1(this)"  style='margin-top:21px' placeholder='Enter Qty' id="qty1{{pro.id}}" class="form-control qty" step=0 min=0 >
                                                     <div><span>Available Qty :</span> <span id="qtyspan{{pro.id}}"class='text-muted'></span></div>
@@ -383,7 +383,8 @@ input[name="service-city"] {
                                         <td style="display: none;">
                                             <input type="text" name='taxamount1' id="taxamount1" class="form-control taxamount"/>
                                         </td>
-                                        <td><button type="button" data-id="{{pro.id}}" class="btn btn-danger remove_row">-</button></td>
+                                        <td><button type="button" data-id="{{pro.id}}" class="btn btn-danger delete-btn" onclick="this">-</button></td>
+                                        
                                     </tr>
                                     {% endfor %}
                                     </tbody>
@@ -391,7 +392,52 @@ input[name="service-city"] {
                                         <td style="border: none;"><a class="btn btn-outline-secondary ml-1" role="button" id="addrow" onclick="add_item_row()">+</a></td>
                                     </tr>
                                 </table>
-                                
+
+
+
+                                <script>
+                                    $(document).ready(function () {
+                                        $('.delete-btn').on('click', function () {
+                                            
+                                            var itemId = $(this).data('id');
+                                            var deleteUrl = "{% url 'delete_item' 0 %}".replace('0', itemId);
+                                            if (confirm('Are you sure you want to delete this item?')) {
+                                                
+                                                $.ajax({
+                                                    url: deleteUrl,
+                                                    method: 'POST',
+                                                    data: {
+                                                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                                                    },
+                                                    success: function (response) {
+                                                        
+                                                        console.log(response);
+                                                        location.reload();  
+                                                    },
+                                                    error: function (error) {
+                                                        
+                                                        console.log(error);
+                                                    },
+                                                });
+                                            } else {
+                                               alert("Deletion cancelled")
+                                            }
+                                        });
+                                    });
+                                </script>
+
+
+
+                               
+
+                                <!-- <script>
+$(document).on('click', '.btn-danger', function () {
+    var row_id = $(this).attr("data-id");
+    $('#addr0' + row_id).remove();
+    calc();
+});
+
+                                </script> -->
 
 
                                
@@ -457,7 +503,7 @@ input[name="service-city"] {
 
                                                    console.log(document.getElementById(`qty1${j}`).value,'qty1');
                                                    console.log(data6,'data6');
-                                                   console.log(data8,'data8');
+                                                   console.log(data7,'data7');
 
                                                    console.log(response.error_flag,'response.error_flag')
 
@@ -503,11 +549,11 @@ input[name="service-city"] {
                                                         console.log('taxOptions',taxOptions)
 
 
-                                                    document.getElementById('tax1').innerHTML =taxOptions
-                                                    var taxis=document.getElementById('tax1')
+                                                    document.getElementById(`tax1${j}`).innerHTML =taxOptions
+                                                    var taxis=document.getElementById(`tax1${j}`)
 
                                                     document.getElementById('taxs').value  = data7 ;
-
+                                                 
 
                                                     for(let i=0;i<taxis.children.length;i++){
 
@@ -2359,7 +2405,7 @@ function qtychange2(incval,roinc) {
                 var placeOfSupply = $('#plosu').val();
 
 // Define the tax options based on place of supply
-              var taxOptions = (placeOfSupply === '{{ cmp1.state }}') ? 
+              var taxOptions = (placeOfSupply === '{{ cmp1.state }}'|| placeOfSupply == '[KL] Kerala') ? 
 
                `<option value="0" hidden>Select</option>
                 <option value=0>00 % GST(00%)</option>
@@ -2539,6 +2585,8 @@ console.log('product1')
                   
                   if (place == '{{ cmp1.state }}')
                   {
+
+                    
                       document.getElementById('ta11').innerHTML = data4 + ' % GST';
                       document.getElementById('ta11').value=data4
                   }
@@ -2767,7 +2815,7 @@ console.log('product1')
                         var input = document.getElementById('qty32')
                         input.setAttribute('data-quantity',data1) 
                        
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala' )
                             {
                                 document.getElementById('ta12').innerHTML = data3 + ' % GST';
                                 document.getElementById('ta12').value=data3
@@ -2815,7 +2863,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data1)
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala')
                         {
                             document.getElementById('ta13').innerHTML = data3 + ' % GST';
                             document.getElementById('ta13').value=data3
@@ -2863,7 +2911,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala' )
                         {
                              document.getElementById('ta14').innerHTML = data4 + ' % GST';
                             document.getElementById('ta14').value=data4
@@ -2913,7 +2961,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala'){
                             document.getElementById('ta15').innerHTML = data4 + ' % GST';
                             document.getElementById('ta15').value=data4
                         }    
@@ -2961,7 +3009,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala'){
                             document.getElementById('ta16').innerHTML = data4 + ' % GST';
                             document.getElementById('ta16').value=data4
                         } 
@@ -3008,7 +3056,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}' || place == '[KL] Kerala'){
                             document.getElementById('ta17').innerHTML = data4 + ' % GST';
                             document.getElementById('ta17').value=data4
                         } 
@@ -3056,7 +3104,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala'){
                             document.getElementById('ta18').innerHTML = data4 + ' % GST';
                             document.getElementById('ta18').value=data4
                         }         
@@ -3105,7 +3153,7 @@ console.log('product1')
                         
                         
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala'){
                             document.getElementById('ta19').innerHTML = data4 + ' % GST';
                             document.getElementById('ta19').value=data4
                         }         
@@ -3152,7 +3200,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
                         
                         
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala'){
                             document.getElementById('ta110').innerHTML = data4 + ' % GST';
                             document.getElementById('ta110').value=data4    
                         }         
@@ -3199,7 +3247,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
                         
                         
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala'){
                             document.getElementById('ta111').innerHTML = data4 + ' % GST';
                             document.getElementById('ta111').value=data4
                         }         
@@ -3246,7 +3294,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta112').innerHTML = data4 + ' % GST';
                             document.getElementById('ta112').value=data4
@@ -3295,7 +3343,7 @@ console.log('product1')
                         
                         
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta113').innerHTML = data4 + ' % GST';
                             document.getElementById('ta113').value=data4
@@ -3343,7 +3391,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
                         
                         
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta114').innerHTML = data4 + ' % GST';
                             document.getElementById('ta114').value=data4
@@ -3393,7 +3441,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}'){
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala'){
                             document.getElementById('ta115').innerHTML = data4 + ' % GST';
                             document.getElementById('ta115').value=data4
                         } 
@@ -3441,7 +3489,7 @@ console.log('product1')
 
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta116').innerHTML = data4 + ' % GST';
                             document.getElementById('ta116').value=data4
@@ -3490,7 +3538,7 @@ console.log('product1')
 
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta117').innerHTML = data4 + ' % GST';
                             document.getElementById('ta117').value=data4
@@ -3539,7 +3587,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
                         
                         
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta118').innerHTML = data4 + ' % GST';
                             document.getElementById('ta118').value=data4
@@ -3587,7 +3635,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
                             
                             
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta119').innerHTML = data4 + ' % GST';
                             document.getElementById('ta119').value=data4
@@ -3635,7 +3683,7 @@ console.log('product1')
                         input.setAttribute('data-quantity',data2)
 
 
-                        if (place == '{{ cmp1.state }}')
+                        if (place == '{{ cmp1.state }}'|| place == '[KL] Kerala')
                         {
                             document.getElementById('ta120').innerHTML = data4 + ' % GST';
                             document.getElementById('ta120').value=data4
@@ -3836,14 +3884,15 @@ console.log('product1')
     $(document).on('input', '.qtys', function() {
         var quantity_value = $(this).val(); //row number
 
+        
         var roinc = $(this).attr('id').replace('qty3', ''); // Extract the roinc value from the input field's ID
-
+        
         quantity_stock = $('.qty').val();  //1st row input value
 
         qty = document.getElementById('quantitys').value;
        
         var selectedValue = document.getElementById(`product${roinc}`).value;
-      
+        
         var select = $('#product').val();
        
         if (selectedValue == select ){
@@ -4057,7 +4106,7 @@ document.getElementById('qty3').addEventListener('change', function(event) {
                 
 
             // Determine which tax options to use based on the place of supply
-            var selectedOptions = (placeOfSupply === '{{ cmp1.state }}') ? gstOptions : igstOptions;
+            var selectedOptions = (placeOfSupply === '{{ cmp1.state }}'|| placeOfSupply === '[KL] Kerala') ? gstOptions : igstOptions;
 
             // Update tax options for the all rows class
             $('.tax').html(selectedOptions);
